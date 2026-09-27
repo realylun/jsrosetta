@@ -19,7 +19,8 @@
     "next": "Bài tiếp →",
     "credits": "Tham khảo:",
     "navLabel": "Điều hướng bài viết",
-    "languagesLabel": "Ngôn ngữ trong bài"
+    "languagesLabel": "Ngôn ngữ trong bài",
+    "codeTabsLabel": "Ngôn ngữ"
   },
   "NotFound": {
     "title": "Không tìm thấy trang",

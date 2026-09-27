@@ -19,7 +19,8 @@
     "next": "Next →",
     "credits": "Reference:",
     "navLabel": "Post navigation",
-    "languagesLabel": "Languages in this post"
+    "languagesLabel": "Languages in this post",
+    "codeTabsLabel": "Languages"
   },
   "NotFound": {
     "title": "Page not found",

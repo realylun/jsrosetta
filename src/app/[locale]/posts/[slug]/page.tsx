@@ -86,7 +86,9 @@ export default async function PostPage({ params }: Props) {
 
   const t = await getTranslations("Post");
   const tCategory = await getTranslations("Categories");
-  const html = await markdownToHtml(post.content);
+  const html = await markdownToHtml(post.content, {
+    tablistLabel: t("codeTabsLabel"),
+  });
   const { previous, next } = getAdjacentPosts(post.slug, locale);
 
   return (

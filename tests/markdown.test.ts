@@ -26,6 +26,12 @@ describe("markdownToHtml", () => {
     expect(html).toContain('aria-selected="true"');
   });
 
+  it("labels the tab list in the requested locale", async () => {
+    expect(await markdownToHtml(tabs)).toContain('aria-label="Languages"');
+    const html = await markdownToHtml(tabs, { tablistLabel: "Ngôn ngữ" });
+    expect(html).toContain('role="tablist" aria-label="Ngôn ngữ"');
+  });
+
   it("shows only the first panel without JavaScript", async () => {
     const html = await markdownToHtml(tabs);
     expect(html.match(/role="tabpanel"[^>]*hidden/g)).toHaveLength(2);

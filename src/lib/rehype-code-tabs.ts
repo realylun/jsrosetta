@@ -53,7 +53,7 @@ function toPanel(node: ElementContent): Panel {
   };
 }
 
-function buildTabs(panels: readonly Panel[], groupId: string): Element {
+function buildTabs(panels: readonly Panel[], groupId: string, tablistLabel: string): Element {
   const idFor = (panel: Panel, index: number) => `${groupId}-${index}-${panel.lang}`;
 
   const tabs = panels.map((panel, index) =>
@@ -89,13 +89,18 @@ function buildTabs(panels: readonly Panel[], groupId: string): Element {
   );
 
   return h("div", { className: ["code-tabs"], dataCodeTabs: "" }, [
-    h("div", { role: "tablist", ariaLabel: "Ngôn ngữ", className: ["code-tabs__list"] }, tabs),
+    h("div", { role: "tablist", ariaLabel: tablistLabel, className: ["code-tabs__list"] }, tabs),
     ...bodies,
   ]);
 }
 
+export type CodeTabsOptions = {
+  /** Accessible name of each tab list, in the page's locale. */
+  tablistLabel: string;
+};
+
 /** Turn `div.code-tabs` (from `:::tabs`) into an accessible tab group, one tab per code block. */
-export default function rehypeCodeTabs() {
+export default function rehypeCodeTabs({ tablistLabel }: CodeTabsOptions) {
   return (tree: Root) => {
     let groupIndex = 0;
     visit(tree, "element", (node, index, parent) => {
@@ -108,7 +113,7 @@ export default function rehypeCodeTabs() {
       assertUniqueLanguages(panels);
 
       groupIndex += 1;
-      parent.children[index] = buildTabs(panels, `${ID_PREFIX}${groupIndex}`);
+      parent.children[index] = buildTabs(panels, `${ID_PREFIX}${groupIndex}`, tablistLabel);
     });
   };
 }

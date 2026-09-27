@@ -99,13 +99,18 @@ export function getPostSlugs(dir: string): string[] {
   return slugs;
 }
 
+// `root` is only known at runtime, so bundler tracing is skipped here and the content
+// folder is traced explicitly instead (outputFileTracingIncludes in next.config.ts).
+const localeDir = (root: string, locale: Locale) =>
+  path.join(/*turbopackIgnore: true*/ root, locale);
+
 const postPath = (root: string, locale: Locale, slug: string) =>
-  path.join(root, locale, `${slug}${POST_EXTENSION}`);
+  path.join(localeDir(root, locale), `${slug}${POST_EXTENSION}`);
 
 /** Translation slugs for `locale`; fails the build when a translation has no source post. */
 function getTranslationSlugs(root: string, locale: Locale): string[] {
-  const slugs = getPostSlugs(path.join(root, locale));
-  const sources = new Set(getPostSlugs(path.join(root, SOURCE_LOCALE)));
+  const slugs = getPostSlugs(localeDir(root, locale));
+  const sources = new Set(getPostSlugs(localeDir(root, SOURCE_LOCALE)));
   const orphans = slugs.filter((slug) => !sources.has(slug));
   if (orphans.length > 0) {
     throw new Error(
@@ -150,7 +155,7 @@ export function getAllPosts(
 ): Post[] {
   const slugs =
     locale === SOURCE_LOCALE
-      ? getPostSlugs(path.join(dir, SOURCE_LOCALE))
+      ? getPostSlugs(localeDir(dir, SOURCE_LOCALE))
       : getTranslationSlugs(dir, locale);
   return slugs
     .map((slug) => readPost(slug, locale, dir))

@@ -18,6 +18,9 @@ type Props = Readonly<{
   params: Promise<{ locale: string }>;
 }>;
 
+// Everything is prerendered: unknown locales and paths get the static global-not-found page.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }

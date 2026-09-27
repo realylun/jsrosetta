@@ -7,7 +7,9 @@ import { getAllPosts, getPostBySlug } from "@/lib/content";
 
 type Params = { locale?: string; slug?: string };
 
-export const dynamicParams = false;
+// generateImageMetadata adds an id segment that generateStaticParams cannot enumerate,
+// so images render on first request (then cached); unknown posts still 404 in Image().
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>

@@ -7,6 +7,10 @@ import { LANGUAGE_IDS } from "@/lib/languages";
 
 type Params = { locale?: string };
 
+// generateImageMetadata adds an id segment that generateStaticParams cannot enumerate,
+// so images render on first request (then cached) instead of inheriting dynamicParams = false.
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
