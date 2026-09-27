@@ -25,7 +25,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[locale]
       feedUrl: localeUrl(locale, "/feed.xml"),
       language: locale,
     },
-    getAllPosts(),
+    getAllPosts(locale),
   );
   return new Response(xml, {
     headers: { "Content-Type": "application/rss+xml; charset=utf-8" },

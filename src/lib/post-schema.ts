@@ -37,3 +37,17 @@ export const frontmatterSchema = z.object({
 });
 
 export type Frontmatter = z.infer<typeof frontmatterSchema>;
+
+/**
+ * Frontmatter of a translated post (content/posts/<locale>/<slug>.md).
+ * Only reader-facing text is translated; order, category, languages, dates and credits
+ * come from the source post, so anything else is rejected to keep a single source of truth.
+ */
+export const translationSchema = z.strictObject({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  tags: z.array(z.string()).optional(),
+  updated: isoDate.optional(),
+});
+
+export type TranslationFrontmatter = z.infer<typeof translationSchema>;

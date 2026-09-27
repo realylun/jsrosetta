@@ -18,8 +18,7 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations("Home");
   const tCategory = await getTranslations("Categories");
-  const posts = getAllPosts();
-  void locale;
+  const posts = getAllPosts(locale);
   const sections = CATEGORIES.map((category) => ({
     category,
     posts: posts.filter((post) => post.category === category),

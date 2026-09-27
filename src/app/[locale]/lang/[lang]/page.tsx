@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function LanguagePage({ params }: Props) {
-  const { lang } = await params;
-  if (!isLanguageId(lang)) notFound();
+  const { locale, lang } = await params;
+  if (!hasLocale(routing.locales, locale) || !isLanguageId(lang)) notFound();
   const t = await getTranslations("Lang");
   const language = LANGUAGES[lang];
-  const posts = getPostsByLanguage(lang);
+  const posts = getPostsByLanguage(lang, locale);
 
   return (
     <main>

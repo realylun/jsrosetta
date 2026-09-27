@@ -18,14 +18,16 @@ type Props = {
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+/** Only translated posts get a page in a non-source locale: the rest 404 (dynamicParams = false). */
+export function generateStaticParams({ params }: { params: { locale: string } }) {
+  if (!hasLocale(routing.locales, params.locale)) return [];
+  return getAllPosts(params.locale).map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!hasLocale(routing.locales, locale)) return {};
-  const post = getPostBySlug(slug);
+  const post = getPostBySlug(slug, locale);
   if (!post) return {};
   const pathname = localizePath(locale, `/posts/${post.slug}`);
   return {
@@ -69,14 +71,15 @@ function AdjacentLink({
 }
 
 export default async function PostPage({ params }: Props) {
-  const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const { locale, slug } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  const post = getPostBySlug(slug, locale);
   if (!post) notFound();
 
   const t = await getTranslations("Post");
   const tCategory = await getTranslations("Categories");
   const html = await markdownToHtml(post.content);
-  const { previous, next } = getAdjacentPosts(post.slug);
+  const { previous, next } = getAdjacentPosts(post.slug, locale);
 
   return (
     <main>

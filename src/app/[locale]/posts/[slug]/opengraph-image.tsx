@@ -10,7 +10,9 @@ type Params = { locale?: string; slug?: string };
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+  return routing.locales.flatMap((locale) =>
+    getAllPosts(locale).map((post) => ({ locale, slug: post.slug })),
+  );
 }
 
 /**
@@ -29,7 +31,7 @@ export async function generateImageMetadata({ params }: { params: Params | Promi
 export default async function Image({ params }: { params: Promise<Params> }) {
   const { locale, slug = "" } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  const post = getPostBySlug(slug);
+  const post = getPostBySlug(slug, locale);
   if (!post) notFound();
   const t = await getTranslations({ locale, namespace: "Categories" });
   return renderOgCard({

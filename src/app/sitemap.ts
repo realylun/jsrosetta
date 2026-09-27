@@ -2,9 +2,10 @@ import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/content";
 import { LANGUAGE_IDS, SOURCE_LANGUAGE } from "@/lib/languages";
 import { absoluteUrl } from "@/lib/site";
+import { routing } from "@/i18n/routing";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getAllPosts();
+  const posts = getAllPosts(routing.defaultLocale);
   const latest = posts.map((post) => post.updated ?? post.date).toSorted().at(-1);
 
   return [
