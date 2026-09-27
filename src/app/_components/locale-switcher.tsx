@@ -1,6 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useSyncExternalStore } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 
@@ -11,9 +13,28 @@ type Props = {
   postSlugs: Readonly<Record<Locale, readonly string[]>>;
 };
 
+type LinksProps = Props & {
+  query?: Record<string, string>;
+  hash?: string;
+};
+
 const ITEM_CLASS = "rounded px-1.5 py-0.5 font-mono text-xs uppercase";
 
-export function LocaleSwitcher({ postSlugs }: Props) {
+const subscribeToHash = (onChange: () => void) => {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+};
+
+/** The URL fragment, read on the client only (the server never sees it). */
+function useLocationHash(): string {
+  return useSyncExternalStore(
+    subscribeToHash,
+    () => window.location.hash,
+    () => "",
+  );
+}
+
+function LocaleLinks({ postSlugs, query, hash }: LinksProps) {
   const t = useTranslations("LocaleSwitcher");
   const current = useLocale();
   const pathname = usePathname();
@@ -52,7 +73,7 @@ export function LocaleSwitcher({ postSlugs }: Props) {
         return (
           <li key={locale}>
             <Link
-              href={pathname}
+              href={{ pathname, query, hash: hash || undefined }}
               locale={locale}
               hrefLang={locale}
               title={name}
@@ -64,5 +85,23 @@ export function LocaleSwitcher({ postSlugs }: Props) {
         );
       })}
     </ul>
+  );
+}
+
+/** Keeps ?lang=… and #section when switching locale. */
+function LocaleLinksWithLocation(props: Props) {
+  const searchParams = useSearchParams();
+  const hash = useLocationHash();
+  const query = searchParams.size > 0 ? Object.fromEntries(searchParams) : undefined;
+  return <LocaleLinks {...props} query={query} hash={hash} />;
+}
+
+export function LocaleSwitcher(props: Props) {
+  // useSearchParams would opt static pages out of prerendering without a Suspense boundary;
+  // the prerendered fallback links to the bare pathname.
+  return (
+    <Suspense fallback={<LocaleLinks {...props} />}>
+      <LocaleLinksWithLocation {...props} />
+    </Suspense>
   );
 }
