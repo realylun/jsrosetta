@@ -40,5 +40,22 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local
+# AI tooling & personal planning (keep local, never publish)
 .omc/
+.claude/
+.cursor/
+.codex/
+.gemini/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+PLAN.md
+/plans/
+/notes/
+*.plan.md
+
+# editors & OS
+.vscode/
+.idea/
+*.swp
+*.log

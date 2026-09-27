@@ -78,8 +78,6 @@ tests/                  vitest
 5. Để bản ghi ở chế độ **DNS only (mây xám)**. Nếu bắt buộc bật proxy: SSL/TLS phải là **Full (strict)**, không redirect `/.well-known/acme-challenge/*`, không cache `/.well-known/vercel/*`.
 6. Kiểm tra: `curl -I http://reallylun.com`, `https://www.reallylun.com` → phải redirect về `https://reallylun.com`, không bị vòng lặp.
 
-Chi tiết và lý do: xem [PLAN.md](PLAN.md).
-
 ## License
 
 - Code: [MIT](LICENSE)
