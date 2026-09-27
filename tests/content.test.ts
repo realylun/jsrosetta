@@ -74,6 +74,23 @@ describe("content (source locale)", () => {
     ).toThrow(/credits/);
   });
 
+  it("accepts minimum versions for languages in the post", () => {
+    const source =
+      '---\ntitle: X\ndescription: d\ndate: "2024-01-01"\norder: 1\ncategory: basics\n' +
+      'languages: [js, go]\nversions:\n  js: "14.13.1"\n  go: "1.22"\n---\n';
+    expect(parsePost("a", source).versions).toEqual({ js: "14.13.1", go: "1.22" });
+  });
+
+  it("rejects versions for unknown or absent languages and malformed numbers", () => {
+    const base =
+      'title: X\ndescription: d\ndate: "2024-01-01"\norder: 1\ncategory: basics\nlanguages: [js, go]';
+    const withVersions = (versions: string) => `---\n${base}\nversions:\n${versions}\n---\n`;
+    expect(() => parsePost("a", withVersions('  python: "3.12"'))).toThrow(/versions/);
+    expect(() => parsePost("a", withVersions('  rust: "1.90"'))).toThrow(/rust/);
+    expect(() => parsePost("a", withVersions('  go: ">= 1.22"'))).toThrow(/versions\.go/);
+    expect(() => parsePost("a", withVersions('  js: "v24"'))).toThrow(/versions\.js/);
+  });
+
   it("fails loudly on badly named post files", () => {
     expect(() => getPostSlugs(path.join(fixtures, "bad-names"))).toThrow(/Hello_World\.md/);
   });

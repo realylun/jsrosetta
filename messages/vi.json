@@ -20,7 +20,9 @@
     "credits": "Tham khảo:",
     "navLabel": "Điều hướng bài viết",
     "languagesLabel": "Ngôn ngữ trong bài",
-    "codeTabsLabel": "Ngôn ngữ"
+    "codeTabsLabel": "Ngôn ngữ",
+    "minVersions": "Phiên bản tối thiểu",
+    "verifiedOn": "Đã chạy thử trên"
   },
   "NotFound": {
     "title": "Không tìm thấy trang",

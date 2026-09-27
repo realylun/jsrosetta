@@ -20,7 +20,9 @@
     "credits": "Reference:",
     "navLabel": "Post navigation",
     "languagesLabel": "Languages in this post",
-    "codeTabsLabel": "Languages"
+    "codeTabsLabel": "Languages",
+    "minVersions": "Minimum versions",
+    "verifiedOn": "Verified on"
   },
   "NotFound": {
     "title": "Page not found",
