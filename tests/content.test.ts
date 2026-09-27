@@ -1,6 +1,8 @@
+import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  clearContentCache,
   getAdjacentPosts,
   getAllPosts,
   getPostBySlug,
@@ -139,5 +141,46 @@ describe("content (translations)", () => {
     expect(() => getAllPosts("en", { dir: path.join(fixtures, "strict") })).toThrow(
       /en\/alpha\.md[\s\S]*order/,
     );
+  });
+});
+
+describe("content cache", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    clearContentCache();
+  });
+
+  it("parses each file once per content root and locale", () => {
+    clearContentCache();
+    const read = vi.spyOn(fs, "readFileSync");
+    getAllPosts("en", published);
+    const firstPass = read.mock.calls.length;
+    expect(firstPass).toBeGreaterThan(0);
+    getAllPosts("en", published);
+    getAllPosts("vi", { dir, includeDrafts: true });
+    getPostBySlug("alpha", "en", { dir });
+    getTranslationLocales("beta", published);
+    expect(read.mock.calls.length).toBe(firstPass);
+  });
+
+  it("keeps content roots apart", () => {
+    expect(getAllPosts("en", published).map((p) => p.slug)).toEqual(["alpha"]);
+    expect(() => getAllPosts("en", { dir: path.join(fixtures, "orphan") })).toThrow(/zeta/);
+    expect(getAllPosts("en", published).map((p) => p.slug)).toEqual(["alpha"]);
+  });
+
+  it("re-reads content after clearContentCache and in development", () => {
+    getAllPosts("vi", published);
+    const read = vi.spyOn(fs, "readFileSync");
+    clearContentCache();
+    getAllPosts("vi", published);
+    expect(read).toHaveBeenCalled();
+
+    read.mockClear();
+    vi.stubEnv("NODE_ENV", "development");
+    getAllPosts("vi", published);
+    getAllPosts("vi", published);
+    expect(read.mock.calls.length).toBe(6);
   });
 });

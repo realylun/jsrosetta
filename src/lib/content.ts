@@ -122,16 +122,56 @@ function getTranslationSlugs(root: string, locale: Locale): string[] {
   return slugs;
 }
 
-function readPost(slug: string, locale: Locale, root: string): Post | undefined {
-  if (!SLUG_PATTERN.test(slug)) return undefined;
-  const sourcePath = postPath(root, SOURCE_LOCALE, slug);
-  if (!fs.existsSync(sourcePath)) return undefined;
-  const source = parsePost(slug, fs.readFileSync(sourcePath, "utf8"));
-  if (locale === SOURCE_LOCALE) return source;
+type LocaleIndex = {
+  bySlug: ReadonlyMap<string, Post>;
+  /** Every post of the locale, drafts included, in display order. */
+  sorted: readonly Post[];
+};
 
-  // Validates every translation of this locale, not just the requested one.
-  if (!getTranslationSlugs(root, locale).includes(slug)) return undefined;
-  return parseTranslation(source, locale, fs.readFileSync(postPath(root, locale, slug), "utf8"));
+/**
+ * Parsed posts per content root and locale. A build renders every page from the same files,
+ * so they are read and validated once per worker instead of once per render. `next dev`
+ * skips the cache so edits to content/ show up on reload.
+ */
+const localeIndexCache = new Map<string, LocaleIndex>();
+
+const cacheEnabled = () => process.env.NODE_ENV !== "development";
+
+/** Drops every cached post; content is re-read on the next call. */
+export function clearContentCache() {
+  localeIndexCache.clear();
+}
+
+function buildLocaleIndex(root: string, locale: Locale): LocaleIndex {
+  const posts =
+    locale === SOURCE_LOCALE
+      ? getPostSlugs(localeDir(root, SOURCE_LOCALE)).map((slug) =>
+          parsePost(slug, fs.readFileSync(postPath(root, SOURCE_LOCALE, slug), "utf8")),
+        )
+      : buildTranslations(root, locale);
+  const sorted = posts.toSorted(comparePosts);
+  return { bySlug: new Map(sorted.map((post) => [post.slug, post])), sorted };
+}
+
+function buildTranslations(root: string, locale: Locale): Post[] {
+  // Validates every translation of this locale, including orphans, before any is used.
+  const slugs = getTranslationSlugs(root, locale);
+  const sources = loadLocaleIndex(root, SOURCE_LOCALE).bySlug;
+  return slugs.flatMap((slug) => {
+    const source = sources.get(slug);
+    if (!source) return []; // unreachable: getTranslationSlugs rejects orphans
+    return [parseTranslation(source, locale, fs.readFileSync(postPath(root, locale, slug), "utf8"))];
+  });
+}
+
+function loadLocaleIndex(root: string, locale: Locale): LocaleIndex {
+  if (!cacheEnabled()) return buildLocaleIndex(root, locale);
+  const key = `${root}\0${locale}`;
+  const cached = localeIndexCache.get(key);
+  if (cached) return cached;
+  const index = buildLocaleIndex(root, locale);
+  localeIndexCache.set(key, index);
+  return index;
 }
 
 export function getPostBySlug(
@@ -139,7 +179,8 @@ export function getPostBySlug(
   locale: Locale,
   { dir = POSTS_DIR, includeDrafts = defaultIncludeDrafts() }: ContentOptions = {},
 ): Post | undefined {
-  const post = readPost(slug, locale, dir);
+  if (!SLUG_PATTERN.test(slug)) return undefined;
+  const post = loadLocaleIndex(dir, locale).bySlug.get(slug);
   if (!post || (post.draft && !includeDrafts)) return undefined;
   return post;
 }
@@ -153,15 +194,7 @@ export function getAllPosts(
   locale: Locale,
   { dir = POSTS_DIR, includeDrafts = defaultIncludeDrafts() }: ContentOptions = {},
 ): Post[] {
-  const slugs =
-    locale === SOURCE_LOCALE
-      ? getPostSlugs(localeDir(dir, SOURCE_LOCALE))
-      : getTranslationSlugs(dir, locale);
-  return slugs
-    .map((slug) => readPost(slug, locale, dir))
-    .filter((post): post is Post => post !== undefined)
-    .filter((post) => includeDrafts || !post.draft)
-    .toSorted(comparePosts);
+  return loadLocaleIndex(dir, locale).sorted.filter((post) => includeDrafts || !post.draft);
 }
 
 export function getPostsByLanguage(
