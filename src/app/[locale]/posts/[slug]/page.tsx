@@ -8,9 +8,16 @@ import { DateFormatter } from "@/app/_components/date-formatter";
 import { LanguageList } from "@/app/_components/language-badge";
 import { PostBody } from "@/app/_components/post-body";
 import { routing } from "@/i18n/routing";
-import { getAdjacentPosts, getAllPosts, getPostBySlug, type Post } from "@/lib/content";
+import {
+  getAdjacentPosts,
+  getAllPosts,
+  getPostBySlug,
+  getTranslationLocales,
+  type Post,
+} from "@/lib/content";
 import { markdownToHtml } from "@/lib/markdown";
-import { baseOpenGraph, localizePath, rssAlternate } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
+import { baseOpenGraph, localizePath } from "@/lib/site";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -29,16 +36,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!hasLocale(routing.locales, locale)) return {};
   const post = getPostBySlug(slug, locale);
   if (!post) return {};
-  const pathname = localizePath(locale, `/posts/${post.slug}`);
+  const pathname = `/posts/${post.slug}`;
+  const locales = getTranslationLocales(post.slug);
   return {
     title: post.title,
     description: post.description,
     keywords: post.tags,
-    alternates: { canonical: pathname, types: rssAlternate(locale) },
+    alternates: buildAlternates({ pathname, locale, locales }),
     openGraph: {
-      ...baseOpenGraph(locale),
+      ...baseOpenGraph(locale, locales),
       type: "article",
-      url: pathname,
+      url: localizePath(locale, pathname),
       title: post.title,
       description: post.description,
       publishedTime: post.date,

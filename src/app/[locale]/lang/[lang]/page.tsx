@@ -7,7 +7,8 @@ import { PostGrid } from "@/app/_components/post-grid";
 import { routing } from "@/i18n/routing";
 import { getPostsByLanguage } from "@/lib/content";
 import { LANGUAGE_IDS, LANGUAGES, SOURCE_LANGUAGE, isLanguageId } from "@/lib/languages";
-import { SITE, baseOpenGraph, localizePath, rssAlternate } from "@/lib/site";
+import { buildAlternates } from "@/lib/seo";
+import { SITE, baseOpenGraph, localizePath } from "@/lib/site";
 
 type Props = {
   params: Promise<{ locale: string; lang: string }>;
@@ -26,15 +27,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const label = LANGUAGES[lang].label;
   const title = t("title", { label });
   const description = t("description", { label });
-  const pathname = localizePath(locale, `/lang/${lang}`);
+  const pathname = `/lang/${lang}`;
   return {
     title,
     description,
-    alternates: { canonical: pathname, types: rssAlternate(locale) },
+    alternates: buildAlternates({ pathname, locale, locales: routing.locales }),
     openGraph: {
       ...baseOpenGraph(locale),
       type: "website",
-      url: pathname,
+      url: localizePath(locale, pathname),
       title: `${title} · ${SITE.name}`,
       description,
     },

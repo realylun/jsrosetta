@@ -26,6 +26,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/[locale]
       language: locale,
     },
     getAllPosts(locale),
+    (post) => localeUrl(locale, `/posts/${post.slug}`),
   );
   return new Response(xml, {
     headers: { "Content-Type": "application/rss+xml; charset=utf-8" },

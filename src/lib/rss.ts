@@ -20,11 +20,16 @@ type Channel = {
 
 const toRfc822 = (isoDate: string) => new Date(isoDate).toUTCString();
 
-export function buildRss(channel: Channel, posts: readonly Post[]): string {
+/** `linkFor` returns the absolute, locale-aware URL of a post. */
+export function buildRss(
+  channel: Channel,
+  posts: readonly Post[],
+  linkFor: (post: Post) => string,
+): string {
   const newestFirst = posts.toSorted((a, b) => b.date.localeCompare(a.date));
   const items = newestFirst
     .map((post) => {
-      const link = new URL(`/posts/${post.slug}`, `${channel.siteUrl}/`).toString();
+      const link = linkFor(post);
       const categories = post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("");
       return [
         "<item>",

@@ -3,16 +3,22 @@ import { getTranslations } from "next-intl/server";
 import { Container } from "@/app/_components/container";
 import { LanguageList } from "@/app/_components/language-badge";
 import { PostGrid } from "@/app/_components/post-grid";
-import type { Locale } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 import { getAllPosts } from "@/lib/content";
 import { LANGUAGE_IDS, SOURCE_LANGUAGE } from "@/lib/languages";
 import { CATEGORIES } from "@/lib/post-schema";
+import { buildAlternates } from "@/lib/seo";
 
 const TARGET_LANGUAGES = LANGUAGE_IDS.filter((id) => id !== SOURCE_LANGUAGE);
 
 type Props = {
   params: Promise<{ locale: Locale }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: buildAlternates({ pathname: "/", locale, locales: routing.locales }) };
+}
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
