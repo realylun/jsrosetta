@@ -2,9 +2,15 @@
 title: "Biến và hằng"
 description: "const, let trong Node.js tương ứng với gì ở Go, Rust, Swift và Java."
 date: "2026-09-27"
-order: 10
+order: 130
 category: basics
 languages: [js, go, rust, swift, java]
+versions:
+  js: "12.20"
+  go: "1.0"
+  rust: "1.58"
+  swift: "3.0"
+  java: "16"
 tags: [const, let, immutability, type-inference]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#variables"
 ---
