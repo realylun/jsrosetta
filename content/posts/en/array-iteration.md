@@ -1,10 +1,10 @@
 ---
 title: "Iterating arrays (map, filter, reduce)"
-description: "Node.js's forEach, map, filter, reduce compared to hand-written generic Map/Filter/Reduce functions in Go."
+description: "Node.js's forEach, map, filter, reduce compared to Rust, Swift, and Java iterators, and hand-written generic Map/Filter/Reduce functions in Go."
 tags: [array, iteration, generics, functional]
 ---
 
-Node.js ships `forEach`, `map`, `filter`, and `reduce` right on `Array.prototype`. Go's standard library has none of these for slices, but since Go 1.18 you can write them once using generics and reuse them for any data type.
+Node.js ships `forEach`, `map`, `filter`, and `reduce` right on `Array.prototype`. Go's standard library has none of these for slices, but since Go 1.18 you can write them once using generics and reuse them for any data type. Rust, Swift, and Java all ship `map`/`filter`/`fold` (or `reduce`) right on their iterators/streams — no need to hand-write them like in Go.
 
 ## Iterating over each element (forEach)
 
@@ -33,6 +33,40 @@ func main() {
 	// 0 a
 	// 1 b
 	// 2 c
+}
+```
+```rust
+fn main() {
+    let array = ["a", "b", "c"];
+
+    for (i, value) in array.iter().enumerate() {
+        println!("{i} {value}");
+    }
+    // 0 a
+    // 1 b
+    // 2 c
+}
+```
+```swift
+let array = ["a", "b", "c"]
+
+for (i, value) in array.enumerated() {
+    print(i, value)
+}
+// 0 a
+// 1 b
+// 2 c
+```
+```java
+void main() {
+    List<String> array = List.of("a", "b", "c");
+
+    for (int i = 0; i < array.size(); i++) {
+        IO.println(i + " " + array.get(i));
+    }
+    // 0 a
+    // 1 b
+    // 2 c
 }
 ```
 :::
@@ -100,8 +134,62 @@ reduced := Reduce(array, []string{}, func(acc []string, value string, i int) []s
 })
 fmt.Println(reduced) // [A C]
 ```
+```rust
+let mapped: Vec<String> = array.iter().map(|v| v.to_uppercase()).collect();
+println!("{mapped:?}"); // ["A", "B", "C"]
+
+let filtered: Vec<&str> = array
+    .iter()
+    .copied()
+    .enumerate()
+    .filter(|&(i, _)| i % 2 == 0)
+    .map(|(_, v)| v)
+    .collect();
+println!("{filtered:?}"); // ["a", "c"]
+
+let reduced = array
+    .iter()
+    .copied()
+    .enumerate()
+    .fold(Vec::new(), |mut acc, (i, v)| {
+        if i % 2 == 0 {
+            acc.push(v.to_uppercase());
+        }
+        acc
+    });
+println!("{reduced:?}"); // ["A", "C"]
+```
+```swift
+let mapped = array.map { $0.uppercased() }
+print(mapped) // ["A", "B", "C"]
+
+let filtered = array.enumerated().filter { (i, _) in i % 2 == 0 }.map { $0.1 }
+print(filtered) // ["a", "c"]
+
+let reduced = array.enumerated().reduce(into: [String]()) { acc, pair in
+    let (i, value) = pair
+    if i % 2 == 0 { acc.append(value.uppercased()) }
+}
+print(reduced) // ["A", "C"]
+```
+```java
+List<String> mapped = array.stream().map(String::toUpperCase).toList();
+IO.println(mapped); // [A, B, C]
+
+List<String> filtered = IntStream.range(0, array.size())
+        .filter(i -> i % 2 == 0)
+        .mapToObj(array::get)
+        .toList();
+IO.println(filtered); // [a, c]
+
+List<String> reduced = IntStream.range(0, array.size())
+        .filter(i -> i % 2 == 0)
+        .mapToObj(i -> array.get(i).toUpperCase())
+        .toList();
+IO.println(reduced); // [A, C]
+```
 :::
 
 :::note
-Go 1.18 added generics (type parameters). Before that you'd write a `for` loop by hand for every type; now `Map`/`Filter`/`Reduce` are written once with `[T, U any]` and reused for `[]string`, `[]int`, and so on — they're not in the standard library, so you (or a package) have to define them yourself.
+Go 1.18 added generics (type parameters). Before that you'd write a `for` loop by hand for every type; now `Map`/`Filter`/`Reduce` are written once with `[T, U any]` and reused for `[]string`, `[]int`, and so on — they're not in the standard library, so you (or a package) have to define them yourself. Java's streams have no index-aware `filter`, so filtering by position goes through `IntStream.range` and `mapToObj` to look the element back up.
 :::

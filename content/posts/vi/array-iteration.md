@@ -1,18 +1,21 @@
 ---
 title: "Duyệt mảng (map, filter, reduce)"
-description: "forEach, map, filter, reduce của Node.js so với hàm generic Map/Filter/Reduce tự viết trong Go."
+description: "forEach, map, filter, reduce của Node.js so với iterator của Rust, Swift, Java và hàm generic Map/Filter/Reduce tự viết trong Go."
 date: "2026-09-27"
 order: 410
 category: collections
-languages: [js, go]
+languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.18"
+  rust: "1.58"
+  swift: "4.0"
+  java: "25"
 tags: [array, iteration, generics, functional]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#array-iteration"
 ---
 
-Node.js có sẵn `forEach`, `map`, `filter`, `reduce` ngay trên `Array.prototype`. Go không có các hàm này cho slice trong thư viện chuẩn, nhưng từ Go 1.18 bạn có thể tự viết chúng một lần bằng generic rồi dùng lại cho mọi kiểu dữ liệu.
+Node.js có sẵn `forEach`, `map`, `filter`, `reduce` ngay trên `Array.prototype`. Go không có các hàm này cho slice trong thư viện chuẩn, nhưng từ Go 1.18 bạn có thể tự viết chúng một lần bằng generic rồi dùng lại cho mọi kiểu dữ liệu. Rust, Swift và Java thì có sẵn `map`/`filter`/`fold` (hoặc `reduce`) ngay trên iterator/stream — không cần tự viết như Go.
 
 ## Duyệt qua từng phần tử (forEach)
 
@@ -41,6 +44,40 @@ func main() {
 	// 0 a
 	// 1 b
 	// 2 c
+}
+```
+```rust
+fn main() {
+    let array = ["a", "b", "c"];
+
+    for (i, value) in array.iter().enumerate() {
+        println!("{i} {value}");
+    }
+    // 0 a
+    // 1 b
+    // 2 c
+}
+```
+```swift
+let array = ["a", "b", "c"]
+
+for (i, value) in array.enumerated() {
+    print(i, value)
+}
+// 0 a
+// 1 b
+// 2 c
+```
+```java
+void main() {
+    List<String> array = List.of("a", "b", "c");
+
+    for (int i = 0; i < array.size(); i++) {
+        IO.println(i + " " + array.get(i));
+    }
+    // 0 a
+    // 1 b
+    // 2 c
 }
 ```
 :::
@@ -108,8 +145,62 @@ reduced := Reduce(array, []string{}, func(acc []string, value string, i int) []s
 })
 fmt.Println(reduced) // [A C]
 ```
+```rust
+let mapped: Vec<String> = array.iter().map(|v| v.to_uppercase()).collect();
+println!("{mapped:?}"); // ["A", "B", "C"]
+
+let filtered: Vec<&str> = array
+    .iter()
+    .copied()
+    .enumerate()
+    .filter(|&(i, _)| i % 2 == 0)
+    .map(|(_, v)| v)
+    .collect();
+println!("{filtered:?}"); // ["a", "c"]
+
+let reduced = array
+    .iter()
+    .copied()
+    .enumerate()
+    .fold(Vec::new(), |mut acc, (i, v)| {
+        if i % 2 == 0 {
+            acc.push(v.to_uppercase());
+        }
+        acc
+    });
+println!("{reduced:?}"); // ["A", "C"]
+```
+```swift
+let mapped = array.map { $0.uppercased() }
+print(mapped) // ["A", "B", "C"]
+
+let filtered = array.enumerated().filter { (i, _) in i % 2 == 0 }.map { $0.1 }
+print(filtered) // ["a", "c"]
+
+let reduced = array.enumerated().reduce(into: [String]()) { acc, pair in
+    let (i, value) = pair
+    if i % 2 == 0 { acc.append(value.uppercased()) }
+}
+print(reduced) // ["A", "C"]
+```
+```java
+List<String> mapped = array.stream().map(String::toUpperCase).toList();
+IO.println(mapped); // [A, B, C]
+
+List<String> filtered = IntStream.range(0, array.size())
+        .filter(i -> i % 2 == 0)
+        .mapToObj(array::get)
+        .toList();
+IO.println(filtered); // [a, c]
+
+List<String> reduced = IntStream.range(0, array.size())
+        .filter(i -> i % 2 == 0)
+        .mapToObj(i -> array.get(i).toUpperCase())
+        .toList();
+IO.println(reduced); // [A, C]
+```
 :::
 
 :::note
-Go 1.18 thêm generic (type parameters). Trước đó phải viết `for` loop tay cho từng kiểu dữ liệu; giờ `Map`/`Filter`/`Reduce` viết một lần với `[T, U any]` rồi dùng lại được cho `[]string`, `[]int`, v.v. — không có sẵn trong thư viện chuẩn, bạn (hoặc một package) phải tự định nghĩa.
+Go 1.18 thêm generic (type parameters). Trước đó phải viết `for` loop tay cho từng kiểu dữ liệu; giờ `Map`/`Filter`/`Reduce` viết một lần với `[T, U any]` rồi dùng lại được cho `[]string`, `[]int`, v.v. — không có sẵn trong thư viện chuẩn, bạn (hoặc một package) phải tự định nghĩa. Java không có `filter`/index trên stream, nên lọc theo chỉ số phải đi qua `IntStream.range` rồi `mapToObj` lấy lại phần tử.
 :::

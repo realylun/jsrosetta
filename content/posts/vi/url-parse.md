@@ -1,18 +1,21 @@
 ---
 title: "Parse URL"
-description: "WHATWG URL của Node.js so với net/url.Parse của Go: lấy scheme, user info, port, path và query."
+description: "WHATWG URL của Node.js so với net/url (Go), crate url (Rust), URLComponents (Swift) và java.net.URI (Java): lấy scheme, user info, port, path và query."
 date: "2026-09-27"
 order: 1030
 category: stdlib
-languages: [js, go]
+languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
+  rust: "1.63"
+  swift: "4.0"
+  java: "25"
 tags: [url, parsing, query-string]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#url-parse"
 ---
 
-Cả hai ngôn ngữ đều parse URL thành các phần riêng: scheme, user info, host, port, path, query. Node.js dùng class `URL` toàn cục (chuẩn WHATWG); Go trả về một struct `*url.URL` với field và method tương ứng.
+Cả năm ngôn ngữ đều parse URL thành các phần riêng: scheme, user info, host, port, path, query. Node.js dùng class `URL` toàn cục (chuẩn WHATWG); Go trả về một struct `*url.URL` với field và method tương ứng. Rust không có URL parser trong std nên dùng crate `url` (cùng nhóm servo, cũng theo chuẩn WHATWG như Node.js). Swift dùng `URLComponents` của Foundation. Java dùng `java.net.URI` có sẵn — nhưng không có sẵn hàm parse query string thành map như bốn ngôn ngữ kia.
 
 ## Tách URL thành các phần
 
@@ -52,8 +55,71 @@ func main() {
 	fmt.Println(u.Query())    // map[foo:[bar]]
 }
 ```
+```rust
+// Cargo.toml: url = "2"
+use std::collections::HashMap;
+
+use url::Url;
+
+fn main() {
+    let urlstr = "http://bob:secret@sub.example.com:8080/somepath?foo=bar";
+
+    let u = Url::parse(urlstr).unwrap();
+    println!("{}:", u.scheme()); // http:
+    println!("{}:{}", u.username(), u.password().unwrap_or("")); // bob:secret
+    println!("{}", u.port().unwrap()); // 8080
+    println!("{}", u.host_str().unwrap()); // sub.example.com
+    println!("{}", u.path()); // /somepath
+
+    let query: HashMap<_, _> = u.query_pairs().into_owned().collect();
+    println!("{query:?}"); // {"foo": "bar"}
+}
+```
+```swift
+import Foundation
+
+let urlstr = "http://bob:secret@sub.example.com:8080/somepath?foo=bar"
+
+let components = URLComponents(string: urlstr)!
+print("\(components.scheme ?? ""):") // http:
+print("\(components.user ?? ""):\(components.password ?? "")") // bob:secret
+print(components.port ?? 0) // 8080
+print(components.host ?? "") // sub.example.com
+print(components.path) // /somepath
+
+let query = Dictionary(uniqueKeysWithValues: (components.queryItems ?? []).map { ($0.name, $0.value ?? "") })
+print(query) // ["foo": "bar"]
+```
+```java
+import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+void main() {
+    String urlstr = "http://bob:secret@sub.example.com:8080/somepath?foo=bar";
+
+    URI u = URI.create(urlstr);
+    IO.println(u.getScheme() + ":"); // http:
+    IO.println(u.getUserInfo()); // bob:secret
+    IO.println(u.getPort()); // 8080
+    IO.println(u.getHost()); // sub.example.com
+    IO.println(u.getPath()); // /somepath
+
+    // java.net.URI không có sẵn hàm parse query string
+    Map<String, String> query = new LinkedHashMap<>();
+    for (String pair : u.getQuery().split("&")) {
+        String[] kv = pair.split("=", 2);
+        query.put(kv[0], kv[1]);
+    }
+    IO.println(query); // {foo=bar}
+}
+```
 :::
 
 :::warning
 **Thay đổi (Node.js 24):** hàm `url.parse()` kiểu cũ giờ in cảnh báo deprecation lúc chạy (DEP0169; đã deprecated trong docs từ Node.js 19). Dùng class `URL` chuẩn WHATWG (toàn cục từ Node.js 10) cùng `URLSearchParams` như ví dụ trên, thay vì `url.parse()`.
+:::
+
+:::tip
+Crate `url` của Rust theo cùng chuẩn WHATWG với `URL` của Node.js, nên hành vi parse (normalize host, encode ký tự đặc biệt…) rất giống nhau giữa hai bên.
 :::

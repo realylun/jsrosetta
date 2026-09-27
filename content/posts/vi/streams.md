@@ -1,18 +1,21 @@
 ---
 title: "Stream"
-description: "Readable/Writable/Transform stream của Node.js so với io.Reader/io.Writer trong Go."
+description: "Readable/Writable/Transform stream của Node.js so với io.Reader/Writer (Go), std::io::Read/Write (Rust), Pipe (Swift) và InputStream (Java)."
 date: "2026-09-27"
 order: 730
 category: async
-languages: [js, go]
+languages: [js, go, rust, swift, java]
 versions:
   js: "15"
   go: "1.0"
+  rust: "1.87"
+  swift: "5.5"
+  java: "25"
 tags: [stream, io, transform, pipeline]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#streams"
 ---
 
-Node.js mô hình hoá dữ liệu chảy qua bằng các lớp `Readable`/`Writable`/`Transform`. Go không có lớp riêng cho stream — bất cứ thứ gì thực thi interface `io.Reader`/`io.Writer` đều "là" một stream, và các hàm như `io.Copy`, `io.Pipe`, `bufio.Scanner` là những khối lắp ghép để đọc/ghi/biến đổi dữ liệu đó.
+Node.js mô hình hoá dữ liệu chảy qua bằng các lớp `Readable`/`Writable`/`Transform`. Go và Rust không có lớp riêng cho stream — bất cứ thứ gì thực thi `io.Reader`/`io.Writer` (Go) hay trait `Read`/`Write` (Rust) đều "là" một stream. Swift dùng lớp `Pipe`/`FileHandle` của Foundation cộng với `AsyncSequence` để đọc bất đồng bộ. Java có sẵn `InputStream`/`OutputStream` từ những ngày đầu, và `FilterInputStream` đóng vai trò một Transform stream — bọc quanh một stream khác để biến đổi dữ liệu khi đọc qua nó.
 
 ## Đọc và ghi dữ liệu dạng stream (Readable/Writable vs io.Reader/io.Writer)
 
@@ -76,6 +79,74 @@ func main() {
 	}
 }
 ```
+```rust
+use std::io::{self, BufRead, BufReader, Write};
+use std::thread;
+
+fn main() -> io::Result<()> {
+    let mut in_stream: &[u8] = b"foobar";
+    io::copy(&mut in_stream, &mut io::stdout())?; // → foobar
+    println!();
+
+    let (reader, mut writer) = io::pipe()?; // io::pipe: ống nối đôi trong bộ nhớ, ổn định từ 1.87
+
+    let handle = thread::spawn(move || {
+        writer.write_all(b"abc\n").unwrap();
+        writer.write_all(b"xyz\n").unwrap();
+        // writer bị drop ở đây, đóng đầu ghi của pipe
+    });
+
+    for line in BufReader::new(reader).lines() {
+        println!("received: {}", line?); // → received: abc, rồi received: xyz
+    }
+    handle.join().unwrap();
+    Ok(())
+}
+```
+```swift
+import Foundation
+
+let inData = Data("foobar".utf8)
+FileHandle.standardOutput.write(inData) // → foobar
+print()
+
+let pipe = Pipe() // Pipe/FileHandle của Foundation: gần nhất với io.Pipe của Go
+
+Task {
+    pipe.fileHandleForWriting.write(Data("abc\n".utf8))
+    pipe.fileHandleForWriting.write(Data("xyz\n".utf8))
+    try? pipe.fileHandleForWriting.close()
+}
+
+for try await line in pipe.fileHandleForReading.bytes.lines {
+    print("received: \(line)") // → received: abc, rồi received: xyz
+}
+```
+```java
+void main() throws Exception {
+    var inStream = new ByteArrayInputStream("foobar".getBytes());
+    inStream.transferTo(System.out); // → foobar
+    System.out.println();
+
+    var pipeIn = new PipedInputStream();
+    var pipeOut = new PipedOutputStream(pipeIn); // PipedInputStream/PipedOutputStream: gần nhất với io.Pipe
+
+    Thread.startVirtualThread(() -> {
+        try (pipeOut) {
+            pipeOut.write("abc\n".getBytes());
+            pipeOut.write("xyz\n".getBytes());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    });
+
+    var reader = new BufferedReader(new InputStreamReader(pipeIn));
+    String line;
+    while ((line = reader.readLine()) != null) {
+        IO.println("received: " + line); // → received: abc, rồi received: xyz
+    }
+}
+```
 :::
 
 ```bash
@@ -88,10 +159,25 @@ $ go run streams.go
 foobar
 received: abc
 received: xyz
+
+$ cargo run -q
+foobar
+received: abc
+received: xyz
+
+$ swift main.swift
+foobar
+received: abc
+received: xyz
+
+$ java Main.java
+foobar
+received: abc
+received: xyz
 ```
 
 :::note
-Thứ tự khác nhau giữa hai ngôn ngữ. `pipe()` của Node bắt đầu chảy bất đồng bộ, nên "foobar" được in ra cuối cùng, sau các callback đồng bộ của `write()` trên `outStream`. `bytes.Buffer.WriteTo` của Go thì chặn (block) cho tới khi xong, nên "foobar" được in ra đầu tiên, trước khi goroutine cấp dữ liệu cho pipe kịp chạy.
+Chỉ Node.js có thứ tự khác. `pipe()` của Node bắt đầu chảy bất đồng bộ, nên "foobar" được in ra cuối cùng, sau các callback đồng bộ của `write()` trên `outStream`. Go, Rust, Swift và Java đều chạy phần ghi vào nguồn đầu tiên một cách đồng bộ/chặn (block), nên "foobar" luôn in ra trước khi goroutine/thread/task cấp dữ liệu cho pipe kịp chạy.
 :::
 
 ## Biến đổi dữ liệu khi đang chảy qua (Transform stream)
@@ -154,4 +240,88 @@ func main() {
 	// → BAZ
 }
 ```
+```rust
+use std::io::{self, Read};
+
+// UppercaseReader bọc một Read và viết hoa mọi thứ đọc được từ nó — tương
+// đương gần nhất với Transform stream của Node.
+struct UppercaseReader<R> {
+    inner: R,
+}
+
+impl<R: Read> Read for UppercaseReader<R> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        let n = self.inner.read(buf)?;
+        // viết hoa theo từng chunk chỉ an toàn với ASCII: một ký tự UTF-8
+        // nhiều byte có thể bị cắt đôi giữa hai lần đọc
+        buf[..n].make_ascii_uppercase();
+        Ok(n)
+    }
+}
+
+fn main() -> io::Result<()> {
+    // Nguồn dữ liệu trong bộ nhớ (không cần stdin) để ví dụ tự chạy độc lập.
+    let src = "foo\nbar\nbaz\n".as_bytes();
+    let mut upper = UppercaseReader { inner: src };
+
+    io::copy(&mut upper, &mut io::stdout())?;
+    // → FOO
+    // → BAR
+    // → BAZ
+    Ok(())
+}
+```
+```swift
+// In-memory source (không cần stdin) để ví dụ tự chạy độc lập.
+let source = AsyncStream { continuation in
+    for word in ["foo", "bar", "baz"] {
+        continuation.yield(word)
+    }
+    continuation.finish()
+}
+
+let upper = source.map { $0.uppercased() } // .map trên AsyncSequence: gần nhất với Transform stream
+
+for await line in upper {
+    print(line)
+}
+// → FOO
+// → BAR
+// → BAZ
+```
+```java
+// UppercaseInputStream bọc một InputStream và viết hoa mọi thứ đọc được từ
+// nó — tương đương gần nhất với Transform stream của Node.
+static class UppercaseInputStream extends FilterInputStream {
+    UppercaseInputStream(InputStream in) {
+        super(in);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        int n = super.read(b, off, len);
+        // viết hoa theo từng chunk chỉ an toàn với ASCII: một ký tự UTF-8
+        // nhiều byte có thể bị cắt đôi giữa hai lần đọc
+        for (int i = off; i < off + n; i++) {
+            b[i] = (byte) Character.toUpperCase(b[i]);
+        }
+        return n;
+    }
+}
+
+void main() throws Exception {
+    // Nguồn dữ liệu trong bộ nhớ (không cần stdin) để ví dụ tự chạy độc lập.
+    var source = new ByteArrayInputStream("foo\nbar\nbaz\n".getBytes());
+    var upper = new UppercaseInputStream(source);
+
+    upper.transferTo(System.out);
+    // → FOO
+    // → BAR
+    // → BAZ
+}
+```
+:::
+
+:::note
+`FileHandle.bytes`/`.lines` của Swift cần macOS 12 trở lên (đi cùng Swift 5.5).
 :::

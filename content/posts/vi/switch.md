@@ -1,18 +1,21 @@
 ---
 title: "Switch"
-description: "switch/case có break/fallthrough ngầm định trong JavaScript so với switch của Go (mặc định không fall through, cần fallthrough tường minh)."
+description: "switch/case của JavaScript so với Go (không fall through, có fallthrough), Rust match (không có khái niệm fallthrough), Swift (giống Go) và Java (giống JS)."
 date: "2026-09-27"
 order: 330
 category: control-flow
-languages: [js, go]
+languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
+  rust: "1.0"
+  swift: "1.0"
+  java: "25"
 tags: [switch, fallthrough, control-flow]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#switch"
 ---
 
-`switch` của Go trông giống JavaScript nhưng hành vi mặc định ngược lại hoàn toàn: JavaScript fall through sang case tiếp theo trừ khi có `break`, còn Go tự dừng sau case khớp trừ khi bạn viết `fallthrough` tường minh.
+`switch` của Go trông giống JavaScript nhưng hành vi mặc định ngược lại hoàn toàn: JavaScript fall through sang case tiếp theo trừ khi có `break`, còn Go tự dừng sau case khớp trừ khi bạn viết `fallthrough` tường minh. Swift giống hệt Go (không fall through, có từ khoá `fallthrough` tường minh). Rust không có `switch` mà có `match` — và `match` **không có khái niệm fallthrough** dưới bất kỳ hình thức nào. Java (`switch` cổ điển dùng `:`) lại giống JavaScript: fall through mặc định, cần `break` để dừng — dù từ Java 14 đã có thêm switch expression dùng `->` không bao giờ fall through.
 
 ## switch không fall through vs fall through
 
@@ -79,19 +82,110 @@ func main() {
 	}
 }
 ```
+```rust
+fn main() {
+    let value = "b";
+
+    match value {
+        "a" => println!("A"),
+        "b" => println!("B"),
+        "c" => println!("C"),
+        _ => println!("first default"),
+    }
+
+    // Rust không có "fallthrough": mỗi nhánh `match` luôn độc lập, không "chảy" xuống nhánh kế
+    // tiếp. Nhiều pattern dùng chung một thân nhánh thì gộp bằng `|` — khác hẳn ngữ nghĩa
+    // "chảy qua nhiều thân nhánh, tích luỹ output" của Go/JS.
+    match value {
+        "a" | "b" | "c" => println!("A, B or C"),
+        _ => println!("default"),
+    }
+}
+```
+```swift
+let value = "b"
+
+switch value {
+case "a":
+    print("A")
+case "b":
+    print("B")
+case "c":
+    print("C")
+default:
+    print("first default")
+}
+
+switch value {
+case "a":
+    print("A - falling through")
+    fallthrough
+case "b":
+    print("B - falling through")
+    fallthrough
+case "c":
+    print("C - falling through")
+    fallthrough
+default:
+    print("second default")
+}
+```
+```java
+void main() {
+    String value = "b";
+
+    switch (value) {
+        case "a":
+            IO.println("A");
+            break;
+        case "b":
+            IO.println("B");
+            break;
+        case "c":
+            IO.println("C");
+            break;
+        default:
+            IO.println("first default");
+    }
+
+    switch (value) {
+        case "a":
+            IO.println("A - falling through");
+        case "b":
+            IO.println("B - falling through");
+        case "c":
+            IO.println("C - falling through");
+        default:
+            IO.println("second default");
+    }
+}
+```
 :::
 
 ```bash
+# Go / Swift / Java
 B
 B - falling through
 C - falling through
 second default
+
+# Rust (match không có fallthrough, xem ghi chú)
+B
+A, B or C
 ```
+
+:::warning
+`match` của Rust **không có khái niệm fallthrough** dưới bất kỳ hình thức nào — không có từ khoá nào để "chảy" từ nhánh này sang nhánh kế tiếp. Ví dụ thứ hai ở trên không phải bản dịch tương đương của ví dụ Go/JS; nó chỉ minh hoạ cách gộp nhiều pattern dùng chung một thân nhánh bằng `|` (or-pattern) — kết quả là MỘT dòng output, không phải chuỗi output tích luỹ từ nhiều nhánh.
+:::
+
+:::note
+Từ Java 14 (JEP 361), Java có thêm switch expression dùng mũi tên (`case "a" -> ...`): không bao giờ fall through, không cần `break`, và có thể trả về giá trị trực tiếp. Ví dụ trên dùng `switch` cổ điển (dùng `:`) vì đó là dạng duy nhất còn giữ hành vi fall through để minh hoạ.
+:::
 
 ## Khác biệt chính
 
-| | Node.js | Go |
-|---|---|---|
-| Mặc định sau một case khớp | fall through sang case kế tiếp | dừng lại (implicit break) |
-| Muốn dừng lại | phải viết `break` | không cần làm gì, đã là mặc định |
-| Muốn fall through | mặc định đã vậy | phải viết `fallthrough` tường minh |
+| | Node.js | Go | Rust | Swift | Java (`switch` cổ điển) |
+|---|---|---|---|---|---|
+| Mặc định sau một case khớp | fall through sang case kế tiếp | dừng lại (implicit break) | dừng lại — không có khái niệm khác | dừng lại (implicit break) | fall through sang case kế tiếp |
+| Muốn dừng lại | phải viết `break` | không cần làm gì, đã là mặc định | không cần làm gì, đã là mặc định | không cần làm gì, đã là mặc định | phải viết `break` |
+| Muốn fall through | mặc định đã vậy | phải viết `fallthrough` tường minh | không thể — dùng or-pattern `\|` nếu muốn gộp | phải viết `fallthrough` tường minh | mặc định đã vậy |

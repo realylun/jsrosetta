@@ -37,7 +37,7 @@ export const LANGUAGES: Readonly<Record<LanguageId, Language>> = {
     verifiedOn: "1.98.1",
   },
   swift: { id: "swift", label: "Swift", aliases: ["swift"], color: "#f05138", verifiedOn: "6.2.4" },
-  java: { id: "java", label: "Java", aliases: ["java"], color: "#b07219", verifiedOn: "17.0.20.1" },
+  java: { id: "java", label: "Java", aliases: ["java"], color: "#b07219", verifiedOn: "25.0.4.1" },
 };
 
 export function isLanguageId(value: string): value is LanguageId {

@@ -1,10 +1,10 @@
 ---
 title: "Promises"
-description: "How Node.js's Promise .then()/.catch() and Promise.all() compare to channels and goroutines in Go."
+description: "How Node.js's Promise .then()/.catch() and Promise.all() compare to channels (Go), Future (Rust), async/await (Swift), and CompletableFuture (Java)."
 tags: [promise, async, channel, goroutine]
 ---
 
-Node.js has `Promise` built into the language. Go has no equivalent type — the closest thing is using a channel to receive a "settled" value from a goroutine running in the background. This post uses the classic `.then()`/`.catch()` syntax; if you want to rewrite it with `await`, see [async/await](/en/posts/async-await).
+Node.js has `Promise` built into the language. Go has no equivalent type — the closest thing is using a channel to receive a "settled" value from a goroutine running in the background. Rust and Swift don't have a Promise type either, but they have `async`/`await` to get the same effect (see [async/await](/en/posts/async-await) for a refresher on that syntax). Java has `CompletableFuture` — the closest thing to a Promise among these five languages, chainable with `.thenAccept()`/`.exceptionally()` just like `.then()`/`.catch()`. This post uses Node's classic `.then()`/`.catch()` syntax.
 
 ## Creating a promise and handling the result (then/catch)
 
@@ -46,6 +46,45 @@ func asyncMethod(value string) <-chan Result {
 		ch <- Result{Value: "resolved: " + value}
 	}()
 	return ch
+}
+```
+```rust
+// Cargo.toml: tokio = { version = "1", features = ["full"] }
+use std::time::Duration;
+use tokio::time::sleep;
+
+// Rust's Future is the closest type, but it's lazy: nothing runs until it's
+// awaited; Result<T, E> plays the role of resolve/reject.
+async fn async_method(value: &str) -> Result<String, String> {
+    sleep(Duration::from_secs(1)).await;
+    Ok(format!("resolved: {value}"))
+}
+```
+```swift
+// Swift has no Promise type; the closest analog is an async function, and
+// `throws` plays the role of reject.
+func asyncMethod(_ value: String) async throws -> String {
+    try await Task.sleep(for: .seconds(1))
+    return "resolved: \(value)"
+}
+```
+```java
+// CompletableFuture is Java's closest analog to Promise: chain with
+// .thenAccept()/.exceptionally() instead of .then()/.catch().
+static CompletableFuture<String> asyncMethod(String value) {
+    return CompletableFuture.supplyAsync(() -> {
+        sleep(1000);
+        return "resolved: " + value;
+    });
+}
+
+static void sleep(long ms) {
+    try {
+        Thread.sleep(ms);
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new RuntimeException(e);
+    }
 }
 ```
 :::
@@ -107,8 +146,68 @@ func main() {
 	fmt.Println(values) // → [resolved: A resolved: B resolved: C]
 }
 ```
+```rust
+#[tokio::main]
+async fn main() {
+    match async_method("foo").await {
+        Ok(result) => println!("{result}"), // → resolved: foo
+        Err(err) => eprintln!("{err}"),
+    }
+
+    let (a, b, c) = tokio::join!(async_method("A"), async_method("B"), async_method("C"));
+    let results: Result<Vec<_>, _> = [a, b, c].into_iter().collect(); // the first Err short-circuits, like Promise.all
+    match results {
+        Ok(values) => println!("{values:?}"), // → ["resolved: A", "resolved: B", "resolved: C"]
+        Err(err) => eprintln!("{err}"),
+    }
+}
+```
+```swift
+// all awaits every task and returns values in the original order, like
+// Promise.all — TaskGroup finishes tasks out of order, so we re-sort by index.
+func all(_ values: [String]) async throws -> [String] {
+    try await withThrowingTaskGroup(of: (Int, String).self) { group in
+        for (index, value) in values.enumerated() {
+            group.addTask { (index, try await asyncMethod(value)) }
+        }
+        var results = [String](repeating: "", count: values.count)
+        for try await (index, result) in group {
+            results[index] = result
+        }
+        return results
+    }
+}
+
+let foo = try await asyncMethod("foo") // await here plays the role of .then()
+print(foo) // → resolved: foo
+
+let results = try await all(["A", "B", "C"])
+print(results) // → ["resolved: A", "resolved: B", "resolved: C"]
+```
+```java
+void main() {
+    asyncMethod("foo")
+            .thenAccept(result -> IO.println(result)) // → resolved: foo
+            .join();
+
+    List<CompletableFuture<String>> tasks = Stream.of("A", "B", "C")
+            .map(value -> asyncMethod(value))
+            .toList();
+
+    CompletableFuture.allOf(tasks.toArray(CompletableFuture[]::new))
+            .thenRun(() -> {
+                List<String> results = tasks.stream().map(CompletableFuture::join).toList();
+                IO.println(results); // → [resolved: A, resolved: B, resolved: C]
+            })
+            .join();
+}
+```
 :::
 
 :::note
 Go 1.25 added `sync.WaitGroup.Go(func())`, replacing the earlier manual `wg.Add(1)` + `go func(){ …; wg.Done() }()` pattern — so a goroutine can no longer be started without a matching `Done()`.
+:::
+
+:::note
+`CompletableFuture` has no hidden "microtask queue" like Promise: `.thenAccept()`/`.thenRun()` run on `ForkJoinPool.commonPool()`, a pool of daemon threads. If `main()` doesn't call `.join()` to wait, the program can exit before the callback runs — the same reason Go needs a `sync.WaitGroup`.
 :::

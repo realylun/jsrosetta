@@ -1,10 +1,10 @@
 ---
 title: "While Loops"
-description: "How JavaScript's while loop maps to Go's for used as a while loop (Go has no while keyword)."
+description: "How JavaScript's while loop maps to Go's for used as a while loop (Go has no while keyword) — Rust, Swift, and Java all have while like JavaScript."
 tags: [while-loop, for, control-flow]
 ---
 
-Go has no `while` keyword. The same thing is achieved with `for` and just a condition, dropping the `init` and `post` parts entirely.
+Go has no `while` keyword. The same thing is achieved with `for` and just a condition, dropping the `init` and `post` parts entirely. Rust, Swift, and Java all have `while` just like JavaScript — of these five languages, Go is the only exception.
 
 ## while in JavaScript, for in Go
 
@@ -31,6 +31,37 @@ func main() {
 
 		i++
 	}
+}
+```
+```rust
+fn main() {
+    let mut i = 0;
+
+    while i <= 5 {
+        println!("{i}");
+
+        i += 1;
+    }
+}
+```
+```swift
+var i = 0
+
+while i <= 5 {
+    print(i)
+
+    i += 1
+}
+```
+```java
+void main() {
+    int i = 0;
+
+    while (i <= 5) {
+        IO.println(i);
+
+        i++;
+    }
 }
 ```
 :::

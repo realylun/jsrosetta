@@ -1,10 +1,10 @@
 ---
 title: "Sorting arrays"
-description: "Node.js's Array.prototype.toSorted compared to Go's slices.Sort, slices.SortFunc, and slices.Reverse."
+description: "Node.js's Array.prototype.toSorted compared to in-place sorting in Go, Rust, Swift, and Java."
 tags: [array, sort, slices, comparator]
 ---
 
-Sorting numbers and strings in Node.js uses the same `toSorted` function with a comparator; Go splits this into two cases: `slices.Sort` for types with a natural order (`cmp.Ordered`), and `slices.SortFunc` for custom comparisons, such as sorting by a struct field.
+Sorting numbers and strings in Node.js uses the same `toSorted` function with a comparator; Go splits this into two cases: `slices.Sort` for types with a natural order (`cmp.Ordered`), and `slices.SortFunc` for custom comparisons, such as sorting by a struct field. Rust, Swift, and Java all sort **in place** (`sort`/`sort_by_key`, `Collections.sort`) — to keep the original untouched, copy it first, just like Go.
 
 ## Sorting numbers and strings
 
@@ -41,6 +41,49 @@ func main() {
 	stringList := []string{"a", "d", "z", "b", "c", "y"}
 	slices.Sort(stringList)
 	fmt.Println(stringList) // [a b c d y z]
+}
+```
+```rust
+fn main() {
+    let mut int_list = vec![1, 3, 5, 9, 4, 2, 0];
+
+    int_list.sort(); // asc
+    println!("{int_list:?}"); // [0, 1, 2, 3, 4, 5, 9]
+
+    int_list.reverse(); // desc: reverse the vec that's now sorted ascending
+    println!("{int_list:?}"); // [9, 5, 4, 3, 2, 1, 0]
+
+    let mut string_list = vec!["a", "d", "z", "b", "c", "y"];
+    string_list.sort();
+    println!("{string_list:?}"); // ["a", "b", "c", "d", "y", "z"]
+}
+```
+```swift
+var intList = [1, 3, 5, 9, 4, 2, 0]
+
+intList.sort() // asc, in place
+print(intList) // [0, 1, 2, 3, 4, 5, 9]
+
+intList.reverse() // desc: reverse the array that's now sorted ascending
+print(intList) // [9, 5, 4, 3, 2, 1, 0]
+
+var stringList = ["a", "d", "z", "b", "c", "y"]
+stringList.sort()
+print(stringList) // ["a", "b", "c", "d", "y", "z"]
+```
+```java
+void main() {
+    List<Integer> intList = new ArrayList<>(List.of(1, 3, 5, 9, 4, 2, 0));
+
+    Collections.sort(intList); // asc
+    IO.println(intList); // [0, 1, 2, 3, 4, 5, 9]
+
+    Collections.reverse(intList); // desc: reverse the list that's now sorted ascending
+    IO.println(intList); // [9, 5, 4, 3, 2, 1, 0]
+
+    List<String> stringList = new ArrayList<>(List.of("a", "d", "z", "b", "c", "y"));
+    Collections.sort(stringList);
+    IO.println(stringList); // [a, b, c, d, y, z]
 }
 ```
 :::
@@ -81,16 +124,65 @@ slices.SortFunc(collection, func(a, b Person) int {
 fmt.Println(collection)
 // [{Yi M 2} {Json C 3} {Li L 8} {Zack W 15}]
 ```
+```rust
+#[derive(Debug)]
+struct Person {
+    name: String,
+    age: u32,
+}
+
+let mut collection = vec![
+    Person { name: "Li L".into(), age: 8 },
+    Person { name: "Json C".into(), age: 3 },
+    Person { name: "Zack W".into(), age: 15 },
+    Person { name: "Yi M".into(), age: 2 },
+];
+
+collection.sort_by_key(|p| p.age);
+println!("{collection:?}");
+// [Person { name: "Yi M", age: 2 }, Person { name: "Json C", age: 3 }, Person { name: "Li L", age: 8 }, Person { name: "Zack W", age: 15 }]
+```
+```swift
+struct Person {
+    let name: String
+    let age: Int
+}
+
+var collection = [
+    Person(name: "Li L", age: 8),
+    Person(name: "Json C", age: 3),
+    Person(name: "Zack W", age: 15),
+    Person(name: "Yi M", age: 2),
+]
+
+collection.sort { $0.age < $1.age }
+print(collection.map { ($0.name, $0.age) })
+// [("Yi M", 2), ("Json C", 3), ("Li L", 8), ("Zack W", 15)]
+```
+```java
+record Person(String name, int age) {}
+
+List<Person> collection = new ArrayList<>(List.of(
+        new Person("Li L", 8),
+        new Person("Json C", 3),
+        new Person("Zack W", 15),
+        new Person("Yi M", 2)
+));
+
+collection.sort(Comparator.comparingInt(Person::age));
+IO.println(collection);
+// [Person[name=Yi M, age=2], Person[name=Json C, age=3], Person[name=Li L, age=8], Person[name=Zack W, age=15]]
+```
 :::
 
 ## Key differences
 
-| | Node.js | Go |
-|---|---|---|
-| Leaves the original untouched | `toSorted()` | `slices.Clone` before `slices.Sort` |
-| Default comparison (no function) | coerces to string | compile error if the type isn't `cmp.Ordered` |
-| Sorting by a field | comparator function | `slices.SortFunc` + `cmp.Compare` |
-| Reversing order | comparator with flipped sign | `slices.Reverse` |
+| | Node.js | Go | Rust | Swift | Java |
+|---|---|---|---|---|---|
+| Leaves the original untouched | `toSorted()` | `slices.Clone` before `slices.Sort` | `.clone()` before `.sort()` | copy (value type) before `.sort()` | copy constructor before `Collections.sort` |
+| Default comparison (no function) | coerces to string | compile error if the type isn't `cmp.Ordered` | compile error if the type doesn't impl `Ord` | compile error if the type isn't `Comparable` | compile error if the type doesn't implement `Comparable` |
+| Sorting by a field | comparator function | `slices.SortFunc` + `cmp.Compare` | `.sort_by_key` / `.sort_by` | `.sort(by:)` with a closure | `Comparator.comparingInt`/`.comparing` |
+| Reversing order | comparator with flipped sign | `slices.Reverse` | `.reverse()` | `.reverse()` | `Collections.reverse` |
 
 :::note
 Node.js 20 added `Array.prototype.toSorted()`, which returns a sorted **copy** and leaves the original array untouched (`sort()` sorts in place, mutating the original).

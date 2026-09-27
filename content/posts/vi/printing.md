@@ -1,18 +1,21 @@
 ---
 title: "In ra output"
-description: "console.log/console.error trong Node.js tương ứng với fmt.Println/fmt.Printf/fmt.Fprintf trong Go."
+description: "console.log/console.error trong Node.js so với fmt.Println/Printf (Go), println!/eprint! (Rust), print (Swift) và IO.println (Java 25)."
 date: "2026-09-27"
 order: 110
 category: basics
-languages: [js, go]
+languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
+  rust: "1.0"
+  swift: "3.0"
+  java: "25"
 tags: [printing, stdout, stderr]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#printing"
 ---
 
-`console.log` in ra stdout, `console.error` in ra stderr. Go tách các hàm rõ ràng hơn: `fmt.Println` in kèm xuống dòng, `fmt.Printf` nhận format string kiểu C, còn `fmt.Fprintf` ghi vào bất kỳ `io.Writer` nào — kể cả `os.Stderr`.
+`console.log` in ra stdout, `console.error` in ra stderr. Go tách các hàm rõ ràng hơn: `fmt.Println` in kèm xuống dòng, `fmt.Printf` nhận format string kiểu C, còn `fmt.Fprintf` ghi vào bất kỳ `io.Writer` nào — kể cả `os.Stderr`. Rust có macro tương đương (`println!`/`eprint!`) ngay trong ngôn ngữ; Swift chỉ có `print` đơn giản nên cần Foundation cho định dạng kiểu C và ghi ra stderr; Java 25 thêm `IO.println` cho compact source file, còn `System.err` vẫn dùng như trước.
 
 ## In ra stdout và stderr
 
@@ -36,6 +39,27 @@ func main() {
 	fmt.Fprintf(os.Stderr, "print to stderr")
 }
 ```
+```rust
+fn main() {
+    println!("print to stdout");
+    println!("format {} {}", "example", 1);
+    eprint!("print to stderr");
+}
+```
+```swift
+import Foundation
+
+print("print to stdout")
+print(String(format: "format %@ %d", "example", 1))
+FileHandle.standardError.write(Data("print to stderr".utf8))
+```
+```java
+void main() {
+    IO.println("print to stdout");
+    IO.println("format %s %d".formatted("example", 1));
+    System.err.print("print to stderr");
+}
+```
 :::
 
 ```bash
@@ -43,3 +67,7 @@ print to stdout
 format example 1
 print to stderr
 ```
+
+:::note
+Swift không có hàm in kiểu `printf` hay ghi ra `stderr` trong core stdlib — cả `String(format:)` lẫn `FileHandle.standardError` đều đến từ Foundation (dùng tên kiểu Swift-native như `FileHandle`/`Data`, có từ Swift 3.0; trước đó là `NSFileHandle`/`NSData`).
+:::
