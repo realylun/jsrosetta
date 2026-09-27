@@ -8,6 +8,7 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import rehypeCodeTabs, { type CodeTabsOptions } from "./rehype-code-tabs";
+import rehypeTableScroll from "./rehype-table-scroll";
 import remarkDirectives from "./remark-directives";
 import remarkSafeLinks from "./remark-safe-links";
 
@@ -29,6 +30,7 @@ const createProcessor = (options: CodeTabsOptions) =>
     .use(remarkRehype)
     .use(rehypePrettyCode, prettyCodeOptions)
     .use(rehypeCodeTabs, options)
+    .use(rehypeTableScroll)
     .use(rehypeSlug)
     .use(rehypeAutolinkHeadings, {
       behavior: "wrap",

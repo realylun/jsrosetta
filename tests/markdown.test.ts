@@ -81,6 +81,11 @@ describe("markdownToHtml", () => {
     expect(html).toContain('id="hello-world"');
     expect(html).toContain('class="heading-anchor"');
   });
+
+  it("wraps tables in a horizontally scrollable container", async () => {
+    const html = await markdownToHtml("| a | b |\n| - | - |\n| 1 | 2 |");
+    expect(html).toMatch(/^<div class="table-scroll"><table>[\s\S]*<\/table><\/div>$/);
+  });
 });
 
 describe("markdownToHtml hardening", () => {
