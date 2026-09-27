@@ -1,10 +1,10 @@
 ---
 title: "Message Passing"
-description: "How Node.js's MessageChannel between ports compares to Go's built-in channel for sending data between tasks."
+description: "How Node.js's MessageChannel compares to channels (Go), mpsc (Rust), AsyncStream (Swift), and BlockingQueue (Java) for sending data between tasks."
 tags: [channel, message-passing, goroutine, concurrency]
 ---
 
-Instead of letting two concurrent tasks read and write the same shared variable, both languages let you send data back and forth between them. Node.js does this through the `MessageChannel`/`postMessage` API; Go has a whole built-in data type for it — the channel (`chan`) — with its own syntax for sending, receiving, closing, and waiting with a timeout.
+Instead of letting two concurrent tasks read and write the same shared variable, all five languages let you send data back and forth between them. Node.js does this through the `MessageChannel`/`postMessage` API. Go has channels (`chan`) built into the language itself, with dedicated syntax (`<-`, `select`) for sending, receiving, closing, and waiting with a timeout. Rust has nothing at the language level for this — `std::sync::mpsc` is just an ordinary standard library type, used through regular method calls (`.send()`, `.recv()`, `.recv_timeout()`) with no special syntax at all. Swift has no channel type; `AsyncStream` is the closest thing — an async queue that one side `yield()`s into and the other reads with `for await`, but it doesn't block when full the way a real channel does. Java has `BlockingQueue` (`SynchronousQueue`, `ArrayBlockingQueue`, …) — the closest match to Go's channel among the remaining three languages.
 
 ## Sending data between two tasks (MessageChannel vs channel)
 
@@ -68,6 +68,141 @@ func main() {
 	}
 }
 ```
+```rust
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn producer(out: mpsc::Sender<i32>, n: i32) {
+    for i in 1..=n {
+        out.send(i).unwrap();
+    }
+    // `out` is dropped here, closing the channel
+}
+
+fn main() {
+    // sync_channel(0): rendezvous — the send blocks until another thread receives it
+    let (tx, rx) = mpsc::sync_channel::<&str>(0);
+    thread::spawn(move || {
+        tx.send("hello from an unbuffered channel").unwrap();
+    });
+    println!("{}", rx.recv().unwrap()); // → hello from an unbuffered channel
+
+    // sync_channel(2): the send only blocks once the buffer is full
+    let (tx, rx) = mpsc::sync_channel(2);
+    tx.send(1).unwrap();
+    tx.send(2).unwrap();
+    println!("{} {}", rx.recv().unwrap(), rx.recv().unwrap()); // → 1 2
+
+    // producer/consumer: iterating the receiver yields values until the channel closes
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || producer(tx, 3));
+    for n in rx {
+        println!("received {n}"); // → received 1, received 2, received 3
+    }
+
+    // recv_timeout, so a stuck receive doesn't hang forever — Rust's stand-in for Go's select
+    let (_tx, rx) = mpsc::channel::<String>();
+    match rx.recv_timeout(Duration::from_millis(50)) {
+        Ok(msg) => println!("{msg}"),
+        Err(_) => println!("timeout: no message after 50ms"), // → timeout: no message after 50ms
+    }
+}
+```
+```swift
+// Swift has no channel type; AsyncStream is the closest thing — an async
+// queue that one side yields into and the other reads with `for await`.
+let messages = AsyncStream<String> { continuation in
+    continuation.yield("hello from an AsyncStream")
+    continuation.finish() // ends the stream, like closing a channel
+}
+
+for await message in messages {
+    print(message) // → hello from an AsyncStream
+}
+
+// producer/consumer: the consumer's loop ends when the producer calls finish()
+func producer(_ continuation: AsyncStream<Int>.Continuation, count: Int) {
+    for i in 1...count {
+        continuation.yield(i)
+    }
+    continuation.finish()
+}
+
+let numbers = AsyncStream<Int> { continuation in
+    Task { producer(continuation, count: 3) }
+}
+
+for await n in numbers {
+    print("received \(n)") // → received 1, received 2, received 3
+}
+
+// receiving with a timeout: race two Tasks with a TaskGroup, since Swift has
+// no `select`. Returns nil on timeout instead of baking in a message — the
+// caller is the one who actually knows the timeout value to report.
+func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> String? {
+    await withTaskGroup(of: String?.self) { group in
+        group.addTask {
+            var iterator = stream.makeAsyncIterator()
+            return await iterator.next()
+        }
+        group.addTask {
+            try? await Task.sleep(for: timeout)
+            return nil
+        }
+        let first = await group.next()! // whichever task finishes first wins
+        group.cancelAll()
+        return first
+    }
+}
+
+let empty = AsyncStream<String> { _ in }
+let message = await firstMessage(from: empty, timeout: .milliseconds(50))
+print(message ?? "timeout: no message after 50ms") // → timeout: no message after 50ms
+```
+```java
+void main() throws InterruptedException {
+    // SynchronousQueue: put() blocks until another thread take()s the value — Go's unbuffered channel
+    var handoff = new SynchronousQueue<String>();
+    Thread.ofVirtual().start(() -> {
+        try {
+            handoff.put("hello from a SynchronousQueue");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    });
+    IO.println(handoff.take()); // → hello from a SynchronousQueue
+
+    // ArrayBlockingQueue(n): put() only blocks once the buffer is full — Go's buffered channel
+    BlockingQueue<Integer> buffered = new ArrayBlockingQueue<>(2);
+    buffered.put(1);
+    buffered.put(2);
+    IO.println(buffered.take() + " " + buffered.take()); // → 1 2
+
+    // producer/consumer: a sentinel value signals "done", since queues have no close()
+    BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(3);
+    int done = -1;
+    Thread.ofVirtual().start(() -> {
+        try {
+            for (int i = 1; i <= 3; i++) {
+                queue.put(i);
+            }
+            queue.put(done);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    });
+    int n;
+    while ((n = queue.take()) != done) {
+        IO.println("received " + n); // → received 1, received 2, received 3
+    }
+
+    // poll(timeout, unit): returns null instead of blocking forever, like select + time.After
+    BlockingQueue<String> empty = new ArrayBlockingQueue<>(1);
+    String msg = empty.poll(50, TimeUnit.MILLISECONDS);
+    IO.println(msg == null ? "timeout: no message after 50ms" : msg); // → timeout: no message after 50ms
+}
+```
 :::
 
 :::note
@@ -75,13 +210,17 @@ A `Worker` talks to its parent the same way — `worker.postMessage()` on one si
 :::
 
 :::note
-"Don't communicate by sharing memory; share memory by communicating." — a core Go proverb. A channel hands ownership of a value to the next goroutine instead of letting two goroutines fight over one shared variable.
+"Don't communicate by sharing memory; share memory by communicating." — a core Go proverb. A channel hands ownership of a value to the next goroutine instead of letting two goroutines fight over one shared variable. Rust's `mpsc` follows the same philosophy: the type checker even requires sent values to be `Send`.
+:::
+
+:::warning
+Swift's `AsyncStream.yield()` never blocks: by default it buffers without limit, or drops elements if you set a `bufferingPolicy` — `.bufferingNewest(n)` keeps the `n` newest values (dropping the **oldest** once full), while `.bufferingOldest(n)` keeps the `n` oldest values (dropping the **newest** incoming one once full). This isn't a real backpressure channel like Go's, Rust's, or Java's — it's just the closest async queue Swift has. `Task.sleep(for:)` (used above to wait for the timeout) is a Swift 5.7 language feature, but on Apple platforms it only runs on macOS 13/iOS 16 or later.
 :::
 
 ## Key differences
 
-| | Node.js | Go |
-|---|---|---|
-| Mechanism | `MessageChannel`/`postMessage` | channel (`chan`) — a built-in language type |
-| Capacity limit | unbounded, an internal hidden queue | can set a fixed buffer at creation (`make(chan T, n)`) |
-| Waiting with a timeout | hand-rolled with `Promise.race` + `setTimeout` | `select` + `time.After` built right into the syntax |
+| | Node.js | Go | Rust | Swift | Java |
+|---|---|---|---|---|---|
+| Mechanism | `MessageChannel`/`postMessage` | channel (`chan`) — built into the language's syntax | `std::sync::mpsc` — an ordinary standard library type, no special syntax | `AsyncStream` — never blocks on send | `BlockingQueue` (`SynchronousQueue`, …) |
+| Capacity limit | unbounded, an internal hidden queue | a fixed buffer set at creation (`make(chan T, n)`) | `sync_channel(n)` for a fixed buffer | no real backpressure | `ArrayBlockingQueue(n)` for a fixed buffer |
+| Waiting with a timeout | hand-rolled with `Promise.race` + `setTimeout` | `select` + `time.After` built into the syntax | `recv_timeout(Duration)` | racing with `TaskGroup` + `Task.sleep` | `poll(timeout, unit)` |

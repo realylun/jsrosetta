@@ -1,10 +1,10 @@
 ---
 title: "Writing to Stdout and Stderr"
-description: "How Node.js's process.stdout.write/process.stderr.write compare to Go's fmt.Fprint(os.Stdout, …)/fmt.Fprint(os.Stderr, …)."
+description: "How Node.js's process.stdout.write/process.stderr.write compares to fmt.Fprint (Go), io::Write (Rust), FileHandle (Swift), and System.out/err.write (Java)."
 tags: [stdout, stderr, io, printing]
 ---
 
-`console.log`/`console.error` covers most needs, but sometimes you need to write straight to a stream without an extra newline or formatting. Both Node.js and Go let you write directly to stdout/stderr as a stream/writer.
+`console.log`/`console.error` covers most needs, but sometimes you need to write straight to a stream without an extra newline or formatting. All five languages let you write directly to stdout/stderr as a stream/writer: Go uses `fmt.Fprint`, Rust uses the `io::Write` trait, Swift uses `FileHandle`, and Java writes raw bytes through `System.out`/`System.err` (both a `PrintStream`).
 
 ## Writing to stdout
 
@@ -22,6 +22,26 @@ import (
 
 func main() {
 	fmt.Fprint(os.Stdout, "hello world\n")
+}
+```
+```rust
+use std::io::{self, Write};
+
+fn main() {
+    // .write_all() with a byte string instead of write!(...,"…\n") avoids
+    // tripping both the write_with_newline and explicit_write clippy lints
+    io::stdout().write_all(b"hello world\n").unwrap();
+}
+```
+```swift
+import Foundation
+
+try FileHandle.standardOutput.write(contentsOf: "hello world\n".data(using: .utf8)!)
+```
+```java
+void main() throws Exception {
+    System.out.write("hello world\n".getBytes());
+    System.out.flush();
 }
 ```
 :::
@@ -46,6 +66,24 @@ import (
 
 func main() {
 	fmt.Fprint(os.Stderr, "hello error\n")
+}
+```
+```rust
+use std::io::{self, Write};
+
+fn main() {
+    io::stderr().write_all(b"hello error\n").unwrap();
+}
+```
+```swift
+import Foundation
+
+try FileHandle.standardError.write(contentsOf: "hello error\n".data(using: .utf8)!)
+```
+```java
+void main() throws Exception {
+    System.err.write("hello error\n".getBytes());
+    System.err.flush();
 }
 ```
 :::

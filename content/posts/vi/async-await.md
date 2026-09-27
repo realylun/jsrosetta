@@ -9,7 +9,7 @@ versions:
   js: "14.8"
   go: "1.22"
   rust: "1.58"
-  swift: "5.9"
+  swift: "5.7"
   java: "16"
 tags: [promise, async, await, concurrency]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#asyncawait"

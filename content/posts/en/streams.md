@@ -1,10 +1,10 @@
 ---
 title: "Streams"
-description: "How Node.js's Readable/Writable/Transform streams compare to io.Reader/io.Writer in Go."
+description: "How Node.js's Readable/Writable/Transform streams compare to io.Reader/Writer (Go), std::io::Read/Write (Rust), Pipe (Swift), and InputStream (Java)."
 tags: [stream, io, transform, pipeline]
 ---
 
-Node.js models flowing data with the `Readable`/`Writable`/`Transform` classes. Go has no dedicated stream class — anything that implements the `io.Reader`/`io.Writer` interface "is" a stream, and functions like `io.Copy`, `io.Pipe`, and `bufio.Scanner` are the building blocks you compose to read, write, and transform it.
+Node.js models flowing data with the `Readable`/`Writable`/`Transform` classes. Go and Rust have no dedicated stream class — anything that implements `io.Reader`/`io.Writer` (Go) or the `Read`/`Write` traits (Rust) "is" a stream. Swift uses Foundation's `Pipe`/`FileHandle` classes together with `AsyncSequence` for asynchronous reads. Java has had `InputStream`/`OutputStream` since its earliest days, and `FilterInputStream` plays the role of a Transform stream — it wraps another stream and transforms the data as it's read through it.
 
 ## Reading and writing streaming data (Readable/Writable vs io.Reader/io.Writer)
 
@@ -68,6 +68,74 @@ func main() {
 	}
 }
 ```
+```rust
+use std::io::{self, BufRead, BufReader, Write};
+use std::thread;
+
+fn main() -> io::Result<()> {
+    let mut in_stream: &[u8] = b"foobar";
+    io::copy(&mut in_stream, &mut io::stdout())?; // → foobar
+    println!();
+
+    let (reader, mut writer) = io::pipe()?; // io::pipe: an anonymous OS pipe (one-way), stable since 1.87
+
+    let handle = thread::spawn(move || {
+        writer.write_all(b"abc\n").unwrap();
+        writer.write_all(b"xyz\n").unwrap();
+        // writer is dropped here, closing its end of the pipe
+    });
+
+    for line in BufReader::new(reader).lines() {
+        println!("received: {}", line?); // → received: abc, then received: xyz
+    }
+    handle.join().unwrap();
+    Ok(())
+}
+```
+```swift
+import Foundation
+
+let inData = Data("foobar".utf8)
+try FileHandle.standardOutput.write(contentsOf: inData) // → foobar
+print()
+
+let pipe = Pipe() // Foundation's Pipe/FileHandle: the closest match to Go's io.Pipe
+
+Task {
+    try pipe.fileHandleForWriting.write(contentsOf: Data("abc\n".utf8))
+    try pipe.fileHandleForWriting.write(contentsOf: Data("xyz\n".utf8))
+    try? pipe.fileHandleForWriting.close()
+}
+
+for try await line in pipe.fileHandleForReading.bytes.lines {
+    print("received: \(line)") // → received: abc, then received: xyz
+}
+```
+```java
+void main() throws Exception {
+    var inStream = new ByteArrayInputStream("foobar".getBytes());
+    inStream.transferTo(System.out); // → foobar
+    System.out.println();
+
+    var pipeIn = new PipedInputStream();
+    var pipeOut = new PipedOutputStream(pipeIn); // PipedInputStream/PipedOutputStream: the closest match to io.Pipe
+
+    Thread.startVirtualThread(() -> {
+        try (pipeOut) {
+            pipeOut.write("abc\n".getBytes());
+            pipeOut.write("xyz\n".getBytes());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    });
+
+    var reader = new BufferedReader(new InputStreamReader(pipeIn));
+    String line;
+    while ((line = reader.readLine()) != null) {
+        IO.println("received: " + line); // → received: abc, then received: xyz
+    }
+}
+```
 :::
 
 ```bash
@@ -80,10 +148,25 @@ $ go run streams.go
 foobar
 received: abc
 received: xyz
+
+$ cargo run -q
+foobar
+received: abc
+received: xyz
+
+$ swift main.swift
+foobar
+received: abc
+received: xyz
+
+$ java Main.java
+foobar
+received: abc
+received: xyz
 ```
 
 :::note
-The order differs by language. Node's `pipe()` starts flowing asynchronously, so `foobar` is printed last, after the synchronous `write()` callbacks on `outStream`. Go's `bytes.Buffer.WriteTo` blocks until it's done, so `foobar` is printed first, before the goroutine feeding the pipe gets a chance to run.
+Only Node.js prints in a different order. Node's `pipe()` starts flowing asynchronously, so `foobar` is printed last, after the synchronous `write()` callbacks on `outStream`. Go, Rust, Swift, and Java all write to the in-memory source synchronously/blocking, so `foobar` is always printed before the goroutine/thread/task feeding the pipe gets a chance to run.
 :::
 
 ## Transforming data as it flows through (Transform stream)
@@ -146,4 +229,97 @@ func main() {
 	// → BAZ
 }
 ```
+```rust
+use std::io::{self, Read};
+
+// UppercaseReader wraps a Read and uppercases everything read from it —
+// the closest equivalent to a Node Transform stream.
+struct UppercaseReader<R> {
+    inner: R,
+}
+
+impl<R: Read> Read for UppercaseReader<R> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        let n = self.inner.read(buf)?;
+        // per-chunk uppercasing is only safe for ASCII: a multi-byte UTF-8
+        // character can be split across two reads
+        buf[..n].make_ascii_uppercase();
+        Ok(n)
+    }
+}
+
+fn main() -> io::Result<()> {
+    // In-memory source (no stdin) so this example is self-contained.
+    let src = "foo\nbar\nbaz\n".as_bytes();
+    let mut upper = UppercaseReader { inner: src };
+
+    io::copy(&mut upper, &mut io::stdout())?;
+    // → FOO
+    // → BAR
+    // → BAZ
+    Ok(())
+}
+```
+```swift
+// In-memory source (no stdin) so this example is self-contained.
+let source = AsyncStream { continuation in
+    for word in ["foo", "bar", "baz"] {
+        continuation.yield(word)
+    }
+    continuation.finish()
+}
+
+let upper = source.map { $0.uppercased() } // .map on an AsyncSequence: the closest match to a Transform stream
+
+for await line in upper {
+    print(line)
+}
+// → FOO
+// → BAR
+// → BAZ
+```
+```java
+// UppercaseInputStream wraps an InputStream and uppercases everything read
+// from it — the closest equivalent to a Node Transform stream.
+static class UppercaseInputStream extends FilterInputStream {
+    UppercaseInputStream(InputStream in) {
+        super(in);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        int n = super.read(b, off, len);
+        // per-chunk uppercasing is only safe for ASCII: a multi-byte UTF-8
+        // character can be split across two reads
+        for (int i = off; i < off + n; i++) {
+            b[i] = (byte) Character.toUpperCase(b[i]);
+        }
+        return n;
+    }
+
+    @Override
+    public int read() throws IOException {
+        // single-byte reads need their own override too: FilterInputStream.read()
+        // doesn't go through read(byte[], int, int) above, so skipping it would
+        // leak untransformed bytes to any caller that reads one byte at a time
+        int b = super.read();
+        return b == -1 ? -1 : Character.toUpperCase(b);
+    }
+}
+
+void main() throws Exception {
+    // In-memory source (no stdin) so this example is self-contained.
+    var source = new ByteArrayInputStream("foo\nbar\nbaz\n".getBytes());
+    var upper = new UppercaseInputStream(source);
+
+    upper.transferTo(System.out);
+    // → FOO
+    // → BAR
+    // → BAZ
+}
+```
+:::
+
+:::note
+Swift's `FileHandle.bytes`/`.lines` require macOS 12 or later (shipped alongside Swift 5.5). `write(contentsOf:)` (the throwing counterpart to the older non-throwing `write(_:)`) throws instead of crashing on a failed write, and has been available since macOS 10.15.4.
 :::

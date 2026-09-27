@@ -1,10 +1,10 @@
 ---
 title: "Arrays"
-description: "Node.js's slice and concat compared to Go's slices.Clone, append, and slices.Insert."
+description: "Node.js's slice and concat compared to Go's slice, Rust's Vec, Swift's value-type Array, and Java's ArrayList."
 tags: [array, slice, immutability, collections]
 ---
 
-In Node.js, `Array` is a flexible reference type with plenty of built-in methods. Go uses a `slice` — a view (pointer, length, capacity) into an underlying array — so slicing, cloning, and concatenating all require you to think about whether the operation shares memory with the original.
+In Node.js, `Array` is a flexible reference type with plenty of built-in methods. Go uses a `slice` — a view (pointer, length, capacity) into an underlying array — so slicing, cloning, and concatenating all require you to think about whether the operation shares memory with the original. Rust has `Vec<T>`, which owns its data, and a borrowed slice type (`&[T]`) — the compiler enforces the ownership boundary. Swift's `Array` is a **value type**: assigning or passing it makes a logical copy (copy-on-write), unlike JS's implicit sharing. Java has no resizable array type — `int[]` is fixed-size — so the example below uses `ArrayList`.
 
 ## Cloning and slicing
 
@@ -38,6 +38,40 @@ func main() {
 	fmt.Println(sub)  // [3 4]
 }
 ```
+```rust
+fn main() {
+    let array = vec![1, 2, 3, 4, 5];
+    println!("{array:?}");
+
+    let clone = array.clone(); // Vec::clone always makes a real copy
+    println!("{clone:?}");
+
+    let sub = &array[2..4]; // slice: a borrow, sharing memory with array
+    println!("{sub:?}"); // [3, 4]
+}
+```
+```swift
+var array = [1, 2, 3, 4, 5]
+print(array)
+
+let clone = array // Array is a value type: assignment makes a logical copy (copy-on-write)
+print(clone)
+
+let sub = array[2..<4] // ArraySlice: shares memory with array until either side is mutated
+print(Array(sub)) // [3, 4]
+```
+```java
+void main() {
+    List<Integer> array = new ArrayList<>(List.of(1, 2, 3, 4, 5));
+    IO.println(array);
+
+    List<Integer> clone = new ArrayList<>(array); // copy constructor: a real copy
+    IO.println(clone);
+
+    List<Integer> sub = array.subList(2, 4); // a view backed by the original list
+    IO.println(sub); // [3, 4]
+}
+```
 :::
 
 ## Concatenating and prepending
@@ -57,10 +91,35 @@ fmt.Println(concatenated) // [1 2 3 4 5 6 7]
 prepended := slices.Insert(concatenated, 0, []int{-2, -1, 0}...)
 fmt.Println(prepended) // [-2 -1 0 1 2 3 4 5 6 7]
 ```
+```rust
+let mut concatenated = clone.clone();
+concatenated.extend_from_slice(&[6, 7]);
+println!("{concatenated:?}"); // [1, 2, 3, 4, 5, 6, 7]
+
+let mut prepended = vec![-2, -1, 0];
+prepended.extend_from_slice(&concatenated);
+println!("{prepended:?}"); // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
+```
+```swift
+let concatenated = clone + [6, 7]
+print(concatenated) // [1, 2, 3, 4, 5, 6, 7]
+
+let prepended = [-2, -1, 0] + concatenated
+print(prepended) // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
+```
+```java
+List<Integer> concatenated = new ArrayList<>(clone);
+concatenated.addAll(List.of(6, 7));
+IO.println(concatenated); // [1, 2, 3, 4, 5, 6, 7]
+
+List<Integer> prepended = new ArrayList<>(List.of(-2, -1, 0));
+prepended.addAll(concatenated);
+IO.println(prepended); // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
+```
 :::
 
 :::warning
-JavaScript's `array.slice()` always returns a new array. Go's slice (`array[2:4]`) is just a view into the same memory as the original — mutating an element through `sub` also changes `array`, unless you `slices.Clone` first.
+JavaScript's `array.slice()` always returns a new array. Go's slice (`array[2:4]`) is a view into the same memory as the original — mutating an element through `sub` also changes `array`, unless you copy first (`slices.Clone`). Rust's slice (`&array[2..4]`) aliases the same memory too, but to mutate through it you need a `&mut` borrow (`&mut array[2..4]`), and the borrow checker won't let you touch the original `array` while that mutable slice is alive — unlike Go, where the compiler does no such aliasing check. Java's `array.subList()` is also a view backed by the original list, with no compiler protection against aliasing. Swift's `ArraySlice` shares memory *until* either side is mutated (copy-on-write), at which point it actually splits — meaning mutating through the slice never changes the original array.
 :::
 
 :::note
