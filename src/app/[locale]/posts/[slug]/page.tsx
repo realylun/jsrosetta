@@ -7,6 +7,7 @@ import { Container } from "@/app/_components/container";
 import { DateFormatter } from "@/app/_components/date-formatter";
 import { LanguageList } from "@/app/_components/language-badge";
 import { PostBody } from "@/app/_components/post-body";
+import { VersionList } from "@/app/_components/version-list";
 import { routing } from "@/i18n/routing";
 import {
   getAdjacentPosts,
@@ -103,6 +104,7 @@ export default async function PostPage({ params }: Props) {
               <DateFormatter dateString={post.updated ?? post.date} />
               <LanguageList ids={post.languages} linked />
             </div>
+            <VersionList languages={post.languages} versions={post.versions} />
           </header>
 
           <PostBody html={html} />

@@ -2,9 +2,15 @@
 title: "Async/Await"
 description: "Promise và async/await của Node.js so với goroutine (Go), Future + tokio (Rust), Swift concurrency và CompletableFuture (Java)."
 date: "2026-09-27"
-order: 60
+order: 710
 category: async
 languages: [js, go, rust, swift, java]
+versions:
+  js: "14.8"
+  go: "1.22"
+  rust: "1.58"
+  swift: "5.9"
+  java: "16"
 tags: [promise, async, await, concurrency]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#asyncawait"
 ---

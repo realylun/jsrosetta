@@ -2,9 +2,15 @@
 title: "Xử lý lỗi và try/catch"
 description: "throw, try/catch/finally của Node.js so với error value (Go), Result (Rust), throws (Swift), exception (Java)."
 date: "2026-09-27"
-order: 70
+order: 800
 category: errors
 languages: [js, go, rust, swift, java]
+versions:
+  js: "12.20"
+  go: "1.13"
+  rust: "1.58"
+  swift: "2.0"
+  java: "16"
 tags: [error, exception, try-catch, result]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#errors"
 ---

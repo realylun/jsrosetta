@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isLanguageId, resolveLanguage } from "@/lib/languages";
+import { LANGUAGES, isLanguageId, resolveLanguage } from "@/lib/languages";
 
 describe("languages", () => {
   it("resolves fence aliases to registered languages", () => {
@@ -17,5 +17,11 @@ describe("languages", () => {
   it("guards language ids", () => {
     expect(isLanguageId("swift")).toBe(true);
     expect(isLanguageId("python")).toBe(false);
+  });
+
+  it("records the exact toolchain every language's code was verified on", () => {
+    for (const language of Object.values(LANGUAGES)) {
+      expect(language.verifiedOn, language.id).toMatch(/^\d+\.\d+\.\d+(\.\d+)?$/);
+    }
   });
 });
