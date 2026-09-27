@@ -1,0 +1,179 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --code-bg: #f6f8fa;
+  --code-border: #e5e7eb;
+  --tab-active: #111827;
+}
+
+.dark {
+  --code-bg: #0d1117;
+  --code-border: #1f2937;
+  --tab-active: #f9fafb;
+}
+
+/* ---------- Shiki dual theme (rehype-pretty-code) ---------- */
+figure[data-rehype-pretty-code-figure] {
+  margin: 1.5rem 0;
+}
+
+[data-rehype-pretty-code-figure] pre {
+  overflow-x: auto;
+  padding: 1rem 0;
+  border: 1px solid var(--code-border);
+  border-radius: 0.5rem;
+  background: var(--code-bg);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Show operators exactly as typed (no `->` → `→` ligatures) — this site teaches syntax. */
+code,
+pre {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+[data-rehype-pretty-code-figure] pre code [data-line] {
+  padding: 0 1rem;
+}
+
+/* Inline `code` (rehype-pretty-code wraps it in a span with the same data attribute) */
+.prose :not(pre) > code {
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background: var(--code-bg);
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+[data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-light);
+}
+
+.dark [data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-dark);
+}
+
+/* ---------- Code tabs ---------- */
+.code-tabs {
+  margin: 1.5rem 0;
+}
+
+.code-tabs__list {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--code-border);
+  scrollbar-width: thin;
+}
+
+.code-tabs__tab {
+  flex: none;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  cursor: pointer;
+}
+
+.code-tabs__tab:hover {
+  color: var(--tab-active);
+}
+
+.code-tabs__tab[aria-selected="true"] {
+  color: var(--tab-active);
+  border-bottom-color: var(--lang-color, currentColor);
+}
+
+.code-tabs__tab:focus-visible {
+  outline: 2px solid var(--lang-color, currentColor);
+  outline-offset: -2px;
+}
+
+.code-tabs__panel figure[data-rehype-pretty-code-figure] {
+  margin-top: 0;
+}
+
+.code-tabs__panel pre {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: 0;
+}
+
+/* ---------- Callouts ---------- */
+.callout {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid;
+  border-radius: 0.375rem;
+}
+
+.callout > :first-child {
+  margin-top: 0;
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout-note {
+  border-color: var(--color-sky-500);
+  background: color-mix(in oklab, var(--color-sky-500) 8%, transparent);
+}
+
+.callout-tip {
+  border-color: var(--color-emerald-500);
+  background: color-mix(in oklab, var(--color-emerald-500) 8%, transparent);
+}
+
+.callout-warning {
+  border-color: var(--color-amber-500);
+  background: color-mix(in oklab, var(--color-amber-500) 10%, transparent);
+}
+
+/* ---------- Headings ---------- */
+.heading-anchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.heading-anchor:hover::after {
+  content: " #";
+  color: var(--color-gray-400);
+}
+
+/* ---------- Language accent colours (keep in sync with src/lib/languages.ts) ---------- */
+[data-lang="js"] {
+  --lang-color: #f7df1e;
+}
+
+[data-lang="go"] {
+  --lang-color: #00add8;
+}
+
+[data-lang="rust"] {
+  --lang-color: #dea584;
+}
+
+[data-lang="swift"] {
+  --lang-color: #f05138;
+}
+
+[data-lang="kotlin"] {
+  --lang-color: #7f52ff;
+}
+
+[data-lang="java"] {
+  --lang-color: #b07219;
+}
