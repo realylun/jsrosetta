@@ -4,18 +4,18 @@ description: "How Node.js declares functions and parameter types compared to Go'
 tags: [function, syntax, types]
 ---
 
-Node.js doesn't require you to declare types for parameters or return values — everything is inferred at runtime. Go is the opposite: every parameter and return value needs an explicit type, and in exchange type errors are caught at compile time instead of at runtime.
+Node.js doesn't require you to declare types for parameters or return values — JavaScript is dynamically typed, so types are only known and checked at runtime, not inferred ahead of time. Go is the opposite: every parameter and return value needs an explicit type, and in exchange type errors are caught at compile time instead of at runtime.
 
 ## Declaring a function
 
 :::tabs
 ```js
 function add(a, b) {
-  return a + b;
+  return a + b
 }
 
-const result = add(2, 3);
-console.log(result); // 5
+const result = add(2, 3)
+console.log(result) // 5
 ```
 ```go
 package main

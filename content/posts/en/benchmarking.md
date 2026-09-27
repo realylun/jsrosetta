@@ -10,34 +10,37 @@ Go has had built-in benchmarking in its `testing` package for a long time. Node.
 
 :::tabs
 ```js
-import { Bench } from "tinybench";
+import { Bench } from 'tinybench'
 
-const bench = new Bench({ name: "fib" });
+const bench = new Bench({ name: 'fib' })
 
 bench
-  .add("fib#recursion", () => {
-    fibRec(10);
+  .add('fib#recursion', () => {
+    fibRec(10)
   })
-  .add("fib#loop", () => {
-    fibLoop(10);
-  });
+  .add('fib#loop', () => {
+    fibLoop(10)
+  })
 
-await bench.run();
+await bench.run()
 
-console.log(bench.name);
-console.table(bench.table());
+console.log(bench.name)
+console.table(bench.table())
 
 function fibRec(n) {
-  if (n <= 1) return n;
-  return fibRec(n - 1) + fibRec(n - 2);
+  if (n <= 1) {
+    return n
+  }
+
+  return fibRec(n-1) + fibRec(n-2)
 }
 
 function fibLoop(n) {
-  let f = [0, 1];
+  let f = [0, 1]
   for (let i = 2; i <= n; i++) {
-    f[i] = f[i - 1] + f[i - 2];
+    f[i] = f[i-1] + f[i-2]
   }
-  return f[n];
+  return f[n]
 }
 ```
 ```go
@@ -81,13 +84,18 @@ func fibLoop(n int) int {
 
 ```bash
 $ node examples/benchmark_test.js
-fib#recursion   430.90 ns/op (avg)
-fib#loop         48.94 ns/op (avg)
+# condensed from console.table(); ns/op numbers vary between runs
+fib
+fib#recursion   413.13 ns/op (avg)
+fib#loop         44.75 ns/op (avg)
 ```
 ```bash
-$ go test -bench=. examples/benchmark_test.go
-BenchmarkFibRec-12     181.4 ns/op
-BenchmarkFibLoop-12     25.75 ns/op
+$ go test -bench=. -benchmem examples/benchmark_test.go
+# trimmed goos/goarch/cpu header; ns/op and allocs vary between runs
+BenchmarkFibRec-12       6266443   171.4 ns/op    0 B/op   0 allocs/op
+BenchmarkFibLoop-12     56055340    20.10 ns/op   96 B/op  1 allocs/op
+PASS
+ok  	command-line-arguments	2.701s
 ```
 
 :::note

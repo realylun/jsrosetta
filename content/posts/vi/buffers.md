@@ -18,15 +18,15 @@ credits: "https://github.com/miguelmota/golang-for-nodejs-developers#buffers"
 
 :::tabs
 ```js
-const buf = Buffer.alloc(6);
+const buf = Buffer.alloc(6)
 
-const value = 0x1234567890ab;
-buf.writeUIntBE(value, 0, 6);
-console.log(buf.toString('hex')); // 1234567890ab
+const value = 0x1234567890ab
+buf.writeUIntBE(value, 0, 6)
+console.log(buf.toString('hex')) // 1234567890ab
 
-const buf2 = Buffer.alloc(6);
-buf2.writeUIntLE(value, 0, 6);
-console.log(buf2.toString('hex')); // ab9078563412
+const buf2 = Buffer.alloc(6)
+buf2.writeUIntLE(value, 0, 6)
+console.log(buf2.toString('hex')) // ab9078563412
 ```
 ```go
 package main
@@ -65,11 +65,11 @@ func main() {
 
 :::tabs
 ```js
-let isEqual = Buffer.compare(buf, buf2) === 0;
-console.log(isEqual); // false
+let isEqual = Buffer.compare(buf, buf2) === 0
+console.log(isEqual) // false
 
-isEqual = Buffer.compare(buf, buf) === 0;
-console.log(isEqual); // true
+isEqual = Buffer.compare(buf, buf) === 0
+console.log(isEqual) // true
 ```
 ```go
 import "bytes"

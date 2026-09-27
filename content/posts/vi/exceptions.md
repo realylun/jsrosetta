@@ -60,3 +60,5 @@ func main() {
 :::warning
 `'uncaughtException'` là phương án cuối cùng, không phải `recover()`: tài liệu Node.js nói rằng tiến trình ở trạng thái không xác định sau đó — hãy log, dọn dẹp rồi thoát với mã khác 0, thay vì cố chạy tiếp.
 :::
+
+Lưu ý mã thoát khác nhau: bản JS gọi `process.exit(1)` nên thoát với mã 1, còn bản Go dùng `recover()` để "nuốt" panic rồi để `main` return bình thường, nên thoát với mã 0.

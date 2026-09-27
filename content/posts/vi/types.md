@@ -12,7 +12,7 @@ tags: [types, primitives, any, interface]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#types"
 ---
 
-JavaScript chỉ có một kiểu số duy nhất (`number`, luôn là double 64-bit) và một số ít kiểu composite dựng sẵn (`object`, `Map`, `Set`, `Promise`…). Go tách số ra thành hơn chục kiểu theo kích thước và dấu, cộng với các composite type tường minh như `struct`, `map`, `channel`.
+JavaScript có hai kiểu số nguyên thuỷ: `number` (luôn là double 64-bit) và `bigint` (số nguyên độ chính xác tuỳ ý), cộng với một số ít kiểu composite dựng sẵn (`object`, `Map`, `Set`, `Promise`…). Go tách số ra thành hơn chục kiểu theo kích thước và dấu, cộng với các composite type tường minh như `struct`, `map`, `channel`.
 
 ## Kiểu nguyên thuỷ và composite
 
@@ -111,7 +111,7 @@ Go 1.18 thêm `any` làm alias cho `interface{}`; dùng `any` cho code dễ đ�
 
 | | Node.js | Go |
 |---|---|---|
-| Kiểu số | 1 kiểu `number` (double 64-bit) | hơn chục kiểu: `int8`..`uint64`, `float32/64`, `complex64/128` |
+| Kiểu số | 2 kiểu: `number` (double 64-bit), `bigint` | hơn chục kiểu: `int8`..`uint64`, `float32/64`, `complex64/128` |
 | Kiểu bất kỳ | không cần khai báo | `any` (alias `interface{}`, từ Go 1.18) |
 | Giá trị "chưa có" | `undefined` | zero value theo từng kiểu (`""`, `0`, `false`, `nil`…) |
 | Hàm là first-class value | có, `const f = function(){}` | có, kiểu `func()` |

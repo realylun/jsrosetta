@@ -18,22 +18,24 @@ Node.js biểu diễn thời điểm bằng `Date` — một object có thể mu
 
 :::tabs
 ```js
-const nowUnix = Date.now(); // mili-giây kể từ epoch
+const nowUnix = Date.now() // mili-giây kể từ epoch
+console.log(nowUnix)
 
-const datestr = "2019-01-17T09:24:23+00:00";
-const date = new Date(datestr);
-console.log(date.getTime()); // mili-giây
-console.log(date.toString()); // theo timezone của máy
+const datestr = '2019-01-17T09:24:23+00:00'
+const date = new Date(datestr)
+console.log(date.getTime()) // mili-giây
+console.log(date.toString()) // theo timezone của máy
 
-const futureDate = new Date(date);
-futureDate.setDate(date.getDate() + 14); // mutate tại chỗ
+const futureDate = new Date(date)
+futureDate.setDate(date.getDate() + 14) // mutate tại chỗ
+console.log(futureDate.toString())
 
-const formatted = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-}).format(date);
-console.log(formatted); // 01/17/2019
+const formatted = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(date)
+console.log(formatted) // 01/17/2019
 ```
 ```go
 package main
@@ -67,6 +69,25 @@ func main() {
 }
 ```
 :::
+
+```bash
+# dòng đầu là timestamp hiện tại (phi tất định); các chuỗi ngày phụ thuộc
+# timezone của máy chạy (ở đây TZ=Asia/Saigon)
+$ node datetime.js
+1790530769893
+1547717063000
+Thu Jan 17 2019 16:24:23 GMT+0700 (Indochina Time)
+Thu Jan 31 2019 16:24:23 GMT+0700 (Indochina Time)
+01/17/2019
+
+$ go run datetime.go
+1790530770
+1547717063
+2019-01-17 09:24:23 +0000 +0000
+2019-01-31 09:24:23 +0000 +0000
+2019-01-31
+01/17/2019
+```
 
 :::note
 **Thay đổi (Go 1.20):** các hằng layout `time.DateOnly` (cùng `time.DateTime`, `time.TimeOnly`) thay cho việc tự viết chuỗi ngày tham chiếu như `"2006-01-02"`.

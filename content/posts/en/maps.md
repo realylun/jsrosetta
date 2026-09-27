@@ -10,22 +10,22 @@ Node.js's `Map` is a dedicated class with `set`/`get`/`has`/`delete` methods. Go
 
 :::tabs
 ```js
-const map = new Map();
-map.set('foo', 'bar');
+const map = new Map()
+map.set('foo', 'bar')
 
-let found = map.has('foo');
-console.log(found); // true
+let found = map.has('foo')
+console.log(found) // true
 
-let item = map.get('foo');
-console.log(item); // bar
+let item = map.get('foo')
+console.log(item) // bar
 
-map.delete('foo');
+map.delete('foo')
 
-found = map.has('foo');
-console.log(found); // false
+found = map.has('foo')
+console.log(found) // false
 
-item = map.get('foo');
-console.log(item); // undefined
+item = map.get('foo')
+console.log(item) // undefined
 ```
 ```go
 package main
@@ -53,13 +53,13 @@ func main() {
 
 :::tabs
 ```js
-const map3 = new Map();
-map3.set('foo', 100);
-map3.set('bar', 200);
-map3.set('baz', 300);
+const map3 = new Map()
+map3.set('foo', 100)
+map3.set('bar', 200)
+map3.set('baz', 300)
 
 for (const [key, value] of map3) {
-  console.log(key, value);
+  console.log(key, value)
 }
 // foo 100
 // bar 200
@@ -96,7 +96,7 @@ for _, key := range slices.Sorted(maps.Keys(map2)) {
 | Deleting a key | `.delete(key)` | `delete(m, key)` |
 
 :::warning
-JavaScript's `Map` preserves insertion order when iterated. Go's map is the opposite — iteration order (`for range`) is deliberately randomized on every run. For a stable result, sort the keys yourself, as in the `slices.Sorted(maps.Keys(...))` example.
+JavaScript's `Map` preserves insertion order when iterated. Go's map is the opposite — iteration order (`for range`) is deliberately randomized every time you range over it, even within the same run. For a stable result, sort the keys yourself, as in the `slices.Sorted(maps.Keys(...))` example.
 :::
 
 :::note

@@ -4,7 +4,7 @@ description: "How Node.js's process.on('uncaughtException') compares to panic/re
 tags: [exception, panic, recover, error-handling]
 ---
 
-The [error handling and try/catch](/posts/errors) post covered `throw`/`try`/`catch` for regular error-handling flow. This one is different: a case where an error *escapes every try/catch* and flies straight to the top level — the last-resort catch before the process crashes.
+The [error handling and try/catch](/en/posts/errors) post covered `throw`/`try`/`catch` for regular error-handling flow. This one is different: a case where an error *escapes every try/catch* and flies straight to the top level — the last-resort catch before the process crashes.
 
 ## Catching an exception at the top level (uncaughtException vs recover)
 
@@ -52,3 +52,5 @@ func main() {
 :::warning
 `'uncaughtException'` is a last resort, not `recover()`: the Node.js docs say the process is in an undefined state afterwards, so log, clean up and exit with a non-zero code instead of resuming.
 :::
+
+Note the different exit codes: the JS version calls `process.exit(1)` and exits with code 1, while the Go version's `recover()` swallows the panic and lets `main` return normally, exiting with code 0.

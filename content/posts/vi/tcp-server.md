@@ -77,5 +77,5 @@ Received: hello
 ```
 
 :::tip
-Go không có `.pipe()` tích hợp cho socket — vòng lặp `for { reader.ReadString(...) }` là idiom thường gặp để xử lý một luồng dữ liệu liên tục.
+`io.Copy(conn, conn)` là tương đương trực tiếp của `socket.pipe(socket)`. Ví dụ trên dùng `bufio.Reader` thay vì vậy, vì nó cần thêm tiền tố `"Received: "` vào mỗi dòng, thay vì chỉ copy nguyên luồng byte.
 :::

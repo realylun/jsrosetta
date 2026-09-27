@@ -66,9 +66,9 @@ func main() {
 
 ```bash
 # DNS answers vary between lookups; TXT records trimmed with …
-ns2.google.com
+ns1.google.com.
 [142.251.12.138 142.251.12.102 …]
-smtp.google.com 10
+smtp.google.com. 10
 [v=spf1 include:_spf.google.com ~all …]
 ```
 
@@ -98,7 +98,7 @@ r := &net.Resolver{
 	},
 }
 
-ns, err := r.LookupNS(context.Background(), "google.com")
+ns, err = r.LookupNS(context.Background(), "google.com")
 if err != nil {
 	panic(err)
 }

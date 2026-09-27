@@ -12,7 +12,7 @@ tags: [stack-trace, debugging, panic, error-handling]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#stack-trace"
 ---
 
-Khi một lỗi bị bắt, đôi lúc bạn cần in ra cả đường đi của lời gọi hàm dẫn tới nó, không chỉ mỗi message. Node.js có `console.trace()` sẵn trong global; Go cần gọi `runtime/debug.Stack()` bên trong hàm `recover()` để lấy chuỗi đó dưới dạng text.
+Khi một lỗi bị bắt, đôi lúc bạn cần in ra cả đường đi của lời gọi hàm dẫn tới nó, không chỉ mỗi message. Node.js có `console.trace()` sẵn trong global; Go cần gọi `runtime/debug.Stack()` trong hàm deferred, ngay sau khi `recover()` trả về giá trị khác `nil`, để lấy chuỗi đó dưới dạng text.
 
 ## In stack trace khi bắt lỗi (console.trace vs debug.Stack)
 
@@ -55,10 +55,16 @@ func main() {
 	foo()
 }
 // → goroutine 1 [running]:
+// → runtime/debug.Stack()
+// →     /…/runtime/debug/stack.go:26 +0x64
+// → main.main.func1()
+// →     /…/stack-trace.go:16 +0x24
+// → panic({0x…, 0x…})
+// →     /…/runtime/panic.go:859 +0x120
 // → main.foo(...)
 // →     /…/stack-trace.go:10
 // → main.main()
-// →     /…/stack-trace.go:15 +0x6c
-// → … (địa chỉ và offset khác nhau tuỳ máy và phiên bản Go)
+// →     /…/stack-trace.go:20 +0x6c
+// → … (địa chỉ, offset và đường dẫn khác nhau tuỳ máy và phiên bản Go)
 ```
 :::

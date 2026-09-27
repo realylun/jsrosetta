@@ -10,22 +10,19 @@ Node.js ships `forEach`, `map`, `filter`, and `reduce` right on `Array.prototype
 
 :::tabs
 ```js
-const array = ['a', 'b', 'c'];
+const array = ['a', 'b', 'c']
 
 array.forEach((value, i) => {
-  console.log(i, value);
-});
-// 0 'a'
-// 1 'b'
-// 2 'c'
+  console.log(i, value)
+})
+// 0 a
+// 1 b
+// 2 c
 ```
 ```go
 package main
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 func main() {
 	array := []string{"a", "b", "c"}
@@ -44,19 +41,21 @@ func main() {
 
 :::tabs
 ```js
-const mapped = array.map((value) => value.toUpperCase());
-console.log(mapped); // ['A', 'B', 'C']
+const mapped = array.map((value) => value.toUpperCase())
+console.log(mapped) // ['A', 'B', 'C']
 
-const filtered = array.filter((value, i) => i % 2 == 0);
-console.log(filtered); // ['a', 'c']
+const filtered = array.filter((value, i) => i % 2 == 0)
+console.log(filtered) // ['a', 'c']
 
 const reduced = array.reduce((acc, value, i) => {
-  if (i % 2 == 0) acc.push(value.toUpperCase());
-  return acc;
-}, []);
-console.log(reduced); // ['A', 'C']
+  if (i % 2 == 0) acc.push(value.toUpperCase())
+  return acc
+}, [])
+console.log(reduced) // ['A', 'C']
 ```
 ```go
+import "strings"
+
 func Map[T, U any](s []T, f func(value T, i int) U) []U {
 	result := make([]U, len(s))
 	for i, value := range s {

@@ -65,5 +65,5 @@ hello world.
 ```
 
 :::note
-Go 1.16 gộp `os.ReadFile`/`os.WriteFile` thay cho `ioutil.ReadFile`/`ioutil.WriteFile` cũ; gói `io/ioutil` đã deprecated, đừng dùng trong code mới.
+Go 1.16 thêm `os.ReadFile`/`os.WriteFile` thay cho `ioutil.ReadFile`/`ioutil.WriteFile` cũ; gói `io/ioutil` đã deprecated, đừng dùng trong code mới.
 :::

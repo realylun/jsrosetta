@@ -52,8 +52,24 @@ import (
 func main() {
 	values := []any{
 		true,
-		10,
+		int8(10),
+		int16(10),
+		int32(10),
+		int64(10),
+		uint(10),
+		uint8(10),
+		uint16(10),
+		uint32(10),
+		uint64(10),
+		uintptr(10),
+		float32(10.5),
+		float64(10.5),
+		complex64(-1 + 10i),
+		complex128(-1 + 10i),
 		"foo",
+		byte(10),
+		'a',
+		rune('a'),
 		struct{}{},
 		[]string{},
 		map[string]int{},
@@ -99,8 +115,24 @@ Output (Go):
 
 ```bash
 bool
-int
+int8
+int16
+int32
+int64
+uint
+uint8
+uint16
+uint32
+uint64
+uintptr
+float32
+float64
+complex64
+complex128
 string
+uint8
+int32
+int32
 struct {}
 []string
 map[string]int
@@ -116,6 +148,6 @@ time.Time
 Go 1.18 added `any` as an alias for `interface{}`; use `any` for a slice or parameter that can hold values of any type — like `values` above.
 :::
 
-:::tip
-ES modules always run in strict mode, so an undeclared loop variable (`for (value of values)`) throws a `ReferenceError` instead of silently creating a global the way it did in sloppy-mode CommonJS. Always declare it: `for (const value of values)`.
+:::warning
+ES modules always run in strict mode, so an undeclared loop variable (`for (value of values)`) throws a `ReferenceError: value is not defined` instead of silently creating a global the way it did in sloppy-mode CommonJS. Always declare it: `for (const value of values)`.
 :::

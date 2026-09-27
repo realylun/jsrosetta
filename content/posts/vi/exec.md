@@ -12,7 +12,7 @@ tags: [exec, subprocess, child-process, io]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#exec-sync"
 ---
 
-Chạy một lệnh hệ thống có hai kiểu: đợi nó chạy xong rồi mới tiếp tục (sync), hoặc chạy song song và xử lý kết quả khi xong (async). Go không phân biệt sync/async như Node.js — thay vào đó bạn dùng `context.Context` để giới hạn thời gian chạy.
+Chạy một lệnh hệ thống có hai kiểu: đợi nó chạy xong rồi mới tiếp tục (sync), hoặc chạy mà không chặn event loop rồi xử lý kết quả sau (async). Go không có sự phân biệt đó: `cmd.Run()` luôn chặn (block) goroutine gọi nó, dù dùng `exec.Command` hay `exec.CommandContext` — muốn chạy đồng thời thật sự phải dùng `cmd.Start()`/`cmd.Wait()`, hoặc chạy `cmd.Run()` trong một goroutine riêng. `context.Context` (qua `exec.CommandContext`) không tạo ra tính đồng thời — nó chỉ giới hạn thời gian lệnh được phép chạy trước khi bị kill.
 
 ## Chạy đồng bộ (sync)
 
@@ -56,7 +56,7 @@ import { promisify } from 'node:util'
 
 const execAsync = promisify(exec)
 
-const { stdout, stderr } = await execAsync(`echo 'hello world'`)
+const { stdout, stderr } = await execAsync(`echo 'hello world'`, { timeout: 5000 })
 
 if (stderr) {
   console.error(stderr)

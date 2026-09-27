@@ -28,5 +28,5 @@ func main() {
 :::
 
 :::note
-Since Node.js ≥ 14.8, ES modules support top-level `await`, so the `(async () => { ... })()` IIFE pattern — used only to get `await` at the top level — usually isn't needed anymore.
+Since Node.js 14.8, ES modules support top-level `await`, so the `(async () => { ... })()` IIFE pattern — used only to get `await` at the top level — usually isn't needed anymore.
 :::

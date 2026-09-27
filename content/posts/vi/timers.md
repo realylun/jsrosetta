@@ -12,7 +12,7 @@ tags: [timer, settimeout, setinterval, goroutine]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#timeout"
 ---
 
-Node.js chạy callback của `setTimeout`/`setInterval` trên event loop, nên chương trình vẫn sống cho tới khi hàng đợi callback trống. Go thì ngược lại: `time.AfterFunc` và `time.Ticker` chạy callback trên một goroutine riêng, nên nếu không có gì giữ `main` lại (một `sync.WaitGroup`, một `for range`, …), chương trình có thể thoát trước khi callback kịp chạy.
+Node.js chạy callback của `setTimeout`/`setInterval` trên event loop, nên chương trình vẫn sống cho tới khi hàng đợi callback trống. Hai kiểu tương ứng trong Go lại hoạt động khác nhau: `time.AfterFunc` chạy callback trên một goroutine riêng, nên nếu không có gì giữ `main` lại (một `sync.WaitGroup`), chương trình có thể thoát trước khi callback kịp chạy. `time.Ticker` thì không chạy callback nào cả — nó chỉ gửi tick qua một channel (`ticker.C`) mà `main` phải tự đọc, thường bằng `for range ticker.C`.
 
 ## Chạy một lần sau một khoảng thời gian (setTimeout / time.AfterFunc)
 

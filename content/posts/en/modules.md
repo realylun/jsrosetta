@@ -4,14 +4,15 @@ description: "Node.js's npm (package.json) compared to Go modules (go.mod): inst
 tags: [modules, npm, go-modules, packages]
 ---
 
-Both ecosystems have a dependency manifest file (`package.json` / `go.mod`) and a CLI to manage it. The biggest difference: npm has a central registry, while a Go module is just a public git repository — there's no registry to publish to at all.
+Both ecosystems have a dependency manifest file (`package.json` / `go.mod`) and a CLI to manage it. The biggest difference: npm has a central registry, while a Go module is usually just a git repository — fetched through the `GOPROXY` module proxy by default, with `GOPRIVATE` for private modules, so there's no registry to publish to.
 
 ## Installing, updating, and removing dependencies
 
 | Task | npm (Node.js) | Go modules |
 |---|---|---|
-| Initialize the dependency file | `npm init` | `go mod init` |
+| Initialize the dependency file | `npm init` | `go mod init github.com/you/yourmodule` |
 | Install a package | `npm install uuid` | `go get github.com/google/uuid@v1.6.0` |
+| Install a CLI globally | `npm install -g <pkg>` | `go install pkg@latest` |
 | Update to the latest version | `npm install uuid@latest` | `go get -u github.com/google/uuid` |
 | Remove a package | `npm uninstall uuid` | `go get github.com/google/uuid@none` |
 | Prune unused dependencies | `npm prune` | `go mod tidy` |
@@ -22,10 +23,10 @@ Both ecosystems have a dependency manifest file (`package.json` / `go.mod`) and 
 :::tabs
 ```js
 // importing a module
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid'
 
-const id = uuidv4();
-console.log(id); // a random uuid, different every run
+const id = uuidv4()
+console.log(id) // a random uuid, different every run
 ```
 ```go
 package main
@@ -50,13 +51,13 @@ func main() {
 ```js
 // greeter.js — exporting a module
 export function greet(name) {
-  console.log(`hello ${name}`);
+  console.log(`hello ${name}`)
 }
 
 // main.js — importing the module you just exported
-import { greet } from "./greeter.js";
+import { greet } from './greeter.js'
 
-greet("bob"); // hello bob
+greet('bob') // hello bob
 ```
 ```go
 // greeter/greeter.go — exporting a module

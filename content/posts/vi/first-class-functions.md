@@ -37,10 +37,6 @@ var add = func(a, b int) int { return a + b }
 func apply(fn func(int, int) int, a, b int) int {
 	return fn(a, b)
 }
-
-func main() {
-	fmt.Println(apply(add, 2, 3)) // 5
-}
 ```
 :::
 
@@ -65,11 +61,6 @@ func makeCounter() func() int {
 		return count
 	}
 }
-
-func main() {
-	counter := makeCounter()
-	fmt.Println(counter(), counter(), counter()) // 1 2 3
-}
 ```
 :::
 
@@ -89,6 +80,11 @@ func addPartial(a int) func(int) int {
 }
 
 func main() {
+	fmt.Println(apply(add, 2, 3)) // 5
+
+	counter := makeCounter()
+	fmt.Println(counter(), counter(), counter()) // 1 2 3
+
 	addTen := addPartial(10)
 	fmt.Println(addTen(5)) // 15
 }

@@ -4,7 +4,7 @@ description: "How Node.js's console.trace() compares to debug.Stack() after reco
 tags: [stack-trace, debugging, panic, error-handling]
 ---
 
-Once an error is caught, you sometimes need to print the whole call path that led to it, not just the message. Node.js has `console.trace()` right on the global object; Go needs `runtime/debug.Stack()` called inside `recover()` to get that same trace as text.
+Once an error is caught, you sometimes need to print the whole call path that led to it, not just the message. Node.js has `console.trace()` right on the global object; Go needs `runtime/debug.Stack()` called in the deferred function once `recover()` returns non-nil, to get that same trace as text.
 
 ## Printing a stack trace when catching an error (console.trace vs debug.Stack)
 
@@ -47,10 +47,16 @@ func main() {
 	foo()
 }
 // → goroutine 1 [running]:
+// → runtime/debug.Stack()
+// →     /…/runtime/debug/stack.go:26 +0x64
+// → main.main.func1()
+// →     /…/stack-trace.go:16 +0x24
+// → panic({0x…, 0x…})
+// →     /…/runtime/panic.go:859 +0x120
 // → main.foo(...)
 // →     /…/stack-trace.go:10
 // → main.main()
-// →     /…/stack-trace.go:15 +0x6c
-// → … (addresses and offsets vary by machine and Go version)
+// →     /…/stack-trace.go:20 +0x6c
+// → … (addresses, offsets and paths vary by machine and Go version)
 ```
 :::

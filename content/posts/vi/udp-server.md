@@ -75,8 +75,15 @@ func main() {
 :::
 
 ```bash
-$ echo 'hello world' > /dev/udp/0.0.0.0/3000
-
+$ node udp_server.js
 server listening 0.0.0.0:3000
-received: hello world from 127.0.0.1:61624
+received: hello world from 127.0.0.1:59740
+
+$ go run udp_server.go
+server listening [::]:3000
+received: hello world from 127.0.0.1:52082
 ```
+
+:::note
+Dù code Go truyền `IP: net.ParseIP("0.0.0.0")`, `conn.LocalAddr()` lại in ra `[::]:3000` — với network chung `"udp"`, listener dual-stack của Go báo địa chỉ "unspecified" theo dạng IPv6 thay vì lặp lại đúng địa chỉ IPv4 đã yêu cầu.
+:::

@@ -10,16 +10,16 @@ Node.js writes regexes as `/pattern/flags` literals right in the code. Go has no
 
 :::tabs
 ```js
-let input = "foobar";
-let replaced = input.replace(/foo(.*)/i, "qux$1");
-console.log(replaced); // quxbar
+let input = 'foobar'
+let replaced = input.replace(/foo(.*)/i, 'qux$1')
+console.log(replaced) // quxbar
 
-let match = /o{2}/i.test(input);
-console.log(match); // true
+let match = /o{2}/i.test(input)
+console.log(match) // true
 
-input = "111-222-333";
-let matches = input.match(/([0-9]+)/gi);
-console.log(matches); // [ '111', '222', '333' ]
+input = '111-222-333'
+let matches = input.match(/([0-9]+)/gi)
+console.log(matches) // [ '111', '222', '333' ]
 ```
 ```go
 package main

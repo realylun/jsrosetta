@@ -4,24 +4,24 @@ description: "Node.js's Uint8Array (set, subarray, fill) compared to Go's []uint
 tags: [uint8array, bytes, slice, binary]
 ---
 
-Node.js's `Uint8Array` is a `TypedArray` holding only unsigned 8-bit integers, with built-in `set`/`subarray`/`fill` methods. Go has no dedicated type for this — you use `[]uint8` (an alias for `[]byte`) directly, along with the language's ordinary slice and loop operations.
+Node.js's `Uint8Array` is a `TypedArray` holding only unsigned 8-bit integers, with built-in `set`/`subarray`/`fill` methods. Go has no dedicated type for this — you use `[]uint8` directly (identical to `[]byte`, since `byte` is just an alias for `uint8`), along with the language's ordinary slice and loop operations.
 
 ## Initializing, writing, and taking a subarray
 
 :::tabs
 ```js
-const array = new Uint8Array(10);
-console.log(array); // Uint8Array(10) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+const array = new Uint8Array(10)
+console.log(array) // Uint8Array(10) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-const offset = 1;
-array.set([1, 2, 3], offset);
-console.log(array); // Uint8Array(10) [0, 1, 2, 3, 0, 0, 0, 0, 0, 0]
+const offset = 1
+array.set([1, 2, 3], offset)
+console.log(array) // Uint8Array(10) [0, 1, 2, 3, 0, 0, 0, 0, 0, 0]
 
-const sub = array.subarray(2);
-console.log(sub); // Uint8Array(8) [2, 3, 0, 0, 0, 0, 0, 0]
+const sub = array.subarray(2)
+console.log(sub) // Uint8Array(8) [2, 3, 0, 0, 0, 0, 0, 0]
 
-const sub2 = array.subarray(2, 4);
-console.log(sub2); // Uint8Array(2) [2, 3]
+const sub2 = array.subarray(2, 4)
+console.log(sub2) // Uint8Array(2) [2, 3]
 ```
 ```go
 package main
@@ -49,13 +49,13 @@ func main() {
 
 :::tabs
 ```js
-const value = 9;
-const start = 5;
-const end = 10;
-array.fill(value, start, end);
-console.log(array); // Uint8Array(10) [0, 1, 2, 3, 0, 9, 9, 9, 9, 9]
+const value = 9
+const start = 5
+const end = 10
+array.fill(value, start, end)
+console.log(array) // Uint8Array(10) [0, 1, 2, 3, 0, 9, 9, 9, 9, 9]
 
-console.log(array.byteLength); // 10
+console.log(array.byteLength) // 10
 ```
 ```go
 value := uint8(9)

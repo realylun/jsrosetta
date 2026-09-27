@@ -48,6 +48,22 @@ func main() {
 ```bash
 $ curl http://localhost:8080
 hello world
+```
+
+Client (`http_client.js`, run while a server from above is up): the global `fetch()` replaces `http.get()`/`http.request()` for simple requests.
+
+```js
+const response = await fetch('http://localhost:8080')
+console.log(await response.text())
+```
+
+```bash
+$ node http_client.js
+hello world
+```
+
+```bash
+# Go-server only — the JS server above has no /hello/{name} route
 $ curl http://localhost:8080/hello/gopher
 hello gopher
 ```

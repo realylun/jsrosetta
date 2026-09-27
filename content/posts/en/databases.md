@@ -10,25 +10,25 @@ The example below creates a table, inserts a few rows, and reads them back from 
 
 :::tabs
 ```js
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync } from 'node:sqlite'
 
-const db = new DatabaseSync("./sqlite3.db");
+const db = new DatabaseSync('./sqlite3.db')
 
-db.exec("DROP TABLE IF EXISTS persons");
-db.exec("CREATE TABLE persons (name TEXT)");
+db.exec('DROP TABLE IF EXISTS persons')
+db.exec('CREATE TABLE persons (name TEXT)')
 
-const insert = db.prepare("INSERT INTO persons VALUES (?)");
-const names = ["alice", "bob", "charlie"];
+const insert = db.prepare('INSERT INTO persons VALUES (?)')
+const names = ['alice', 'bob', 'charlie']
 for (const name of names) {
-  insert.run(name);
+  insert.run(name)
 }
 
-const select = db.prepare("SELECT rowid AS id, name FROM persons");
+const select = db.prepare('SELECT rowid AS id, name FROM persons')
 for (const row of select.all()) {
-  console.log(row.id, row.name); // 1 alice / 2 bob / 3 charlie
+  console.log(row.id, row.name) // 1 alice / 2 bob / 3 charlie
 }
 
-db.close();
+db.close()
 ```
 ```go
 package main

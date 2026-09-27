@@ -18,22 +18,22 @@ credits: "https://github.com/miguelmota/golang-for-nodejs-developers#maps"
 
 :::tabs
 ```js
-const map = new Map();
-map.set('foo', 'bar');
+const map = new Map()
+map.set('foo', 'bar')
 
-let found = map.has('foo');
-console.log(found); // true
+let found = map.has('foo')
+console.log(found) // true
 
-let item = map.get('foo');
-console.log(item); // bar
+let item = map.get('foo')
+console.log(item) // bar
 
-map.delete('foo');
+map.delete('foo')
 
-found = map.has('foo');
-console.log(found); // false
+found = map.has('foo')
+console.log(found) // false
 
-item = map.get('foo');
-console.log(item); // undefined
+item = map.get('foo')
+console.log(item) // undefined
 ```
 ```go
 package main
@@ -61,13 +61,13 @@ func main() {
 
 :::tabs
 ```js
-const map3 = new Map();
-map3.set('foo', 100);
-map3.set('bar', 200);
-map3.set('baz', 300);
+const map3 = new Map()
+map3.set('foo', 100)
+map3.set('bar', 200)
+map3.set('baz', 300)
 
 for (const [key, value] of map3) {
-  console.log(key, value);
+  console.log(key, value)
 }
 // foo 100
 // bar 200
@@ -104,7 +104,7 @@ for _, key := range slices.Sorted(maps.Keys(map2)) {
 | Xoá key | `.delete(key)` | `delete(m, key)` |
 
 :::warning
-`Map` trong JavaScript giữ đúng thứ tự chèn khi duyệt. Map của Go thì ngược lại — thứ tự duyệt (`for range`) bị cố tình random hoá ở mỗi lần chạy. Muốn kết quả ổn định phải tự sort key, như ví dụ dùng `slices.Sorted(maps.Keys(...))`.
+`Map` trong JavaScript giữ đúng thứ tự chèn khi duyệt. Map của Go thì ngược lại — thứ tự duyệt (`for range`) bị cố tình random hoá mỗi lần bạn range qua nó, kể cả trong cùng một lần chạy chương trình. Muốn kết quả ổn định phải tự sort key, như ví dụ dùng `slices.Sorted(maps.Keys(...))`.
 :::
 
 :::note

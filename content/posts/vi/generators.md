@@ -46,7 +46,7 @@ func Generator() iter.Seq[string] {
 :::
 
 :::note
-**Thay đổi:** Go 1.23 — `iter.Seq` và range-over-func thay thế cách viết generator thủ công kiểu closure "next" (`func() (string, bool)`) trước đây; giờ bạn range trực tiếp qua `iter.Seq` như mọi sequence khác.
+Go 1.23 thêm `iter.Seq` và range-over-func, thay thế cách viết generator thủ công kiểu closure "next" (`func() (string, bool)`) trước đây; giờ bạn range trực tiếp qua `iter.Seq` như mọi sequence khác.
 :::
 
 ## Lấy giá trị thủ công (`next()` / `done`)
@@ -68,31 +68,24 @@ while (true) {
 // undefined true
 ```
 ```go
-// channelGenerator mô phỏng generator bằng một goroutine gửi giá trị qua
-// channel, đóng lại khi xong — cách kinh điển để lấy từng giá trị một.
-func channelGenerator() chan string {
-	c := make(chan string)
-
-	go func() {
-		defer close(c)
-		c <- "hello"
-		c <- "world"
-	}()
-
-	return c
-}
-
 func main() {
-	for value := range channelGenerator() {
-		fmt.Println(value)
+	// iter.Pull chuyển một iter.Seq kiểu "push" thành cặp next/stop kiểu
+	// "pull" — cách gần nhất với việc tự gọi gen.next().
+	next, stop := iter.Pull(Generator())
+	defer stop() // luôn gọi stop, kể cả khi sequence đã chạy hết
+
+	for {
+		v, ok := next()
+		if !ok {
+			break
+		}
+		fmt.Println(v)
 	}
 	// hello
 	// world
 }
 ```
 :::
-
-Channel vẫn là một cách hợp lệ để mô hình hoá generator giữa các goroutine — nó có từ trước Go 1.23 và không bị `iter.Seq` thay thế hoàn toàn.
 
 ## Duyệt bằng for...of / iterator helpers
 
@@ -113,6 +106,20 @@ for (const value of generator().map((word) => word.toUpperCase())) {
 // WORLD
 ```
 ```go
+// channelGenerator mô phỏng generator bằng một goroutine gửi giá trị qua
+// channel, đóng lại khi xong — cách kinh điển để lấy từng giá trị một.
+func channelGenerator() chan string {
+	c := make(chan string)
+
+	go func() {
+		defer close(c)
+		c <- "hello"
+		c <- "world"
+	}()
+
+	return c
+}
+
 func main() {
 	for value := range Generator() {
 		fmt.Println(value)
@@ -120,16 +127,18 @@ func main() {
 	// hello
 	// world
 
-	// Go không có chuỗi iterator helper dựng sẵn — biến đổi ngay trong vòng lặp
-	for value := range Generator() {
-		fmt.Println(strings.ToUpper(value))
+	// cách khác: dùng channel kiểu kinh điển
+	for value := range channelGenerator() {
+		fmt.Println(value)
 	}
-	// HELLO
-	// WORLD
+	// hello
+	// world
 }
 ```
 :::
 
+Channel vẫn là một cách hợp lệ để mô hình hoá generator giữa các goroutine — nó có từ trước Go 1.23 và không bị `iter.Seq` thay thế hoàn toàn. Go cũng không có chuỗi iterator helper dựng sẵn (`.map()`, `.filter()`, …); bạn phải biến đổi giá trị ngay trong vòng lặp.
+
 :::note
-**Thay đổi:** Node.js 22 — Iterator helpers (`Iterator.prototype.map`, `.filter`, `.take`, …) cho phép biến đổi kết quả của generator trực tiếp, không cần spread ra mảng trước.
+Node.js 22 thêm iterator helpers (`Iterator.prototype.map`, `.filter`, `.take`, …), cho phép biến đổi kết quả của generator trực tiếp, không cần spread ra mảng trước.
 :::

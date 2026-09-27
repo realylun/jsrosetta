@@ -4,7 +4,7 @@ description: "How JavaScript's primitive and composite types (number, object, Ma
 tags: [types, primitives, any, interface]
 ---
 
-JavaScript has exactly one number type (`number`, always a 64-bit double) and a handful of built-in composite types (`object`, `Map`, `Set`, `Promise`…). Go splits numbers into more than a dozen types by size and signedness, plus explicit composite types like `struct`, `map`, and `channel`.
+JavaScript has two numeric primitive types: `number` (always a 64-bit double) and `bigint` (arbitrary-precision integers), plus a handful of built-in composite types (`object`, `Map`, `Set`, `Promise`…). Go splits numbers into more than a dozen types by size and signedness, plus explicit composite types like `struct`, `map`, and `channel`.
 
 ## Primitive and composite types
 
@@ -103,7 +103,7 @@ Go 1.18 added `any` as an alias for `interface{}`; prefer `any` for readability 
 
 | | Node.js | Go |
 |---|---|---|
-| Number types | 1 type, `number` (64-bit double) | over a dozen: `int8`..`uint64`, `float32/64`, `complex64/128` |
+| Number types | 2 types: `number` (64-bit double), `bigint` | over a dozen: `int8`..`uint64`, `float32/64`, `complex64/128` |
 | Any type | no declaration needed | `any` (alias for `interface{}`, since Go 1.18) |
 | "Not set" value | `undefined` | a per-type zero value (`""`, `0`, `false`, `nil`…) |
 | Functions as first-class values | yes, `const f = function(){}` | yes, type `func()` |

@@ -79,7 +79,7 @@ func main() {
 :::
 
 :::note
-Một `Worker` giao tiếp với tiến trình cha theo cách tương tự — `worker.postMessage()` ở một phía, `worker.on('message', ...)` ở phía kia. `BroadcastChannel` mở rộng ý tưởng này cho nhiều listener cùng lúc: bất kỳ ai mở channel cùng tên đều nhận được mọi message gửi tới, không cần ghép cặp port.
+Một `Worker` giao tiếp với luồng cha (main thread) theo cách tương tự — `worker.postMessage()` ở một phía, `worker.on('message', ...)` ở phía kia. `BroadcastChannel` mở rộng ý tưởng này cho nhiều listener cùng lúc: bất kỳ ai mở channel cùng tên đều nhận được mọi message gửi tới, không cần ghép cặp port.
 :::
 
 :::note

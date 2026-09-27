@@ -36,3 +36,36 @@ func main() {
 }
 ```
 :::
+
+## Doc comment: JSDoc và godoc
+
+:::tabs
+```js
+/**
+ * Trả về lời chào cho một cái tên.
+ * @param {string} name
+ * @returns {string}
+ */
+function greet(name) {
+  return `Hello, ${name}!`
+}
+
+console.log(greet('Go')) // Hello, Go!
+```
+```go
+package main
+
+import "fmt"
+
+// Greet trả về lời chào cho một cái tên.
+func Greet(name string) string {
+	return "Hello, " + name + "!"
+}
+
+func main() {
+	fmt.Println(Greet("Go")) // Hello, Go!
+}
+```
+:::
+
+Doc comment ở Go phải bắt đầu bằng đúng tên định danh nó mô tả (`Greet returns...`) để `go doc`/godoc và các IDE nhận diện đúng; JSDoc dùng khối `/** ... */` với tag `@param`/`@returns` để công cụ như VS Code hay TypeScript suy luận kiểu và hiện gợi ý.

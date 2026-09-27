@@ -10,16 +10,16 @@ Sorting numbers and strings in Node.js uses the same `toSorted` function with a 
 
 :::tabs
 ```js
-const stringArray = ['a', 'd', 'z', 'b', 'c', 'y'];
-const stringSortedAsc = stringArray.toSorted((a, b) => (a > b ? 1 : -1));
-console.log(stringSortedAsc); // ['a', 'b', 'c', 'd', 'y', 'z']
+const stringArray = ['a', 'd', 'z', 'b', 'c', 'y']
+const stringSortedAsc = stringArray.toSorted((a, b) => (a > b ? 1 : -1))
+console.log(stringSortedAsc) // ['a', 'b', 'c', 'd', 'y', 'z']
 
-const numberArray = [1, 3, 5, 9, 4, 2, 0];
-const numberSortedAsc = numberArray.toSorted((a, b) => a - b);
-console.log(numberSortedAsc); // [0, 1, 2, 3, 4, 5, 9]
+const numberArray = [1, 3, 5, 9, 4, 2, 0]
+const numberSortedAsc = numberArray.toSorted((a, b) => a - b)
+console.log(numberSortedAsc) // [0, 1, 2, 3, 4, 5, 9]
 
-const numberSortedDesc = numberArray.toSorted((a, b) => b - a);
-console.log(numberSortedDesc); // [9, 5, 4, 3, 2, 1, 0]
+const numberSortedDesc = numberArray.toSorted((a, b) => b - a)
+console.log(numberSortedDesc) // [9, 5, 4, 3, 2, 1, 0]
 ```
 ```go
 package main
@@ -53,11 +53,11 @@ const collection = [
   { name: 'Li L', age: 8 },
   { name: 'Json C', age: 3 },
   { name: 'Zack W', age: 15 },
-  { name: 'Yi M', age: 2 },
-];
+  { name: 'Yi M', age: 2 }
+]
 
-const sortedByAge = collection.toSorted((a, b) => a.age - b.age);
-console.log(sortedByAge);
+const sortedByAge = collection.toSorted((a, b) => a.age - b.age)
+console.log(sortedByAge)
 // [{ name: 'Yi M', age: 2 }, { name: 'Json C', age: 3 }, { name: 'Li L', age: 8 }, { name: 'Zack W', age: 15 }]
 ```
 ```go

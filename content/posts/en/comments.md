@@ -28,3 +28,36 @@ func main() {
 }
 ```
 :::
+
+## Doc comments: JSDoc vs. godoc
+
+:::tabs
+```js
+/**
+ * Returns a greeting for the given name.
+ * @param {string} name
+ * @returns {string}
+ */
+function greet(name) {
+  return `Hello, ${name}!`
+}
+
+console.log(greet('Go')) // Hello, Go!
+```
+```go
+package main
+
+import "fmt"
+
+// Greet returns a greeting for the given name.
+func Greet(name string) string {
+	return "Hello, " + name + "!"
+}
+
+func main() {
+	fmt.Println(Greet("Go")) // Hello, Go!
+}
+```
+:::
+
+A Go doc comment must start with the exact name of the identifier it describes (`Greet returns...`) for `go doc`/godoc and editors to recognize it; JSDoc uses a `/** ... */` block with `@param`/`@returns` tags so tools like VS Code and TypeScript can infer types and show hints.

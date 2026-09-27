@@ -4,7 +4,7 @@ description: "How Node.js's setTimeout and setInterval compare to time.AfterFunc
 tags: [timer, settimeout, setinterval, goroutine]
 ---
 
-Node.js runs `setTimeout`/`setInterval` callbacks on the event loop, so the program stays alive until the callback queue is empty. Go works the other way: `time.AfterFunc` and `time.Ticker` run their callback on a separate goroutine, so unless something keeps `main` around (a `sync.WaitGroup`, a `for range`, …), the program can exit before the callback gets a chance to run.
+Node.js runs `setTimeout`/`setInterval` callbacks on the event loop, so the program stays alive until the callback queue is empty. Go's two equivalents work differently from each other: `time.AfterFunc` runs its callback on a separate goroutine, so unless something keeps `main` around (a `sync.WaitGroup`), the program can exit before the callback gets a chance to run. `time.Ticker` doesn't run a callback at all — it only sends a tick on a channel (`ticker.C`) that `main` has to read itself, typically with `for range ticker.C`.
 
 ## Running something once after a delay (setTimeout / time.AfterFunc)
 

@@ -17,7 +17,7 @@ const inStream = new Readable();
 inStream.push(Buffer.from("foo"));
 inStream.push(Buffer.from("bar"));
 inStream.push(null); // end the stream
-inStream.pipe(process.stdout); // → foobar
+inStream.pipe(process.stdout); // async: starts flowing, but "foobar" only prints after the writes below
 
 const outStream = new Writable({
   write(chunk, encoding, callback) {
@@ -26,8 +26,8 @@ const outStream = new Writable({
   },
 });
 
-outStream.write(Buffer.from("abc")); // → received: abc
-outStream.write(Buffer.from("xyz")); // → received: xyz
+outStream.write(Buffer.from("abc")); // synchronous callback: prints immediately
+outStream.write(Buffer.from("xyz")); // synchronous callback: prints immediately
 outStream.end();
 ```
 ```go
@@ -68,6 +68,22 @@ func main() {
 	}
 }
 ```
+:::
+
+```bash
+$ node streams.js
+received: abc
+received: xyz
+foobar
+
+$ go run streams.go
+foobar
+received: abc
+received: xyz
+```
+
+:::note
+The order differs by language. Node's `pipe()` starts flowing asynchronously, so `foobar` is printed last, after the synchronous `write()` callbacks on `outStream`. Go's `bytes.Buffer.WriteTo` blocks until it's done, so `foobar` is printed first, before the goroutine feeding the pipe gets a chance to run.
 :::
 
 ## Transforming data as it flows through (Transform stream)

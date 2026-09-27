@@ -10,15 +10,15 @@ Both languages parse a URL into its separate parts: scheme, user info, host, por
 
 :::tabs
 ```js
-const urlstr = "http://bob:secret@sub.example.com:8080/somepath?foo=bar";
+const urlstr = 'http://bob:secret@sub.example.com:8080/somepath?foo=bar'
 
-const parsed = new URL(urlstr);
-console.log(parsed.protocol); // http:
-console.log(`${parsed.username}:${parsed.password}`); // bob:secret
-console.log(parsed.port); // 8080
-console.log(parsed.hostname); // sub.example.com
-console.log(parsed.pathname); // /somepath
-console.log(Object.fromEntries(parsed.searchParams)); // { foo: 'bar' }
+const parsed = new URL(urlstr)
+console.log(parsed.protocol) // http:
+console.log(`${parsed.username}:${parsed.password}`) // bob:secret
+console.log(parsed.port) // 8080
+console.log(parsed.hostname) // sub.example.com
+console.log(parsed.pathname) // /somepath
+console.log(Object.fromEntries(parsed.searchParams)) // { foo: 'bar' }
 ```
 ```go
 package main

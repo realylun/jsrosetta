@@ -10,22 +10,24 @@ Node.js represents a point in time with `Date` — an object you can mutate thro
 
 :::tabs
 ```js
-const nowUnix = Date.now(); // milliseconds since the epoch
+const nowUnix = Date.now() // milliseconds since the epoch
+console.log(nowUnix)
 
-const datestr = "2019-01-17T09:24:23+00:00";
-const date = new Date(datestr);
-console.log(date.getTime()); // milliseconds
-console.log(date.toString()); // in the machine's local timezone
+const datestr = '2019-01-17T09:24:23+00:00'
+const date = new Date(datestr)
+console.log(date.getTime()) // milliseconds
+console.log(date.toString()) // in the machine's local timezone
 
-const futureDate = new Date(date);
-futureDate.setDate(date.getDate() + 14); // mutates in place
+const futureDate = new Date(date)
+futureDate.setDate(date.getDate() + 14) // mutates in place
+console.log(futureDate.toString())
 
-const formatted = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-}).format(date);
-console.log(formatted); // 01/17/2019
+const formatted = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(date)
+console.log(formatted) // 01/17/2019
 ```
 ```go
 package main
@@ -59,6 +61,25 @@ func main() {
 }
 ```
 :::
+
+```bash
+# first line is the current timestamp (non-deterministic); the date strings
+# depend on the machine's local timezone (this was run with TZ=Asia/Saigon)
+$ node datetime.js
+1790530769893
+1547717063000
+Thu Jan 17 2019 16:24:23 GMT+0700 (Indochina Time)
+Thu Jan 31 2019 16:24:23 GMT+0700 (Indochina Time)
+01/17/2019
+
+$ go run datetime.go
+1790530770
+1547717063
+2019-01-17 09:24:23 +0000 +0000
+2019-01-31 09:24:23 +0000 +0000
+2019-01-31
+01/17/2019
+```
 
 :::note
 **Changed (Go 1.20):** the `time.DateOnly` layout constant (along with `time.DateTime` and `time.TimeOnly`) replaces hand-written reference-time strings such as `"2006-01-02"`.

@@ -12,7 +12,7 @@ tags: [class, struct, embedding, encapsulation]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#classes"
 ---
 
-Node.js có `class` với constructor, trường riêng tư (`#item`), static method và `extends` để kế thừa. Go không có class — thứ gần nhất là struct cộng với method gắn vào struct đó, và kế thừa được thay bằng embedding (nhúng một struct vào struct khác).
+Node.js có `class` với constructor, trường riêng tư (`#item`), static method và `extends` để kế thừa. Go không có class — thứ gần nhất là struct cộng với method gắn vào struct đó. Kế thừa (`extends`) sẽ tương ứng với struct embedding (nhúng một struct vào struct khác), dù ví dụ dưới đây không dùng `extends` — nó chỉ cho thấy embedding được dùng để chia sẻ method.
 
 ## Class (Node.js) vs struct + embedding (Go)
 
@@ -89,4 +89,4 @@ func main() {
 |---|---|---|
 | Trường riêng tư | `#item` | trường viết thường (chỉ riêng tư với package) |
 | Static method | `static create()` | hàm cấp package, ví dụ `NewFoo()` |
-| Kế thừa | `extends` | struct embedding |
+| Kế thừa | `extends` | sẽ tương ứng với struct embedding |

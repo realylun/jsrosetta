@@ -36,6 +36,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -54,16 +55,6 @@ func asyncMethod(value string) <-chan Result {
 	}()
 	return ch
 }
-
-func main() {
-	foo := asyncMethod("foo") // channel bắt đầu chạy ngay, giống Promise được tạo là chạy ngay
-
-	if r := <-foo; r.Err != nil { // <-foo: chờ giá trị, giống .then()/.catch()
-		fmt.Fprintln(os.Stderr, r.Err)
-	} else {
-		fmt.Println(r.Value) // → resolved: foo
-	}
-}
 ```
 :::
 
@@ -73,16 +64,15 @@ Dùng lại `asyncMethod` và `Result` ở trên:
 
 :::tabs
 ```js
-const results = await Promise.all([
+Promise.all([
   asyncMethod("A"),
   asyncMethod("B"),
   asyncMethod("C"),
-]);
-console.log(results); // → ['resolved: A', 'resolved: B', 'resolved: C']
+])
+  .then((results) => console.log(results)) // → ['resolved: A', 'resolved: B', 'resolved: C']
+  .catch((err) => console.error(err));
 ```
 ```go
-import "sync"
-
 // all chờ mọi channel settle, giống Promise.all: trả về giá trị theo đúng
 // thứ tự, hoặc lỗi đầu tiên gặp phải.
 func all(chs ...<-chan Result) ([]string, error) {
@@ -108,7 +98,14 @@ func all(chs ...<-chan Result) ([]string, error) {
 }
 
 func main() {
+	foo := asyncMethod("foo") // channel bắt đầu chạy ngay, giống Promise được tạo là chạy ngay
 	abc := []<-chan Result{asyncMethod("A"), asyncMethod("B"), asyncMethod("C")} // cả 3 chạy song song ngay lập tức
+
+	if r := <-foo; r.Err != nil { // <-foo: chờ giá trị, giống .then()/.catch()
+		fmt.Fprintln(os.Stderr, r.Err)
+	} else {
+		fmt.Println(r.Value) // → resolved: foo
+	}
 
 	values, err := all(abc...)
 	if err != nil {

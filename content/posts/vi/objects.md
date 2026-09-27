@@ -20,18 +20,18 @@ Object literal trong Node.js gói cả dữ liệu lẫn method trong cùng mộ
 ```js
 const obj = {
   someProperties: {
-    foo: 'bar',
+    foo: 'bar'
   },
   someMethod: (prop) => {
-    return obj.someProperties[prop];
-  },
-};
+    return obj.someProperties[prop]
+  }
+}
 
-let item = obj.someProperties['foo'];
-console.log(item); // bar
+let item = obj.someProperties['foo']
+console.log(item) // bar
 
-item = obj.someMethod('foo');
-console.log(item); // bar
+item = obj.someMethod('foo')
+console.log(item) // bar
 ```
 ```go
 package main

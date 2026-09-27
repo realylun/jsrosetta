@@ -36,5 +36,5 @@ func main() {
 :::
 
 :::note
-Từ Node.js ≥ 14.8, ES module hỗ trợ `await` ở top level, nên kiểu IIFE `(async () => { ... })()` — vốn chỉ được dùng để có `await` ở ngoài cùng — trong đa số trường hợp không còn cần thiết nữa.
+Từ Node.js 14.8, ES module hỗ trợ `await` ở top level, nên kiểu IIFE `(async () => { ... })()` — vốn chỉ được dùng để có `await` ở ngoài cùng — trong đa số trường hợp không còn cần thiết nữa.
 :::

@@ -12,7 +12,7 @@ tags: [documentation, jsdoc, godoc, comments]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#documentation"
 ---
 
-Node.js dùng comment đặc biệt theo chuẩn [JSDoc](https://jsdoc.app/) phía trên khai báo, được công cụ editor/generator đọc riêng qua các tag `@...`. Go coi doc comment là một phần của ngôn ngữ: comment `//` ngay phía trên một khai báo exported sẽ tự động được [`go doc`](https://pkg.go.dev/cmd/doc) và pkg.go.dev hiển thị, không cần cú pháp tag nào cả.
+Node.js dùng comment đặc biệt theo chuẩn [JSDoc](https://jsdoc.app/) phía trên khai báo, được công cụ editor/generator đọc riêng qua các tag `@...`. Doc comment của Go là một quy ước của toolchain, không phải một phần của đặc tả ngôn ngữ: comment `//` ngay phía trên một khai báo exported sẽ tự động được package [`go/doc`](https://pkg.go.dev/go/doc) đọc và hiển thị qua [`go doc`](https://pkg.go.dev/cmd/doc) cùng pkg.go.dev, không cần cú pháp tag nào cả.
 
 ## Comment cho class/struct và method
 
@@ -30,7 +30,7 @@ class Person {
    * @param {string} [name] - The person's name.
    */
   constructor(name) {
-    this.name = name;
+    this.name = name
   }
 
   /**
@@ -40,7 +40,7 @@ class Person {
    * person.getName()
    */
   getName() {
-    return this.name;
+    return this.name
   }
 
   /**
@@ -50,7 +50,7 @@ class Person {
    * person.setName('bob')
    */
   setName(name) {
-    this.name = name;
+    this.name = name
   }
 }
 ```
@@ -81,10 +81,10 @@ func (p *Person) SetName(name string) {
 
 Chạy `go doc Person` ngay trong thư mục package để xem tài liệu ngay trên dòng lệnh; cùng nội dung đó lên `pkg.go.dev` khi module được publish, hoặc xem local bằng [`pkgsite`](https://pkg.go.dev/golang.org/x/pkgsite) (`go run golang.org/x/pkgsite/cmd/pkgsite@latest`) — server `godoc` cũ đã bị deprecate để nhường chỗ cho `pkgsite`.
 
-## Example function: doc comment chạy được như test
+## Example function: ví dụ trong tài liệu chạy được như test
 
 :::tip
-`@example` trong JSDoc chỉ là text hiển thị trong tài liệu — không có gì đảm bảo nó còn đúng theo thời gian. Go có kiểu hàm `Example`: nếu bên trong có comment `// Output:`, `go test` sẽ **chạy thật** function đó và so khớp output in ra — biến doc comment thành một dạng test.
+`@example` trong JSDoc chỉ là text hiển thị trong tài liệu — không có gì đảm bảo nó còn đúng theo thời gian. Go có kiểu hàm `Example`: nếu bên trong có comment `// Output:`, `go test` sẽ **chạy thật** function đó và so khớp output in ra — biến ví dụ trong tài liệu thành một dạng test.
 :::
 
 ```go
@@ -92,9 +92,23 @@ package person
 
 import "fmt"
 
+// Example of creating a new Person.
+func ExampleNewPerson() {
+	person := NewPerson("bob")
+	_ = person
+}
+
 // Example of getting person's name.
 func ExamplePerson_GetName() {
 	person := NewPerson("bob")
+	fmt.Println(person.GetName())
+	// Output: bob
+}
+
+// Example of setting person's name.
+func ExamplePerson_SetName() {
+	person := NewPerson("alice")
+	person.SetName("bob")
 	fmt.Println(person.GetName())
 	// Output: bob
 }
@@ -104,5 +118,12 @@ func ExamplePerson_GetName() {
 $ go test -v examples/documentation.go examples/documentation_test.go
 === RUN   ExamplePerson_GetName
 --- PASS: ExamplePerson_GetName (0.00s)
+=== RUN   ExamplePerson_SetName
+--- PASS: ExamplePerson_SetName (0.00s)
 PASS
+ok  	command-line-arguments	0.620s
 ```
+
+:::note
+`ExampleNewPerson` không có comment `// Output:`, nên `go test` chỉ compile nó (để đảm bảo code còn hợp lệ) chứ không chạy — chỉ ví dụ nào có `// Output:` mới hiện dòng `=== RUN` như ở trên.
+:::

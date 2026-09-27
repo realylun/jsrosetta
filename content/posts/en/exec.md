@@ -4,7 +4,7 @@ description: "How Node.js's child_process.execSync/exec compare to Go's os/exec.
 tags: [exec, subprocess, child-process, io]
 ---
 
-Running a system command comes in two flavors: wait for it to finish before continuing (sync), or run it in the background and handle the result later (async). Go doesn't distinguish sync/async the way Node.js does — instead you use a `context.Context` to bound how long it's allowed to run.
+Running a system command comes in two flavors: wait for it to finish before continuing (sync), or run it without blocking the event loop and handle the result later (async). Go doesn't have that distinction: `cmd.Run()` always blocks the calling goroutine, whether you use `exec.Command` or `exec.CommandContext` — real concurrency needs `cmd.Start()`/`cmd.Wait()`, or running `cmd.Run()` inside its own goroutine. A `context.Context` (via `exec.CommandContext`) doesn't add concurrency; it just bounds how long the command is allowed to run before it's killed.
 
 ## Running synchronously
 
@@ -48,7 +48,7 @@ import { promisify } from 'node:util'
 
 const execAsync = promisify(exec)
 
-const { stdout, stderr } = await execAsync(`echo 'hello world'`)
+const { stdout, stderr } = await execAsync(`echo 'hello world'`, { timeout: 5000 })
 
 if (stderr) {
   console.error(stderr)

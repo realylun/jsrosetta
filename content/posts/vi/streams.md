@@ -25,7 +25,7 @@ const inStream = new Readable();
 inStream.push(Buffer.from("foo"));
 inStream.push(Buffer.from("bar"));
 inStream.push(null); // kết thúc stream
-inStream.pipe(process.stdout); // → foobar
+inStream.pipe(process.stdout); // bất đồng bộ: bắt đầu chảy, nhưng "foobar" chỉ in ra sau các lệnh write bên dưới
 
 const outStream = new Writable({
   write(chunk, encoding, callback) {
@@ -34,8 +34,8 @@ const outStream = new Writable({
   },
 });
 
-outStream.write(Buffer.from("abc")); // → received: abc
-outStream.write(Buffer.from("xyz")); // → received: xyz
+outStream.write(Buffer.from("abc")); // callback đồng bộ: in ra ngay
+outStream.write(Buffer.from("xyz")); // callback đồng bộ: in ra ngay
 outStream.end();
 ```
 ```go
@@ -76,6 +76,22 @@ func main() {
 	}
 }
 ```
+:::
+
+```bash
+$ node streams.js
+received: abc
+received: xyz
+foobar
+
+$ go run streams.go
+foobar
+received: abc
+received: xyz
+```
+
+:::note
+Thứ tự khác nhau giữa hai ngôn ngữ. `pipe()` của Node bắt đầu chảy bất đồng bộ, nên "foobar" được in ra cuối cùng, sau các callback đồng bộ của `write()` trên `outStream`. `bytes.Buffer.WriteTo` của Go thì chặn (block) cho tới khi xong, nên "foobar" được in ra đầu tiên, trước khi goroutine cấp dữ liệu cho pipe kịp chạy.
 :::
 
 ## Biến đổi dữ liệu khi đang chảy qua (Transform stream)

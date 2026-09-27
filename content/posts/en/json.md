@@ -4,19 +4,19 @@ description: "Node.js's JSON.parse/stringify compared to Go's encoding/json (Mar
 tags: [json, marshal, unmarshal, serialization]
 ---
 
-Node.js's `JSON.parse`/`JSON.stringify` work directly with plain objects, with no shape declared up front. Go needs a `struct` with `json:"..."` tags so `encoding/json` knows which field maps to which key — in exchange you get an explicit type that's checked at compile time.
+Node.js's `JSON.parse`/`JSON.stringify` work directly with plain objects, with no shape declared up front. Go needs a `struct` with `json:"..."` tags so `encoding/json` knows which field maps to which key — but that mapping is resolved at runtime via reflection: unknown JSON keys are silently ignored, and only the struct's field types are checked at compile time, not the tag-to-key mapping itself.
 
 ## Parsing (unmarshal) and stringifying (marshal)
 
 :::tabs
 ```js
-let jsonstr = '{"foo":"bar"}';
+let jsonstr = '{"foo":"bar"}'
 
-let parsed = JSON.parse(jsonstr);
-console.log(parsed); // { foo: 'bar' }
+let parsed = JSON.parse(jsonstr)
+console.log(parsed) // { foo: 'bar' }
 
-jsonstr = JSON.stringify(parsed);
-console.log(jsonstr); // {"foo":"bar"}
+jsonstr = JSON.stringify(parsed)
+console.log(jsonstr) // {"foo":"bar"}
 ```
 ```go
 package main

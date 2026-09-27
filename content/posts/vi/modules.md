@@ -12,14 +12,15 @@ tags: [modules, npm, go-modules, packages]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#modules"
 ---
 
-Cả hai hệ sinh thái đều có một file khai báo dependency (`package.json` / `go.mod`) và một CLI để quản lý chúng. Khác biệt lớn nhất: npm có registry trung tâm, còn một Go module chính là một git repository công khai — không cần publish qua registry nào cả.
+Cả hai hệ sinh thái đều có một file khai báo dependency (`package.json` / `go.mod`) và một CLI để quản lý chúng. Khác biệt lớn nhất: npm có registry trung tâm, còn một Go module thường chỉ là một git repository — được tải về qua module proxy `GOPROXY` theo mặc định, có `GOPRIVATE` cho module riêng tư, nên không cần publish qua registry nào cả.
 
 ## Cài đặt, cập nhật và gỡ dependency
 
 | Việc cần làm | npm (Node.js) | Go modules |
 |---|---|---|
-| Khởi tạo file quản lý dependency | `npm init` | `go mod init` |
+| Khởi tạo file quản lý dependency | `npm init` | `go mod init github.com/you/yourmodule` |
 | Cài một package | `npm install uuid` | `go get github.com/google/uuid@v1.6.0` |
+| Cài một CLI dùng toàn cục | `npm install -g <pkg>` | `go install pkg@latest` |
 | Cập nhật lên bản mới nhất | `npm install uuid@latest` | `go get -u github.com/google/uuid` |
 | Gỡ một package | `npm uninstall uuid` | `go get github.com/google/uuid@none` |
 | Dọn dependency không dùng | `npm prune` | `go mod tidy` |
@@ -30,10 +31,10 @@ Cả hai hệ sinh thái đều có một file khai báo dependency (`package.js
 :::tabs
 ```js
 // import module
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid'
 
-const id = uuidv4();
-console.log(id); // uuid ngẫu nhiên, khác nhau mỗi lần chạy
+const id = uuidv4()
+console.log(id) // uuid ngẫu nhiên, khác nhau mỗi lần chạy
 ```
 ```go
 package main
@@ -58,13 +59,13 @@ func main() {
 ```js
 // greeter.js — export module
 export function greet(name) {
-  console.log(`hello ${name}`);
+  console.log(`hello ${name}`)
 }
 
 // main.js — import module vừa export
-import { greet } from "./greeter.js";
+import { greet } from './greeter.js'
 
-greet("bob"); // hello bob
+greet('bob') // hello bob
 ```
 ```go
 // greeter/greeter.go — export module

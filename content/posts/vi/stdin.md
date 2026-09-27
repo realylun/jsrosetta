@@ -58,5 +58,5 @@ Your name is: bob
 ```
 
 :::note
-Node.js 17 thay `process.openStdin()` (API cũ, không còn nằm trong docs của `process`) bằng `node:readline/promises`, hàm `createInterface().question()` trả về `Promise` có thể `await` thay vì phải đăng ký listener `'data'` rồi tự gọi `.pause()`. `node:readline/promises` ở trạng thái experimental cho tới Node.js 24.0.
+Từ Node.js 17, `node:readline/promises` thay thế `process.openStdin()` cũ (không có trong docs của `process`) — `createInterface().question()` trả về `Promise` có thể `await` thay vì phải đăng ký listener `'data'` rồi tự gọi `.pause()`. `node:readline/promises` ở trạng thái experimental cho tới Node.js 24.0.
 :::

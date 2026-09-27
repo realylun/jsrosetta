@@ -38,7 +38,7 @@ func Generator() iter.Seq[string] {
 :::
 
 :::note
-**Changed:** Go 1.23 — `iter.Seq` and range-over-func replace the older hand-rolled "next" closure (`func() (string, bool)`) as the idiomatic way to write a generator; you now range directly over the `iter.Seq` like any other sequence.
+Go 1.23 added `iter.Seq` and range-over-func, which replace the older hand-rolled "next" closure (`func() (string, bool)`) as the idiomatic way to write a generator; you now range directly over the `iter.Seq` like any other sequence.
 :::
 
 ## Pulling values manually (`next()` / `done`)
@@ -60,31 +60,24 @@ while (true) {
 // undefined true
 ```
 ```go
-// channelGenerator models a generator as a goroutine sending values on a
-// channel, closed when it's done — the classic way to pull one value at a time.
-func channelGenerator() chan string {
-	c := make(chan string)
-
-	go func() {
-		defer close(c)
-		c <- "hello"
-		c <- "world"
-	}()
-
-	return c
-}
-
 func main() {
-	for value := range channelGenerator() {
-		fmt.Println(value)
+	// iter.Pull converts a push-style iter.Seq into a pull-style next/stop
+	// pair — the closest equivalent to calling gen.next() by hand.
+	next, stop := iter.Pull(Generator())
+	defer stop() // always call stop, even if the sequence already ran to completion
+
+	for {
+		v, ok := next()
+		if !ok {
+			break
+		}
+		fmt.Println(v)
 	}
 	// hello
 	// world
 }
 ```
 :::
-
-Channels are still a valid way to model a generator across goroutines — they predate Go 1.23 and aren't fully replaced by `iter.Seq`.
 
 ## Iterating with for...of / iterator helpers
 
@@ -105,6 +98,20 @@ for (const value of generator().map((word) => word.toUpperCase())) {
 // WORLD
 ```
 ```go
+// channelGenerator models a generator as a goroutine sending values on a
+// channel, closed when it's done — the classic way to pull one value at a time.
+func channelGenerator() chan string {
+	c := make(chan string)
+
+	go func() {
+		defer close(c)
+		c <- "hello"
+		c <- "world"
+	}()
+
+	return c
+}
+
 func main() {
 	for value := range Generator() {
 		fmt.Println(value)
@@ -112,16 +119,18 @@ func main() {
 	// hello
 	// world
 
-	// Go has no built-in iterator-helper chain — transform inline in the loop body
-	for value := range Generator() {
-		fmt.Println(strings.ToUpper(value))
+	// alternatively, the classic channel-based generator
+	for value := range channelGenerator() {
+		fmt.Println(value)
 	}
-	// HELLO
-	// WORLD
+	// hello
+	// world
 }
 ```
 :::
 
+Channels are still a valid way to model a generator across goroutines — they predate Go 1.23 and aren't fully replaced by `iter.Seq`. Go also has no built-in iterator-helper chain (`.map()`, `.filter()`, …); you'd transform values inline in the loop body instead.
+
 :::note
-**Changed:** Node.js 22 — Iterator helpers (`Iterator.prototype.map`, `.filter`, `.take`, …) let you transform a generator's results directly, without first spreading it into an array.
+Node.js 22 added iterator helpers (`Iterator.prototype.map`, `.filter`, `.take`, …), letting you transform a generator's results directly, without first spreading it into an array.
 :::

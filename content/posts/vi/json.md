@@ -12,19 +12,19 @@ tags: [json, marshal, unmarshal, serialization]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#json"
 ---
 
-`JSON.parse`/`JSON.stringify` của Node.js làm việc trực tiếp với object thường, không cần khai báo shape trước. Go cần một `struct` với tag `json:"..."` để `encoding/json` biết map field nào vào key nào — đổi lại bạn có kiểu tường minh và được kiểm tra lúc biên dịch.
+`JSON.parse`/`JSON.stringify` của Node.js làm việc trực tiếp với object thường, không cần khai báo shape trước. Go cần một `struct` với tag `json:"..."` để `encoding/json` biết map field nào vào key nào — nhưng việc map này được giải quyết lúc runtime qua reflection: key JSON nào không khớp field sẽ bị bỏ qua âm thầm, và chỉ kiểu dữ liệu của field trong struct được kiểm tra lúc biên dịch, chứ không phải việc map tag ↔ key.
 
 ## Parse (unmarshal) và stringify (marshal)
 
 :::tabs
 ```js
-let jsonstr = '{"foo":"bar"}';
+let jsonstr = '{"foo":"bar"}'
 
-let parsed = JSON.parse(jsonstr);
-console.log(parsed); // { foo: 'bar' }
+let parsed = JSON.parse(jsonstr)
+console.log(parsed) // { foo: 'bar' }
 
-jsonstr = JSON.stringify(parsed);
-console.log(jsonstr); // {"foo":"bar"}
+jsonstr = JSON.stringify(parsed)
+console.log(jsonstr) // {"foo":"bar"}
 ```
 ```go
 package main

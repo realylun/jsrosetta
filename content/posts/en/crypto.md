@@ -10,11 +10,11 @@ Node.js bundles every hash algorithm behind one common API, `createHash(algorith
 
 :::tabs
 ```js
-import { createHash } from "node:crypto";
+import { createHash } from 'node:crypto'
 
-const hash = createHash("sha256").update("hello").digest("hex");
+const hash = createHash('sha256').update('hello').digest('hex')
 
-console.log(hash); // 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+console.log(hash) // 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
 ```
 ```go
 package main

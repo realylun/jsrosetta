@@ -12,18 +12,18 @@ A Node.js object literal bundles data and methods into the same value. Go splits
 ```js
 const obj = {
   someProperties: {
-    foo: 'bar',
+    foo: 'bar'
   },
   someMethod: (prop) => {
-    return obj.someProperties[prop];
-  },
-};
+    return obj.someProperties[prop]
+  }
+}
 
-let item = obj.someProperties['foo'];
-console.log(item); // bar
+let item = obj.someProperties['foo']
+console.log(item) // bar
 
-item = obj.someMethod('foo');
-console.log(item); // bar
+item = obj.someMethod('foo')
+console.log(item) // bar
 ```
 ```go
 package main

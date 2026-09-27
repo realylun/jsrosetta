@@ -101,7 +101,7 @@ qux: true
 | Đối số thô | `process.argv.slice(2)` | `os.Args[1:]` |
 | Parse cờ có tên | `util.parseArgs()` | package `flag` |
 | Tiền tố cờ | `--foo` | `-foo` (một hay hai gạch đều được) |
-| Cờ boolean | `--qux` (không nhận giá trị) | `-qux=true` (nhận giá trị tường minh) |
+| Cờ boolean | `--qux` (không nhận giá trị) | `-qux` hoặc `-qux=true` (không phải `-qux true`) |
 
 :::note
 Node.js 18.3 thêm `util.parseArgs()` vào standard library, thay cho các thư viện parse cờ của bên thứ ba như `yargs`; option `default` dùng ở trên xuất hiện từ Node.js 18.11, và `parseArgs()` ở trạng thái experimental cho tới Node.js 20. Cờ boolean là flag trần (`--qux`) — truyền kèm giá trị (`--qux=true`) sẽ ném lỗi `ERR_PARSE_ARGS_INVALID_OPTION_VALUE`.

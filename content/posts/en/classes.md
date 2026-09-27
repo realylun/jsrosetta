@@ -4,7 +4,7 @@ description: "Classes, private fields, and inheritance in Node.js compared to st
 tags: [class, struct, embedding, encapsulation]
 ---
 
-Node.js has `class` with a constructor, private fields (`#item`), static methods, and `extends` for inheritance. Go has no classes — the closest thing is a struct plus methods attached to it, and inheritance is replaced by embedding (nesting one struct inside another).
+Node.js has `class` with a constructor, private fields (`#item`), static methods, and `extends` for inheritance. Go has no classes — the closest thing is a struct plus methods attached to it. Inheritance (`extends`) would map to struct embedding (nesting one struct inside another), though the example below isn't using `extends` — it just shows embedding used to share methods.
 
 ## Classes (Node.js) vs structs + embedding (Go)
 
@@ -81,4 +81,4 @@ func main() {
 |---|---|---|
 | Private field | `#item` | lowercase field (private to the package) |
 | Static method | `static create()` | package-level function, e.g. `NewFoo()` |
-| Inheritance | `extends` | struct embedding |
+| Inheritance | `extends` | would map to struct embedding |

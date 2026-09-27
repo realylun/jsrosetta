@@ -50,5 +50,5 @@ Your name is: bob
 ```
 
 :::note
-Node.js 17 replaced `process.openStdin()` (a legacy API that was never documented under `process`) with `node:readline/promises`'s `createInterface().question()`, which returns a `Promise` you can `await` instead of registering a `'data'` listener and manually calling `.pause()`. `node:readline/promises` was experimental until Node.js 24.0.
+Since Node.js 17, `node:readline/promises` replaces the legacy `process.openStdin()` (not listed in the process docs) — `createInterface().question()` returns a `Promise` you can `await` instead of registering a `'data'` listener and manually calling `.pause()`. `node:readline/promises` was experimental until Node.js 24.0.
 :::

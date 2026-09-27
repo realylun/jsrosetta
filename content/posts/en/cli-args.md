@@ -93,7 +93,7 @@ qux: true
 | Raw arguments | `process.argv.slice(2)` | `os.Args[1:]` |
 | Parsing named flags | `util.parseArgs()` | the `flag` package |
 | Flag prefix | `--foo` | `-foo` (one or two dashes both work) |
-| Boolean flags | `--qux` (takes no value) | `-qux=true` (needs an explicit value) |
+| Boolean flags | `--qux` (takes no value) | `-qux` or `-qux=true` (never `-qux true`) |
 
 :::note
 Node.js 18.3 added `util.parseArgs()` to the standard library, replacing third-party flag parsers like `yargs`; the `default` option used above arrived in Node.js 18.11, and `parseArgs()` was experimental until Node.js 20. Boolean flags are plain switches (`--qux`) — passing a value (`--qux=true`) throws `ERR_PARSE_ARGS_INVALID_OPTION_VALUE`.

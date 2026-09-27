@@ -67,8 +67,15 @@ func main() {
 :::
 
 ```bash
-$ echo 'hello world' > /dev/udp/0.0.0.0/3000
-
+$ node udp_server.js
 server listening 0.0.0.0:3000
-received: hello world from 127.0.0.1:61624
+received: hello world from 127.0.0.1:59740
+
+$ go run udp_server.go
+server listening [::]:3000
+received: hello world from 127.0.0.1:52082
 ```
+
+:::note
+Even though the Go code passes `IP: net.ParseIP("0.0.0.0")`, `conn.LocalAddr()` prints `[::]:3000` — with the generic `"udp"` network, Go's dual-stack listener reports the unspecified address in its IPv6 form rather than echoing back the IPv4 address that was requested.
+:::

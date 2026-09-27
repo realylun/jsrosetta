@@ -56,6 +56,22 @@ func main() {
 ```bash
 $ curl http://localhost:8080
 hello world
+```
+
+Client (`http_client.js`, chạy trong khi một server ở trên đang bật): `fetch()` toàn cục thay cho `http.get()`/`http.request()` cho các request đơn giản.
+
+```js
+const response = await fetch('http://localhost:8080')
+console.log(await response.text())
+```
+
+```bash
+$ node http_client.js
+hello world
+```
+
+```bash
+# chỉ áp dụng cho Go server — JS server ở trên không có route /hello/{name}
 $ curl http://localhost:8080/hello/gopher
 hello gopher
 ```

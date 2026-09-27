@@ -10,25 +10,25 @@ Both languages have a built-in test runner, no external package required. Node.j
 
 :::tabs
 ```js
-import { test } from "node:test";
-import assert from "node:assert/strict";
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
 
-test("sum", async (t) => {
+test('sum', async t => {
   const tt = [
     { a: 1, b: 1, ret: 2 },
     { a: 2, b: 3, ret: 5 },
     { a: 5, b: 5, ret: 10 },
-  ];
+  ]
 
   for (const { a, b, ret } of tt) {
     await t.test(`${a} + ${b}`, () => {
-      assert.equal(sum(a, b), ret);
-    });
+      assert.equal(sum(a, b), ret)
+    })
   }
-});
+})
 
 function sum(a, b) {
-  return a + b;
+  return a + b
 }
 ```
 ```go
@@ -67,18 +67,24 @@ func sum(a, b int) int {
 ```bash
 $ node --test examples/example_test.js
 ▶ sum
-  ✔ 1 + 1
-  ✔ 2 + 3
-  ✔ 5 + 5
-✔ sum
+  ✔ 1 + 1 (0.29ms)
+  ✔ 2 + 3 (0.05ms)
+  ✔ 5 + 5 (0.05ms)
+✔ sum (0.87ms)
+# trimmed: tests/suites/pass/fail/duration summary lines; durations vary between runs
 ```
 ```bash
 $ go test -v examples/example_test.go
+=== RUN   TestSum
 === RUN   TestSum/(1_+_1)
 === RUN   TestSum/(2_+_3)
 === RUN   TestSum/(5_+_5)
---- PASS: TestSum
+--- PASS: TestSum (0.00s)
+    --- PASS: TestSum/(1_+_1) (0.00s)
+    --- PASS: TestSum/(2_+_3) (0.00s)
+    --- PASS: TestSum/(5_+_5) (0.00s)
 PASS
+ok  	command-line-arguments	0.459s
 ```
 
 :::note
@@ -86,5 +92,5 @@ PASS
 :::
 
 :::note
-**Changed:** `tape` (a third-party TAP test framework, unmaintained for years) → the built-in `node:test` runner with `node:assert/strict`. No dependency to install; `t.test()` mirrors Go's `t.Run()` for table-driven subtests, and `node --test` replaces `node examples/example_test.js`.
+**Changed:** `tape` (a third-party TAP test framework, last published years ago) → the built-in `node:test` runner with `node:assert/strict`. No dependency to install; `t.test()` mirrors Go's `t.Run()` for table-driven subtests, and `node --test` replaces `node examples/example_test.js`.
 :::

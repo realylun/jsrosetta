@@ -12,18 +12,18 @@ tags: [function, syntax, types]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#functions"
 ---
 
-Node.js không bắt bạn khai báo kiểu cho tham số hay giá trị trả về — mọi thứ được suy luận lúc chạy. Go thì ngược lại: mỗi tham số và giá trị trả về đều phải có kiểu tường minh, đổi lại lỗi kiểu bị bắt ngay lúc biên dịch thay vì lúc chạy.
+Node.js không bắt bạn khai báo kiểu cho tham số hay giá trị trả về — JavaScript là ngôn ngữ định kiểu động (dynamically typed), kiểu chỉ được biết và kiểm tra lúc chạy, không phải được suy luận từ trước. Go thì ngược lại: mỗi tham số và giá trị trả về đều phải có kiểu tường minh, đổi lại lỗi kiểu bị bắt ngay lúc biên dịch thay vì lúc chạy.
 
 ## Khai báo hàm
 
 :::tabs
 ```js
 function add(a, b) {
-  return a + b;
+  return a + b
 }
 
-const result = add(2, 3);
-console.log(result); // 5
+const result = add(2, 3)
+console.log(result) // 5
 ```
 ```go
 package main

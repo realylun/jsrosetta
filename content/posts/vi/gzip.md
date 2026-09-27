@@ -18,19 +18,19 @@ Node.js expose gzip qua callback trong `node:zlib`, nên ví dụ dưới dùng 
 
 :::tabs
 ```js
-import { gzip, unzip } from "node:zlib";
-import { promisify } from "node:util";
+import { gzip, unzip } from 'node:zlib'
+import { promisify } from 'node:util'
 
-const gzipAsync = promisify(gzip);
-const unzipAsync = promisify(unzip);
+const gzipAsync = promisify(gzip)
+const unzipAsync = promisify(unzip)
 
-const data = Buffer.from("hello world", "utf-8");
+const data = Buffer.from('hello world', 'utf-8')
 
-const compressed = await gzipAsync(data);
-console.log(compressed); // <Buffer 1f 8b 08 00 ...>
+const compressed = await gzipAsync(data)
+console.log(compressed) // <Buffer 1f 8b 08 00 ...>
 
-const decompressed = await unzipAsync(compressed);
-console.log(decompressed.toString()); // hello world
+const decompressed = await unzipAsync(compressed)
+console.log(decompressed.toString()) // hello world
 ```
 ```go
 package main

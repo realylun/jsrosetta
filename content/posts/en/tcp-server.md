@@ -69,5 +69,5 @@ Received: hello
 ```
 
 :::tip
-Go has no built-in `.pipe()` for sockets — the `for { reader.ReadString(...) }` loop is the common idiom for processing a continuous stream of data.
+`io.Copy(conn, conn)` is the direct equivalent of `socket.pipe(socket)`. The example above uses a `bufio.Reader` instead, because it needs to prefix each line with `"Received: "` rather than copying the raw byte stream unmodified.
 :::

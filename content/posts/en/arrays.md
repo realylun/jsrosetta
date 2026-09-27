@@ -10,14 +10,14 @@ In Node.js, `Array` is a flexible reference type with plenty of built-in methods
 
 :::tabs
 ```js
-const array = [1, 2, 3, 4, 5];
-console.log(array);
+const array = [1, 2, 3, 4, 5]
+console.log(array)
 
-const clone = array.slice(0); // slice() always returns a new array
-console.log(clone);
+const clone = array.slice(0) // slice() always returns a new array
+console.log(clone)
 
-const sub = array.slice(2, 4);
-console.log(sub); // [3, 4]
+const sub = array.slice(2, 4)
+console.log(sub) // [3, 4]
 ```
 ```go
 package main
@@ -44,11 +44,11 @@ func main() {
 
 :::tabs
 ```js
-const concatenated = clone.concat([6, 7]);
-console.log(concatenated); // [1, 2, 3, 4, 5, 6, 7]
+const concatenated = clone.concat([6, 7])
+console.log(concatenated) // [1, 2, 3, 4, 5, 6, 7]
 
-const prepended = [-2, -1, 0].concat(concatenated);
-console.log(prepended); // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
+const prepended = [-2, -1, 0].concat(concatenated)
+console.log(prepended) // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
 ```
 ```go
 concatenated := append(clone, []int{6, 7}...)

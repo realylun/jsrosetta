@@ -4,7 +4,7 @@ description: "How Node.js's Promise .then()/.catch() and Promise.all() compare t
 tags: [promise, async, channel, goroutine]
 ---
 
-Node.js has `Promise` built into the language. Go has no equivalent type — the closest thing is using a channel to receive a "settled" value from a goroutine running in the background. This post uses the classic `.then()`/`.catch()` syntax; if you want to rewrite it with `await`, see [async/await](/posts/async-await).
+Node.js has `Promise` built into the language. Go has no equivalent type — the closest thing is using a channel to receive a "settled" value from a goroutine running in the background. This post uses the classic `.then()`/`.catch()` syntax; if you want to rewrite it with `await`, see [async/await](/en/posts/async-await).
 
 ## Creating a promise and handling the result (then/catch)
 
@@ -28,6 +28,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -46,16 +47,6 @@ func asyncMethod(value string) <-chan Result {
 	}()
 	return ch
 }
-
-func main() {
-	foo := asyncMethod("foo") // the channel starts running immediately, like a Promise starts as soon as it's created
-
-	if r := <-foo; r.Err != nil { // <-foo: wait for the value, like .then()/.catch()
-		fmt.Fprintln(os.Stderr, r.Err)
-	} else {
-		fmt.Println(r.Value) // → resolved: foo
-	}
-}
 ```
 :::
 
@@ -65,16 +56,15 @@ Reusing `asyncMethod` and `Result` from above:
 
 :::tabs
 ```js
-const results = await Promise.all([
+Promise.all([
   asyncMethod("A"),
   asyncMethod("B"),
   asyncMethod("C"),
-]);
-console.log(results); // → ['resolved: A', 'resolved: B', 'resolved: C']
+])
+  .then((results) => console.log(results)) // → ['resolved: A', 'resolved: B', 'resolved: C']
+  .catch((err) => console.error(err));
 ```
 ```go
-import "sync"
-
 // all waits for every channel to settle, like Promise.all: it returns the
 // values in order, or the first error encountered.
 func all(chs ...<-chan Result) ([]string, error) {
@@ -100,7 +90,14 @@ func all(chs ...<-chan Result) ([]string, error) {
 }
 
 func main() {
+	foo := asyncMethod("foo") // the channel starts running immediately, like a Promise starts as soon as it's created
 	abc := []<-chan Result{asyncMethod("A"), asyncMethod("B"), asyncMethod("C")} // all 3 start running in parallel right away
+
+	if r := <-foo; r.Err != nil { // <-foo: wait for the value, like .then()/.catch()
+		fmt.Fprintln(os.Stderr, r.Err)
+	} else {
+		fmt.Println(r.Value) // → resolved: foo
+	}
 
 	values, err := all(abc...)
 	if err != nil {
