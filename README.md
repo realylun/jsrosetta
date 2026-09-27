@@ -72,11 +72,11 @@ tests/                  vitest
 ## Deploy (Vercel + domain Cloudflare)
 
 1. Push repo lên GitHub, import vào Vercel (tự nhận Next.js).
-2. Đặt biến môi trường `NEXT_PUBLIC_SITE_URL=https://jsrosetta.dev` (và tuỳ chọn `NEXT_PUBLIC_REPO_URL`).
-3. Vercel → Project → Domains: thêm `jsrosetta.dev` và `www.jsrosetta.dev`. Chọn apex làm domain chính, `www` redirect 308.
+2. Đặt biến môi trường `NEXT_PUBLIC_SITE_URL=https://reallylun.com` (và tuỳ chọn `NEXT_PUBLIC_REPO_URL`).
+3. Vercel → Project → Domains: thêm `reallylun.com` và `www.reallylun.com`. Chọn apex làm domain chính, `www` redirect 308.
 4. Cloudflare DNS: tạo bản ghi A (`@`) và CNAME (`www`) theo **đúng giá trị Vercel hiển thị** trong trang Domains.
 5. Để bản ghi ở chế độ **DNS only (mây xám)**. Nếu bắt buộc bật proxy: SSL/TLS phải là **Full (strict)**, không redirect `/.well-known/acme-challenge/*`, không cache `/.well-known/vercel/*`.
-6. Kiểm tra: `curl -I http://jsrosetta.dev`, `https://www.jsrosetta.dev` → phải redirect về `https://jsrosetta.dev`, không bị vòng lặp.
+6. Kiểm tra: `curl -I http://reallylun.com`, `https://www.reallylun.com` → phải redirect về `https://reallylun.com`, không bị vòng lặp.
 
 Chi tiết và lý do: xem [PLAN.md](PLAN.md).
 

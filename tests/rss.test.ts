@@ -11,8 +11,8 @@ const post = (slug: string, date: string, title = slug) =>
 const channel = {
   title: "T",
   description: "D",
-  siteUrl: "https://jsrosetta.dev",
-  feedUrl: "https://jsrosetta.dev/feed.xml",
+  siteUrl: "https://reallylun.com",
+  feedUrl: "https://reallylun.com/feed.xml",
   language: "vi",
 };
 
@@ -24,7 +24,7 @@ describe("rss", () => {
   it("lists newest posts first with absolute links", () => {
     const xml = buildRss(channel, [post("old", "2026-01-01"), post("new", "2026-02-01", "A < B")]);
     expect(xml.indexOf("/posts/new")).toBeLessThan(xml.indexOf("/posts/old"));
-    expect(xml).toContain("<link>https://jsrosetta.dev/posts/new</link>");
+    expect(xml).toContain("<link>https://reallylun.com/posts/new</link>");
     expect(xml).toContain("<title>A &lt; B</title>");
     expect(xml).toContain("<category>a&amp;b</category>");
     expect(xml).toContain("<lastBuildDate>Sun, 01 Feb 2026 00:00:00 GMT</lastBuildDate>");

@@ -9,10 +9,10 @@ afterEach(() => {
 
 describe("site url", () => {
   it("prefers NEXT_PUBLIC_SITE_URL and trims trailing slashes", async () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://jsrosetta.dev/");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://reallylun.com/");
     const { SITE, absoluteUrl } = await load();
-    expect(SITE.url).toBe("https://jsrosetta.dev");
-    expect(absoluteUrl("/posts/a")).toBe("https://jsrosetta.dev/posts/a");
+    expect(SITE.url).toBe("https://reallylun.com");
+    expect(absoluteUrl("/posts/a")).toBe("https://reallylun.com/posts/a");
   });
 
   it("falls back to the Vercel production URL", async () => {
@@ -30,7 +30,7 @@ describe("site url", () => {
 
 describe("site url validation", () => {
   it("rejects relative or path-based URLs", async () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "jsrosetta.dev");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "reallylun.com");
     await expect(load()).rejects.toThrow(/absolute URL/);
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://x.dev/blog");

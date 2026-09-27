@@ -8,7 +8,7 @@ function resolveSiteUrl(): string {
   try {
     url = new URL(candidate);
   } catch {
-    throw new Error(`NEXT_PUBLIC_SITE_URL must be an absolute URL like https://jsrosetta.dev (got "${candidate}")`);
+    throw new Error(`NEXT_PUBLIC_SITE_URL must be an absolute URL like https://reallylun.com (got "${candidate}")`);
   }
   if (url.pathname !== "/") {
     throw new Error(`NEXT_PUBLIC_SITE_URL must not contain a path (got "${candidate}")`);

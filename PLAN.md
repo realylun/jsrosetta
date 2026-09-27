@@ -3,7 +3,7 @@
 > Blog so sánh cú pháp từ **Node.js/JavaScript** sang **Go, Rust, Swift, Kotlin, Java** (mở rộng sau: C#, Python, Zig…).
 > Nội dung lưu bằng Markdown trong repo · Next.js mới nhất · Deploy Vercel · Domain quản lý ở Cloudflare.
 
-- **Tên repo / site:** `jsrosetta` → `jsrosetta.dev` (cần kiểm tra lại trên Cloudflare Registrar trước khi mua)
+- **Tên repo / site:** `jsrosetta` · domain **`reallylun.com`** (đã mua, Cloudflare Registrar, nameserver Cloudflare)
 - **Template gốc:** [vercel/next.js › examples/blog-starter](https://github.com/vercel/next.js/tree/canary/examples/blog-starter)
 - **Nguồn cảm hứng nội dung:** [miguelmota/golang-for-nodejs-developers](https://github.com/miguelmota/golang-for-nodejs-developers) (MIT, © 2016 Miguel Mota), có bản local ở `../golang-for-nodejs-developers`
 - **Ngày lập:** 2026-09-27
@@ -168,8 +168,8 @@ Xem checklist ở mục 6.
 
 1. [ ] Tạo repo GitHub `jsrosetta` (public), push `main`
 2. [ ] Vercel → **Add New Project** → import repo (framework tự nhận Next.js, build `next build`)
-3. [ ] Mua / kiểm tra `jsrosetta.dev` trên Cloudflare Registrar
-4. [ ] Vercel → Project → **Domains**: thêm `jsrosetta.dev` và `www.jsrosetta.dev`; chọn apex làm canonical, `www` redirect 308
+3. [x] Mua domain `reallylun.com` trên Cloudflare Registrar (nameserver: Cloudflare → dùng DNS-only, không đổi NS)
+4. [ ] Vercel → Project → **Domains**: thêm `reallylun.com` và `www.reallylun.com`; chọn apex làm canonical, `www` redirect 308
 5. [ ] Cloudflare DNS: tạo **A `@`** và **CNAME `www`** theo **đúng giá trị dashboard Vercel hiển thị** (có thể là record riêng theo project, không mặc định `76.76.21.21` / `cname.vercel-dns.com`)
 6. [ ] Để cả hai record ở **DNS-only (mây xám)**
 7. [ ] Chờ Vercel báo *Valid Configuration* + cấp chứng chỉ SSL
@@ -195,7 +195,7 @@ Xem checklist ở mục 6.
 | Code mẫu sai / lỗi thời | Ghi `versions` trong frontmatter; (tuỳ chọn) CI compile snippet |
 | Tab không đồng bộ khi bài thiếu ngôn ngữ | Fallback về panel đầu; hiển thị "chưa có" cho ngôn ngữ thiếu |
 | Cloudflare Registrar có thể không cho đổi nameserver sang Vercel | Dùng DNS-only trên Cloudflare (không cần đổi NS) |
-| Domain `jsrosetta.dev` chưa chắc còn trống (chỉ mới kiểm tra NS) | Kiểm tra trên Registrar trước Phase 6 |
+| ~~Domain chưa chắc còn trống~~ | Đã mua `reallylun.com` |
 
 Câu hỏi mở:
 - Có làm snippet chạy được + CI compile cho từng ngôn ngữ ngay từ đầu không?
