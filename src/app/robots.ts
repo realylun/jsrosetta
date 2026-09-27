@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
-import { absoluteUrl } from "@/lib/site";
+import { headers } from "next/headers";
+import { buildRobots } from "@/lib/robots";
 
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: { userAgent: "*", allow: "/" },
-    sitemap: absoluteUrl("/sitemap.xml"),
-  };
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  return buildRobots((await headers()).get("host"));
 }
