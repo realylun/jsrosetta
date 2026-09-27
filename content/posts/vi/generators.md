@@ -8,14 +8,14 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "22"
   go: "1.23"
-  rust: "1.34"
-  swift: "5.5"
+  rust: "1.58"
+  swift: "5.7"
   java: "25"
 tags: [generator, yield, iterator, channel, virtual-thread]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#generators"
 ---
 
-Node.js có generator function (`function*` / `yield`) built-in: gọi hàm không chạy gì cả, mỗi lần gọi `.next()` mới chạy tới `yield` tiếp theo. Không ngôn ngữ nào khác trong danh sách có `yield` thật. Rust không cần giả lập gì nhiều: `Iterator` vốn đã "pull" từng giá trị một qua `.next()`, nên `std::iter::from_fn` — một closure giữ state và trả `Option<T>` — gần như là generator viết tay. Swift dùng `AsyncStream`, thứ duy nhất trong 5 ngôn ngữ có một API tên đúng là `yield()`. Java không có gì dựng sẵn, nhưng từ bản 21 có virtual thread: chạy phần thân generator trên một virtual thread và đồng bộ qua `SynchronousQueue` để mô phỏng `yield` chặn (blocking). Go không có cú pháp generator, nhưng từ 1.23 có `iter.Seq` — kiểu "range-over-func" giúp bạn range trực tiếp qua một hàm giống hệt range qua slice hay map. Trước đó (và vẫn còn hợp lệ), cách kinh điển là dùng channel.
+Node.js có generator function (`function*` / `yield`) built-in: gọi hàm không chạy gì cả, mỗi lần gọi `.next()` mới chạy tới `yield` tiếp theo. Không ngôn ngữ nào khác trong danh sách có `yield` thật. Rust không cần giả lập gì nhiều: `Iterator` vốn đã "pull" từng giá trị một qua `.next()`, nên `std::iter::from_fn` — một closure giữ state và trả `Option<T>` — gần như là generator viết tay. Swift dùng `AsyncStream`, thứ duy nhất trong 5 ngôn ngữ có một API tên đúng là `yield()` — nhưng khác với `from_fn` của Rust vốn lazy (chỉ chạy khi bị gọi `.next()`), closure của `AsyncStream` chạy eager ngay khi được tạo và đệm (buffer) sẵn các giá trị yield ra. Java không có gì dựng sẵn, nhưng từ bản 21 có virtual thread: chạy phần thân generator trên một virtual thread và đồng bộ qua `SynchronousQueue` để mô phỏng `yield` chặn (blocking). Go không có cú pháp generator, nhưng từ 1.23 có `iter.Seq` — kiểu "range-over-func" giúp bạn range trực tiếp qua một hàm giống hệt range qua slice hay map. Trước đó (và vẫn còn hợp lệ), cách kinh điển là dùng channel.
 
 ## Định nghĩa generator
 
@@ -127,7 +127,7 @@ static class Generator implements Iterable<String>, Iterator<String> {
 :::
 
 :::note
-Go 1.23 thêm `iter.Seq` và range-over-func, thay thế cách viết generator thủ công kiểu closure "next" (`func() (string, bool)`) trước đây; giờ bạn range trực tiếp qua `iter.Seq` như mọi sequence khác. `std::iter::from_fn` của Rust ổn định từ bản 1.34 — có trước cả `iter.Seq` của Go khá lâu. Virtual thread của Java (JEP 444) chỉ ổn định từ bản 21; nhờ virtual thread rẻ (không tốn một OS thread thật) mà cách "chặn trên một luồng riêng" này mới thực tế — trước Java 21, mỗi generator sẽ tốn một platform thread.
+Go 1.23 thêm `iter.Seq` và range-over-func, thay thế cách viết generator thủ công kiểu closure "next" (`func() (string, bool)`) trước đây; giờ bạn range trực tiếp qua `iter.Seq` như mọi sequence khác. `std::iter::from_fn` của Rust ổn định từ bản 1.34 — có trước cả `iter.Seq` của Go khá lâu. Virtual thread của Java (JEP 444) chỉ ổn định từ bản 21; nhờ virtual thread rẻ (không tốn một OS thread thật) mà cách "chặn trên một luồng riêng" này mới thực tế — trước Java 21, mỗi generator sẽ tốn một platform thread. Lưu ý: nếu bên tiêu thụ dừng lấy giá trị giữa chừng (không gọi hết `next()`), virtual thread bên trong sẽ bị kẹt mãi ở `queue.put()` và không bao giờ được giải phóng.
 :::
 
 ## Lấy giá trị thủ công (`next()` / `done`)
@@ -170,14 +170,13 @@ func main() {
 fn main() {
     // Iterator vốn đã "pull": gọi .next() trực tiếp, không cần chuyển đổi
     // gì thêm (khác với Go, phải dùng iter.Pull để có next/stop).
-    let mut gen = generator();
+    // (đặt tên `it` vì `gen` là từ khoá dành riêng từ edition 2024)
+    let mut it = generator();
 
-    loop {
-        match gen.next() {
-            Some(value) => println!("{value}"),
-            None => break, // None đóng vai trò done: true
-        }
+    while let Some(value) = it.next() {
+        println!("{value}");
     }
+    // None đóng vai trò done: true khi vòng lặp dừng
     // hello
     // world
 }
@@ -185,10 +184,12 @@ fn main() {
 ```swift
 // makeAsyncIterator() lấy iterator thủ công; next() trả nil khi hết —
 // đóng vai trò done: true.
-var iterator = generator().makeAsyncIterator()
+do {
+    var iterator = generator().makeAsyncIterator()
 
-while let value = await iterator.next() {
-    print(value)
+    while let value = await iterator.next() {
+        print(value)
+    }
 }
 // hello
 // world

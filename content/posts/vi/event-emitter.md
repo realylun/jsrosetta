@@ -85,7 +85,7 @@ impl MyEmitter {
     }
 
     fn on(&mut self, event: &str, listener: impl Fn(&str) + 'static) {
-        self.listeners.entry(event.to_string()).or_insert_with(Vec::new).push(Box::new(listener));
+        self.listeners.entry(event.to_string()).or_default().push(Box::new(listener));
     }
 
     fn emit(&self, event: &str, msg: &str) {
@@ -130,8 +130,6 @@ myEmitter.post(name: myOtherEvent, object: "hello other world")
 // hello other world
 ```
 ```java
-import java.util.function.Consumer;
-
 static class MyEmitter {
     private final Map<String, List<Consumer<String>>> listeners = new HashMap<>();
 

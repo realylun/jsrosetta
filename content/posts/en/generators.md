@@ -4,7 +4,7 @@ description: "Generator functions and iterator helpers in Node.js compared to It
 tags: [generator, yield, iterator, channel, virtual-thread]
 ---
 
-Node.js has generator functions (`function*` / `yield`) built in: calling the function runs nothing at all, and each call to `.next()` runs up to the next `yield`. None of the other languages here have a real `yield`. Rust doesn't need much faking: `Iterator` is already "pull"-based via `.next()`, so `std::iter::from_fn` — a closure that holds state and returns `Option<T>` — is almost a hand-written generator. Swift uses `AsyncStream`, the only one of the five languages with an API literally named `yield()`. Java has nothing built in, but since version 21 it has virtual threads: run the generator body on a virtual thread and synchronize through a `SynchronousQueue` to simulate a blocking `yield`. Go has no generator syntax, but since 1.23 it has `iter.Seq` — a "range-over-func" type that lets you range directly over a function, just like ranging over a slice or map. Before that (and still valid today), the classic approach was a channel.
+Node.js has generator functions (`function*` / `yield`) built in: calling the function runs nothing at all, and each call to `.next()` runs up to the next `yield`. None of the other languages here have a real `yield`. Rust doesn't need much faking: `Iterator` is already "pull"-based via `.next()`, so `std::iter::from_fn` — a closure that holds state and returns `Option<T>` — is almost a hand-written generator. Swift uses `AsyncStream`, the only one of the five languages with an API literally named `yield()` — though unlike Rust's lazy `from_fn` (which only runs when `.next()` is called), the `AsyncStream` closure runs eagerly as soon as it's created and buffers whatever it yields. Java has nothing built in, but since version 21 it has virtual threads: run the generator body on a virtual thread and synchronize through a `SynchronousQueue` to simulate a blocking `yield`. Go has no generator syntax, but since 1.23 it has `iter.Seq` — a "range-over-func" type that lets you range directly over a function, just like ranging over a slice or map. Before that (and still valid today), the classic approach was a channel.
 
 ## Defining a generator
 
@@ -117,7 +117,7 @@ static class Generator implements Iterable<String>, Iterator<String> {
 :::
 
 :::note
-Go 1.23 added `iter.Seq` and range-over-func, which replace the older hand-rolled "next" closure (`func() (string, bool)`) as the idiomatic way to write a generator; you now range directly over the `iter.Seq` like any other sequence. Rust's `std::iter::from_fn` has been stable since 1.34 — well before Go's `iter.Seq`. Java's virtual threads (JEP 444) only stabilized in version 21; cheap virtual threads (no real OS thread per generator) are what make this "block on a dedicated thread" approach practical — before Java 21 each generator would have cost a whole platform thread.
+Go 1.23 added `iter.Seq` and range-over-func, which replace the older hand-rolled "next" closure (`func() (string, bool)`) as the idiomatic way to write a generator; you now range directly over the `iter.Seq` like any other sequence. Rust's `std::iter::from_fn` has been stable since 1.34 — well before Go's `iter.Seq`. Java's virtual threads (JEP 444) only stabilized in version 21; cheap virtual threads (no real OS thread per generator) are what make this "block on a dedicated thread" approach practical — before Java 21 each generator would have cost a whole platform thread. Note: if the consumer stops pulling values early (never exhausts `next()`), the virtual thread stays parked forever on `queue.put()` and is never reclaimed.
 :::
 
 ## Pulling values manually (`next()` / `done`)
@@ -160,14 +160,13 @@ func main() {
 fn main() {
     // Iterator is already pull-based: call .next() directly, no
     // conversion needed (unlike Go, which needs iter.Pull for a next/stop pair).
-    let mut gen = generator();
+    // (named `it` because `gen` is a reserved keyword since edition 2024)
+    let mut it = generator();
 
-    loop {
-        match gen.next() {
-            Some(value) => println!("{value}"),
-            None => break, // None plays the role of done: true
-        }
+    while let Some(value) = it.next() {
+        println!("{value}");
     }
+    // None plays the role of done: true once the loop ends
     // hello
     // world
 }
@@ -175,10 +174,12 @@ fn main() {
 ```swift
 // makeAsyncIterator() gets a manual iterator; next() returns nil when
 // done — playing the role of done: true.
-var iterator = generator().makeAsyncIterator()
+do {
+    var iterator = generator().makeAsyncIterator()
 
-while let value = await iterator.next() {
-    print(value)
+    while let value = await iterator.next() {
+        print(value)
+    }
 }
 // hello
 // world

@@ -9,7 +9,7 @@ versions:
   js: "17"
   go: "1.0"
   rust: "1.58"
-  swift: "1.0"
+  swift: "2.0"
   java: "25"
 tags: [stdin, readline, io, cli]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#stdin"
@@ -90,5 +90,5 @@ Từ Node.js 17, `node:readline/promises` thay thế `process.openStdin()` cũ (
 :::
 
 :::note
-`IO.readln(String)` là một phần của `java.lang.IO` (JEP 512, chính thức hoá ở Java 25 sau nhiều bản preview từ Java 21) — in ra prompt rồi đọc một dòng từ stdin, gộp hai bước `System.out.print` + `BufferedReader.readLine()` cũ thành một lời gọi.
+`IO.readln(String)` là một phần của `java.lang.IO`, chính thức hoá ở Java 25 (JEP 512) — in ra prompt rồi đọc một dòng từ stdin, gộp hai bước `System.out.print` + `BufferedReader.readLine()` cũ thành một lời gọi. Lịch sử preview của tính năng này: JEP 445 (Java 21) mới chỉ preview unnamed class + instance main method, chưa có lớp `IO` (lúc đó vẫn phải gọi `System.out.println`); `IO` lần đầu xuất hiện dưới dạng preview là `java.io.IO` ở Java 23 (JEP 477), rồi mới chuyển sang `java.lang.IO` khi ổn định ở Java 25.
 :::

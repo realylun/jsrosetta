@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.25"
   rust: "1.71"
-  swift: "5.9"
+  swift: "5.7"
   java: "25"
 tags: [promise, async, channel, goroutine]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#promises"
@@ -165,10 +165,10 @@ async fn main() {
         Err(err) => eprintln!("{err}"),
     }
 
-    let (a, b, c) = tokio::join!(async_method("A"), async_method("B"), async_method("C"));
-    let results: Result<Vec<_>, _> = [a, b, c].into_iter().collect(); // gặp Err đầu tiên là dừng, giống Promise.all
-    match results {
-        Ok(values) => println!("{values:?}"), // → ["resolved: A", "resolved: B", "resolved: C"]
+    // try_join! (khác join!) trả về ngay khi có future đầu tiên lỗi, không đợi
+    // các future còn lại chạy xong — đây mới thật sự giống Promise.all
+    match tokio::try_join!(async_method("A"), async_method("B"), async_method("C")) {
+        Ok((a, b, c)) => println!("{:?}", [a, b, c]), // → ["resolved: A", "resolved: B", "resolved: C"]
         Err(err) => eprintln!("{err}"),
     }
 }
@@ -216,9 +216,9 @@ void main() {
 :::
 
 :::note
-Go 1.25 thêm `sync.WaitGroup.Go(func())`, thay cho cách viết thủ công `wg.Add(1)` + `go func(){ …; wg.Done() }()` trước đó — nhờ vậy một goroutine không thể được khởi động mà thiếu `Done()` đi kèm.
+Go 1.25 thêm `sync.WaitGroup.Go(func())`, thay cho cách viết thủ công `wg.Add(1)` + `go func(){ …; wg.Done() }()` trước đó — nhờ vậy một goroutine không thể được khởi động mà thiếu `Done()` đi kèm. `Task.sleep(for:)` của Swift là tính năng ngôn ngữ Swift 5.7, nhưng trên nền tảng Apple chỉ chạy được từ macOS 13/iOS 16 trở lên.
 :::
 
 :::note
-`CompletableFuture` không có "microtask queue" ẩn như Promise: `.thenAccept()`/`.thenRun()` chạy trên `ForkJoinPool.commonPool()`, một pool dùng daemon thread. Nếu `main()` không gọi `.join()` để chờ, chương trình có thể thoát trước khi callback kịp chạy — cùng lý do Go cần `sync.WaitGroup`.
+`CompletableFuture` không có "microtask queue" ẩn như Promise: `.thenAccept()`/`.thenRun()` (không có hậu tố `Async`) chạy ngay trên thread nào hoàn tất future đó, hoặc chạy đồng bộ trên chính thread gọi nếu future đã hoàn tất từ trước — chỉ các biến thể `...Async` (`.thenAcceptAsync()`, `.thenRunAsync()`) mới mặc định chạy trên `ForkJoinPool.commonPool()`. Ở ví dụ trên, `asyncMethod` tự chạy qua `supplyAsync` trên `commonPool` (dùng daemon thread), nên nếu `main()` không gọi `.join()` để chờ, chương trình có thể thoát trước khi callback kịp chạy — cùng lý do Go cần `sync.WaitGroup`.
 :::

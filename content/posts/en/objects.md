@@ -4,7 +4,7 @@ description: "Node.js object literals and methods compared to structs/classes wi
 tags: [object, struct, method, receiver]
 ---
 
-A Node.js object literal bundles data and methods into the same value. Go splits the two: a `struct` holds only data, and behavior is attached with functions that take a receiver (usually a pointer to that struct). Rust and Swift also split data (`struct`) from behavior (`impl`/methods), much like Go — Swift even auto-generates a default constructor (a memberwise initializer), so you don't hand-write one like `NewObj()`. Java is closer to the JS object literal: a `class` bundles both fields and methods, just with explicit types.
+A Node.js object literal bundles data and methods into the same value. Go splits the two: a `struct` holds only data, and behavior is attached with functions that take a receiver (usually a pointer to that struct) declared elsewhere. Of these five languages, only Rust splits it the same way as Go: fields live in the `struct`, and methods live in a separate `impl` block. Swift is different — methods are written right inside the `struct` body, alongside the properties, much like how Java bundles fields and methods inside a `class` body; Swift's only real difference from Java is that it auto-generates a default constructor (a memberwise initializer), so there's nothing to hand-write. Java is closer to the JS object literal: a `class` bundles both fields and methods, just with explicit types.
 
 ## An object literal with a property and a method
 
@@ -70,8 +70,8 @@ impl Obj {
         Obj { some_properties }
     }
 
-    fn some_method(&self, prop: &str) -> Option<&String> {
-        self.some_properties.get(prop)
+    fn some_method(&self, prop: &str) -> Option<&str> {
+        self.some_properties.get(prop).map(String::as_str)
     }
 }
 
@@ -128,5 +128,5 @@ void main() {
 :::
 
 :::tip
-`NewObj()` acts as a constructor — a common Go convention, not required syntax. `(o *Obj) SomeMethod(...)` is a method with a pointer receiver: `o` is a pointer to that same struct, similar to how `someMethod` in the JS object literal reaches back into `obj` through a closure. Rust uses `impl` + `&self` (like a pointer receiver, but a borrow instead of a raw pointer); Swift auto-generates a constructor for structs, so there's no need to hand-write an `Obj::new()`-style function (though you still can). Java is closest to JS: fields and methods live together in a `class`, reaching each other through an implicit `this`.
+`NewObj()` acts as a constructor — a common Go convention, not required syntax. `(o *Obj) SomeMethod(...)` is a method with a pointer receiver: `o` is a pointer to that same struct, similar to how `someMethod` in the JS object literal reaches back into `obj` through a closure. Rust uses `impl` + `&self` (like a pointer receiver, but a borrow instead of a raw pointer), and `Obj::new()` here is just a naming convention like Go's `NewObj()` — not special constructor syntax. Swift auto-generates a constructor for structs (a memberwise init), so there's no need to hand-write a separate `init` (though you still can, e.g. to validate input). Java is closest to JS: fields and methods live together in a `class`, reaching each other through an implicit `this`.
 :::

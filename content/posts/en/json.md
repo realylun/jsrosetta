@@ -4,7 +4,7 @@ description: "Node.js's JSON.parse/stringify compared to Go's encoding/json, Rus
 tags: [json, marshal, unmarshal, serialization]
 ---
 
-Node.js's `JSON.parse`/`JSON.stringify` work directly with plain objects, with no shape declared up front. Go needs a `struct` with `json:"..."` tags so `encoding/json` knows which field maps to which key — but that mapping is resolved at runtime via reflection: unknown JSON keys are silently ignored, and only the struct's field types are checked at compile time, not the tag-to-key mapping itself. Rust has no JSON support in std, so it uses the `serde`/`serde_json` crate pair with the `#[derive(Serialize, Deserialize)]` macro — the field-to-key mapping is checked at compile time through the macro, stricter than Go. Swift uses the built-in `Codable` protocol, with the compiler synthesizing the same kind of field-mapping code. Java has no JSON in its standard library at all (JEP 540 is still an incubator feature, expected around JDK 28), so the example below uses the most common library, Jackson.
+Node.js's `JSON.parse`/`JSON.stringify` work directly with plain objects, with no shape declared up front. Go needs a `struct` with `json:"..."` tags so `encoding/json` knows which field maps to which key — but that mapping is resolved at runtime via reflection: unknown JSON keys are silently ignored, and only the struct's field types are checked at compile time, not the tag-to-key mapping itself. Rust has no JSON support in std, so it uses the `serde`/`serde_json` crate pair with the `#[derive(Serialize, Deserialize)]` macro — the field-to-key mapping is checked at compile time through the macro, stricter than Go. Swift uses the built-in `Codable` protocol, with the compiler synthesizing the same kind of field-mapping code. Java has no JSON in its standard library at all — JEP 540 (Simple JSON API) is only proposed to add one as an incubator module (`jdk.incubator.json`) starting JDK 28, and JDK 25 has nothing yet — so the example below uses the most common library, Jackson.
 
 ## Parsing (unmarshal) and stringifying (marshal)
 
@@ -75,15 +75,7 @@ import Foundation
 
 struct T: Codable {
     var foo: String
-    var bar: String?
-
-    enum CodingKeys: String, CodingKey { case foo, bar }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(foo, forKey: .foo)
-        try container.encodeIfPresent(bar, forKey: .bar) // drops the key entirely when nil, mirrors omitempty
-    }
+    var bar: String? // synthesized Codable uses encodeIfPresent for Optionals, dropping the key when nil — no custom encode(to:) needed
 }
 
 let jsonstr = #"{"foo":"bar"}"#
@@ -118,5 +110,9 @@ Go 1.24 adds `omitzero`, a stricter alternative to `omitempty`: it omits a field
 :::
 
 :::note
-Java 25 has no standard JSON API yet — JEP 540 (Simple JSON API) is still an incubator feature (`jdk.incubator.json`), expected to stabilize around JDK 28. The example above uses Jackson's `ObjectMapper`, the most widely used JSON library in the Java ecosystem; it can read/write a `record` directly with no extra module, since record component names are available through reflection.
+Java 25 has no standard JSON API yet — JEP 540 (Simple JSON API) is only proposed so far, targeting an incubator module `jdk.incubator.json` starting JDK 28; JDK 25 has nothing at all yet, not even as an incubator. The example above uses Jackson's `ObjectMapper`, the most widely used JSON library in the Java ecosystem; it can read/write a `record` directly with no extra module, since record component names are available through reflection. Jackson 3.0 (GA since October 2025) renamed its Maven group id/packages to `tools.jackson.*` so it can run side by side with 2.x; this example still uses 2.x (`com.fasterxml.jackson.*`) for simplicity, since it remains the most widely deployed version as of writing.
+:::
+
+:::note
+The `Codable` struct above needs no `CodingKeys` or hand-written `encode(to:)`: Codable's synthesized code already calls `encodeIfPresent` for every Optional property, so a nil `bar` is dropped from the JSON output entirely — the same behavior as `omitempty`, with no manual code required.
 :::

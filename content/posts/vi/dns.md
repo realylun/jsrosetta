@@ -1,6 +1,6 @@
 ---
 title: "Tra cứu DNS"
-description: "node:dns/promises của Node.js so với package net (Go), hickory-resolver (Rust), Host (Swift, chỉ A/AAAA) và JNDI (Java) để tra cứu DNS."
+description: "node:dns/promises của Node.js so với package net (Go), hickory-resolver (Rust), getaddrinfo (Swift, chỉ A/AAAA) và JNDI (Java) để tra cứu DNS."
 date: "2026-09-27"
 order: 990
 category: io
@@ -8,14 +8,14 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "15"
   go: "1.9"
-  rust: "1.71.1"
-  swift: "1.0"
+  rust: "1.88"
+  swift: "3.0"
   java: "25"
 tags: [dns, lookup, networking, io]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#dns"
 ---
 
-Tra cứu DNS (NS, A/AAAA, MX, TXT) có sẵn trong standard library của Node.js và Go, không cần thư viện ngoài. Rust std chỉ tra được A/AAAA qua `ToSocketAddrs` (dùng resolver của hệ điều hành) — muốn NS/MX/TXT phải dùng crate `hickory-resolver`, một resolver DNS thuần Rust chạy trong tiến trình, không qua libc. Swift/Foundation còn hạn chế hơn: chỉ có A/AAAA (qua `Host`), không có API nào cho NS/MX/TXT cả. Java có `InetAddress` cho A/AAAA và JNDI (`com.sun.jndi.dns.DnsContextFactory`) cho mọi loại record khác — kỹ thuật cũ nhưng vẫn hoạt động tốt trên JDK hiện đại.
+Tra cứu DNS (NS, A/AAAA, MX, TXT) có sẵn trong standard library của Node.js và Go, không cần thư viện ngoài. Rust std chỉ tra được A/AAAA qua `ToSocketAddrs` (dùng resolver của hệ điều hành) — muốn NS/MX/TXT phải dùng crate `hickory-resolver`, một resolver DNS thuần Rust chạy trong tiến trình, không qua libc. Swift/Foundation còn hạn chế hơn: chỉ có A/AAAA (qua `getaddrinfo`, vì `Host` đã bị to-be-deprecated và chỉ chạy trên macOS), không có API nào cho NS/MX/TXT cả. Java có `InetAddress` cho A/AAAA và JNDI (`com.sun.jndi.dns.DnsContextFactory`) cho mọi loại record khác — kỹ thuật cũ nhưng vẫn hoạt động tốt trên JDK hiện đại.
 
 ## Tra cứu NS, IP, MX, TXT
 
@@ -74,7 +74,7 @@ func main() {
 }
 ```
 ```rust
-// Cargo.toml: hickory-resolver = "0.25"
+// Cargo.toml: hickory-resolver = "0.26"
 // Cargo.toml: tokio = { version = "1", features = ["full"] }
 use hickory_resolver::Resolver;
 
@@ -82,36 +82,50 @@ use hickory_resolver::Resolver;
 async fn main() {
     // std::net::ToSocketAddrs (qua resolver hệ điều hành) chỉ cho A/AAAA;
     // NS/MX/TXT cần một resolver DNS thật như hickory-resolver.
-    let resolver = Resolver::builder_tokio().unwrap().build();
+    let resolver = Resolver::builder_tokio().unwrap().build().unwrap();
 
     let ns = resolver.ns_lookup("google.com").await.unwrap();
-    for n in ns.iter() {
-        println!("{n}");
+    for n in ns.answers() {
+        println!("{}", n.data); // RData tự Display; NS/MX in kèm dấu chấm cuối FQDN
     }
 
     let ips = resolver.lookup_ip("google.com").await.unwrap();
     for ip in ips.iter() {
-        println!("{ip}");
+        println!("{ip}"); // mỗi địa chỉ một dòng, không gộp thành mảng như Go/Node
     }
 
     let mx = resolver.mx_lookup("google.com").await.unwrap();
-    for m in mx.iter() {
-        println!("{} {}", m.exchange(), m.preference());
+    for m in mx.answers() {
+        println!("{}", m.data); // "priority host.", ví dụ "10 smtp.google.com."
     }
 
     let txt = resolver.txt_lookup("google.com").await.unwrap();
-    for t in txt.iter() {
-        println!("{t}");
+    for t in txt.answers() {
+        println!("{}", t.data);
     }
 }
 ```
 ```swift
 import Foundation
 
-// Foundation/Network.framework không có API tra NS/MX/TXT — chỉ tra được A/AAAA.
-// Muốn NS/MX/TXT phải gọi thư viện C `dnssd` (DNSServiceQueryRecord) hoặc dùng gói bên thứ ba.
-let host = Host(name: "google.com")
-print(host.addresses)
+// Host bị to-be-deprecated (API_TO_BE_DEPRECATED trong header) và chỉ chạy trên macOS;
+// getaddrinfo (POSIX, cũng chạy trên Linux) tra A/AAAA di động hơn. Foundation/Network.framework
+// không có API nào tra NS/MX/TXT — muốn vậy phải gọi thư viện C `dnssd` hoặc dùng gói bên thứ ba.
+var hints = addrinfo(ai_flags: 0, ai_family: AF_UNSPEC, ai_socktype: SOCK_STREAM,
+                      ai_protocol: 0, ai_addrlen: 0, ai_canonname: nil, ai_addr: nil, ai_next: nil)
+var info: UnsafeMutablePointer<addrinfo>?
+guard getaddrinfo("google.com", nil, &hints, &info) == 0 else { fatalError("lookup thất bại") }
+defer { freeaddrinfo(info) }
+
+var addresses: [String] = []
+var node = info
+while let n = node {
+    var buf = [Int8](repeating: 0, count: Int(NI_MAXHOST))
+    getnameinfo(n.pointee.ai_addr, n.pointee.ai_addrlen, &buf, socklen_t(buf.count), nil, 0, NI_NUMERICHOST)
+    addresses.append(String(cString: buf))
+    node = n.pointee.ai_next
+}
+print(addresses)
 ```
 ```java
 import java.net.InetAddress;
@@ -140,8 +154,10 @@ void main() throws Exception {
     }
 
     Attribute txt = ctx.getAttributes("google.com", new String[] { "TXT" }).get("TXT");
-    for (int i = 0; i < txt.size(); i++) {
-        IO.println(txt.get(i));
+    if (txt != null) { // get("TXT") trả về null nếu domain không có bản ghi TXT
+        for (int i = 0; i < txt.size(); i++) {
+            IO.println(txt.get(i));
+        }
     }
 }
 ```
@@ -157,11 +173,15 @@ smtp.google.com. 10
 ```
 
 :::note
+Định dạng in ra thực tế khác nhau giữa các ngôn ngữ, không gộp gọn như khối trên: Rust in mỗi địa chỉ IP/record trên một dòng riêng (không gộp thành mảng); MX ở Rust và Java in theo thứ tự "priority host." — ví dụ `10 smtp.google.com.` — trong khi Go tự format theo thứ tự "host priority" (`smtp.google.com. 10`); TXT ở Java được `Attribute.toString()` bọc trong dấu ngoặc kép khi giá trị chứa khoảng trắng (ví dụ bản ghi SPF), các ngôn ngữ khác thì không.
+:::
+
+:::note
 Node.js 15 làm cho promise API import được trực tiếp qua `node:dns/promises` (trước đó chỉ có `dns.promises`); nhờ top-level `await`, mỗi lần tra cứu chạy tuần tự theo đúng thứ tự `await`, thay vì phải lồng callback.
 :::
 
 :::note
-`hickory-resolver` (kế thừa `trust-dns-resolver`) là resolver DNS thuần Rust, tự gửi/nhận gói UDP tới nameserver thay vì gọi `getaddrinfo` của libc như `std::net::ToSocketAddrs` — nhờ vậy tra được mọi loại record (NS, MX, TXT…), không chỉ A/AAAA. Bản 0.25 yêu cầu Rust 1.71.1+ (MSRV).
+`hickory-resolver` (kế thừa `trust-dns-resolver`) là resolver DNS thuần Rust, tự gửi/nhận gói UDP tới nameserver thay vì gọi `getaddrinfo` của libc như `std::net::ToSocketAddrs` — nhờ vậy tra được mọi loại record (NS, MX, TXT…), không chỉ A/AAAA. Bản 0.26 yêu cầu Rust 1.88+ (MSRV); `ResolverBuilder::build()` trả về `Result` từ bản này nên cần thêm `.unwrap()`, và duyệt record qua `.answers()` (trả `&[Record]`, đọc field `.data`) thay cho `.iter()` của các bản cũ.
 :::
 
 ## Đổi DNS resolver server
@@ -197,25 +217,25 @@ for _, n := range ns {
 ```rust
 // thêm vào cùng file với ví dụ ở trên
 use std::net::{IpAddr, Ipv4Addr};
-use hickory_resolver::config::{NameServerConfigGroup, ResolverConfig};
-use hickory_resolver::name_server::TokioConnectionProvider;
+use hickory_resolver::config::{NameServerConfig, ResolverConfig};
+use hickory_resolver::net::runtime::TokioRuntimeProvider;
 
-let config = ResolverConfig::from_parts(
-    None,
-    vec![],
-    NameServerConfigGroup::from_ips_clear(&[IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1))], 53, true),
-);
-let resolver = Resolver::builder_with_config(config, TokioConnectionProvider::default()).build();
+let config = ResolverConfig::from_name_servers(vec![
+    NameServerConfig::udp_and_tcp(IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1))),
+]);
+let resolver = Resolver::builder_with_config(config, TokioRuntimeProvider::default())
+    .build()
+    .unwrap();
 
 let ns2 = resolver.ns_lookup("google.com").await.unwrap();
-for n in ns2.iter() {
-    println!("{n}");
+for n in ns2.answers() {
+    println!("{}", n.data);
 }
 ```
 ```swift
-// Foundation/Network.framework luôn dùng resolver hệ thống — không có API hỗ trợ trỏ
-// thẳng tới một DNS server cụ thể như net.Resolver{Dial: …} của Go. Muốn làm được phải
-// tự gửi gói DNS qua UDP tới 1.1.1.1:53 bằng tay, vượt ngoài phạm vi ví dụ ngắn này.
+// Foundation/Network.framework (và getaddrinfo) luôn dùng resolver hệ thống — không có API
+// hỗ trợ trỏ thẳng tới một DNS server cụ thể như net.Resolver{Dial: …} của Go. Muốn làm được
+// phải tự gửi gói DNS qua UDP tới 1.1.1.1:53 bằng tay, vượt ngoài phạm vi ví dụ ngắn này.
 ```
 ```java
 // tạo InitialDirContext mới với "java.naming.provider.url" trỏ tới 1.1.1.1
@@ -236,5 +256,5 @@ Field `Dial` của `net.Resolver` — dùng ở trên để gửi truy vấn t�
 :::
 
 :::note
-Swift/Foundation không có khái niệm "custom resolver": `Host` và `Network.framework` luôn tra cứu qua resolver hệ thống, không có tham số nào để chỉ định nameserver khác — đây là giới hạn thật của nền tảng, không phải thiếu sót trong ví dụ.
+Swift/Foundation không có khái niệm "custom resolver": `getaddrinfo` và `Network.framework` luôn tra cứu qua resolver hệ thống, không có tham số nào để chỉ định nameserver khác — đây là giới hạn thật của nền tảng, không phải thiếu sót trong ví dụ.
 :::

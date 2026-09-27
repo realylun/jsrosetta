@@ -119,7 +119,7 @@ IO.println(prepended); // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
 :::
 
 :::warning
-JavaScript's `array.slice()` always returns a new array. Go's slice (`array[2:4]`) and Rust's (`&array[2..4]`) are just views into the same memory as the original — mutating an element through `sub` also changes `array`, unless you copy first (`slices.Clone` in Go, `.to_vec()` in Rust). Java's `array.subList()` is also a view backed by the original list. Swift's `ArraySlice` shares memory *until* either side is mutated (copy-on-write), at which point it actually splits.
+JavaScript's `array.slice()` always returns a new array. Go's slice (`array[2:4]`) is a view into the same memory as the original — mutating an element through `sub` also changes `array`, unless you copy first (`slices.Clone`). Rust's slice (`&array[2..4]`) aliases the same memory too, but to mutate through it you need a `&mut` borrow (`&mut array[2..4]`), and the borrow checker won't let you touch the original `array` while that mutable slice is alive — unlike Go, where the compiler does no such aliasing check. Java's `array.subList()` is also a view backed by the original list, with no compiler protection against aliasing. Swift's `ArraySlice` shares memory *until* either side is mutated (copy-on-write), at which point it actually splits — meaning mutating through the slice never changes the original array.
 :::
 
 :::note

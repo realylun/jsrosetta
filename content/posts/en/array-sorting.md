@@ -1,10 +1,10 @@
 ---
 title: "Sorting arrays"
-description: "Node.js's Array.prototype.toSorted compared to in-place sorting in Go, Rust, Swift, and Java."
+description: "Node.js's Array.prototype.toSorted compared to in-place sorting in Go, Rust, and Java, and Swift's sort()/sorted()."
 tags: [array, sort, slices, comparator]
 ---
 
-Sorting numbers and strings in Node.js uses the same `toSorted` function with a comparator; Go splits this into two cases: `slices.Sort` for types with a natural order (`cmp.Ordered`), and `slices.SortFunc` for custom comparisons, such as sorting by a struct field. Rust, Swift, and Java all sort **in place** (`sort`/`sort_by_key`, `Collections.sort`) — to keep the original untouched, copy it first, just like Go.
+Sorting numbers and strings in Node.js uses the same `toSorted` function with a comparator; Go splits this into two cases: `slices.Sort` for types with a natural order (`cmp.Ordered`), and `slices.SortFunc` for custom comparisons, such as sorting by a struct field. Rust and Java only sort **in place** (`sort`/`sort_by_key`, `Collections.sort`) — to keep the original untouched, copy it first, just like Go. Swift has both: `sort()`/`sort(by:)` sorts in place, *and* `sorted()`/`sorted(by:)` returns a **new** array without touching the original — a direct equivalent of JavaScript's `toSorted()`.
 
 ## Sorting numbers and strings
 
@@ -127,6 +127,7 @@ fmt.Println(collection)
 ```rust
 #[derive(Debug)]
 struct Person {
+    #[allow(dead_code)] // only read through Debug — derives are ignored by dead-code analysis
     name: String,
     age: u32,
 }
@@ -179,7 +180,7 @@ IO.println(collection);
 
 | | Node.js | Go | Rust | Swift | Java |
 |---|---|---|---|---|---|
-| Leaves the original untouched | `toSorted()` | `slices.Clone` before `slices.Sort` | `.clone()` before `.sort()` | copy (value type) before `.sort()` | copy constructor before `Collections.sort` |
+| Leaves the original untouched | `toSorted()` | `slices.Clone` before `slices.Sort` | `.clone()` before `.sort()` | `.sorted()`/`.sorted(by:)` | copy constructor before `Collections.sort`, or `.stream().sorted().toList()` |
 | Default comparison (no function) | coerces to string | compile error if the type isn't `cmp.Ordered` | compile error if the type doesn't impl `Ord` | compile error if the type isn't `Comparable` | compile error if the type doesn't implement `Comparable` |
 | Sorting by a field | comparator function | `slices.SortFunc` + `cmp.Compare` | `.sort_by_key` / `.sort_by` | `.sort(by:)` with a closure | `Comparator.comparingInt`/`.comparing` |
 | Reversing order | comparator with flipped sign | `slices.Reverse` | `.reverse()` | `.reverse()` | `Collections.reverse` |

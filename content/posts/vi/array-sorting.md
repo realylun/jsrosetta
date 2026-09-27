@@ -1,6 +1,6 @@
 ---
 title: "Sắp xếp mảng"
-description: "Array.prototype.toSorted của Node.js so với sort tại chỗ ở Go, Rust, Swift và Java."
+description: "Array.prototype.toSorted của Node.js so với sort tại chỗ ở Go, Rust, Java, và sort()/sorted() ở Swift."
 date: "2026-09-27"
 order: 420
 category: collections
@@ -8,14 +8,14 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "20"
   go: "1.21"
-  rust: "1.7"
+  rust: "1.58"
   swift: "3.0"
   java: "25"
 tags: [array, sort, slices, comparator]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#array-sorting"
 ---
 
-Sắp xếp số và chuỗi ở Node.js dùng chung một hàm `toSorted` với comparator; Go tách hai trường hợp: `slices.Sort` cho kiểu có thứ tự sẵn (`cmp.Ordered`), và `slices.SortFunc` khi cần so sánh tuỳ ý, ví dụ theo field của struct. Rust, Swift và Java đều sắp xếp **tại chỗ** (`sort`/`sort_by_key`, `Collections.sort`) — muốn giữ mảng gốc thì tự sao chép trước, giống Go.
+Sắp xếp số và chuỗi ở Node.js dùng chung một hàm `toSorted` với comparator; Go tách hai trường hợp: `slices.Sort` cho kiểu có thứ tự sẵn (`cmp.Ordered`), và `slices.SortFunc` khi cần so sánh tuỳ ý, ví dụ theo field của struct. Rust và Java chỉ sắp xếp được **tại chỗ** (`sort`/`sort_by_key`, `Collections.sort`) — muốn giữ mảng gốc thì tự sao chép trước, giống Go. Swift thì có cả hai: `sort()`/`sort(by:)` sắp xếp tại chỗ, *và* `sorted()`/`sorted(by:)` trả về một mảng **mới** mà không đổi mảng gốc — tương đương trực tiếp với `toSorted()` của JavaScript.
 
 ## Sắp xếp số và chuỗi
 
@@ -138,6 +138,7 @@ fmt.Println(collection)
 ```rust
 #[derive(Debug)]
 struct Person {
+    #[allow(dead_code)] // chỉ đọc qua Debug — derive bị bỏ qua khi phân tích dead code
     name: String,
     age: u32,
 }
@@ -190,7 +191,7 @@ IO.println(collection);
 
 | | Node.js | Go | Rust | Swift | Java |
 |---|---|---|---|---|---|
-| Không đổi mảng gốc | `toSorted()` | `slices.Clone` rồi mới `slices.Sort` | `.clone()` rồi mới `.sort()` | copy (value type) rồi mới `.sort()` | copy constructor rồi mới `Collections.sort` |
+| Không đổi mảng gốc | `toSorted()` | `slices.Clone` rồi mới `slices.Sort` | `.clone()` rồi mới `.sort()` | `.sorted()`/`.sorted(by:)` | copy constructor rồi `Collections.sort`, hoặc `.stream().sorted().toList()` |
 | So sánh mặc định (không truyền hàm) | ép kiểu chuỗi | lỗi biên dịch nếu kiểu không phải `cmp.Ordered` | lỗi biên dịch nếu kiểu không impl `Ord` | lỗi biên dịch nếu kiểu không `Comparable` | lỗi biên dịch nếu kiểu không implement `Comparable` |
 | Sắp theo field | comparator function | `slices.SortFunc` + `cmp.Compare` | `.sort_by_key` / `.sort_by` | `.sort(by:)` với closure | `Comparator.comparingInt`/`.comparing` |
 | Đảo ngược thứ tự | comparator ngược dấu | `slices.Reverse` | `.reverse()` | `.reverse()` | `Collections.reverse` |

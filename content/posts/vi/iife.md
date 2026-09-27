@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "1.0"
+  swift: "2.0"
   java: "25"
 tags: [iife, closure, scope]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#iife"
@@ -58,5 +58,5 @@ void main() {
 :::
 
 :::note
-Từ Node.js 14.8, ES module hỗ trợ `await` ở top level, nên kiểu IIFE `(async () => { ... })()` — vốn chỉ được dùng để có `await` ở ngoài cùng — trong đa số trường hợp không còn cần thiết nữa. Rust và Swift gọi closure ẩn danh ngay tại chỗ khá tự nhiên, nhưng ở cả hai ngôn ngữ, cách phổ biến hơn để tạo scope riêng là dùng khối lệnh `{ ... }` như một biểu thức thay vì "IIFE". Java không có IIFE thật sự — ví dụ trên chỉ để minh hoạ, code Java thật sẽ dùng method riêng hoặc block thường.
+Từ Node.js 14.8, ES module hỗ trợ `await` ở top level, nên kiểu IIFE `(async () => { ... })()` — vốn chỉ được dùng để có `await` ở ngoài cùng — trong đa số trường hợp không còn cần thiết nữa. Rust và Swift gọi closure ẩn danh ngay tại chỗ khá tự nhiên, nhưng ở cả hai ngôn ngữ, cách phổ biến hơn để tạo scope riêng là dùng khối lệnh `{ ... }` như một biểu thức thay vì "IIFE". Java không có IIFE thật sự — ví dụ trên chỉ để minh hoạ, code Java thật sẽ dùng method riêng hoặc block thường. Clippy sẽ cảnh báo ví dụ Rust ở trên bằng lint `redundant_closure_call` (định nghĩa closure rồi gọi ngay) — cảnh báo đúng cho code thật, nhưng ở đây cố ý viết kiểu IIFE để so sánh với các ngôn ngữ khác.
 :::

@@ -8,8 +8,8 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
-  rust: "1.0"
-  swift: "1.0"
+  rust: "1.58"
+  swift: "2.0"
   java: "25"
 tags: [if-else, ternary, control-flow]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#ifelse"

@@ -22,7 +22,7 @@ Mỗi hệ sinh thái đều có một file khai báo dependency (`package.json`
 | Việc cần làm | npm (Node.js) | Go modules | Cargo (Rust) | Swift Package Manager | Maven (Java) |
 |---|---|---|---|---|---|
 | Khởi tạo file quản lý dependency | `npm init` | `go mod init github.com/you/yourmodule` | `cargo new`/`cargo init` | `swift package init` | `mvn archetype:generate` |
-| Cài một package | `npm install uuid` | `go get github.com/google/uuid@v1.6.0` | `cargo add uuid` | `swift package add-dependency <url> --from <ver>` | thêm `<dependency>` vào `pom.xml` |
+| Cài một package | `npm install uuid` | `go get github.com/google/uuid@v1.6.0` | `cargo add uuid -F v4` | `swift package add-dependency <url> --from <ver>` | thêm `<dependency>` vào `pom.xml` |
 | Cài một CLI dùng toàn cục | `npm install -g <pkg>` | `go install pkg@latest` | `cargo install <crate>` | — (không chuẩn hoá; thường dùng Homebrew/Mint) | — (thường dùng SDKMAN/jbang) |
 | Cập nhật lên bản mới nhất | `npm install uuid@latest` | `go get -u github.com/google/uuid` | `cargo update -p uuid` | `swift package update` | sửa version trong `pom.xml` |
 | Gỡ một package | `npm uninstall uuid` | `go get github.com/google/uuid@none` | `cargo remove uuid` | xoá dependency khỏi `Package.swift` | xoá `<dependency>` khỏi `pom.xml` |
@@ -55,6 +55,7 @@ func main() {
 }
 ```
 ```rust
+// Cargo.toml: uuid = { version = "1", features = ["v4"] }
 // import module
 use uuid::Uuid;
 
@@ -187,5 +188,5 @@ Ví dụ Java trên chạy trực tiếp qua **JEP 458** (Launch Multi-File Sour
 :::
 
 :::note
-`swift package add-dependency` và `add-target-dependency` cần Swift 6.0 trở lên (đã xác nhận hoạt động ở Swift 6.2). Từ khoá `public` đánh dấu API export ra ngoài module — mặc định (`internal`) chỉ thấy được trong cùng module, khác với Go/Rust nơi export theo item (chữ hoa đầu, hoặc `pub`) chứ không theo cả module.
+`swift package add-dependency` và `add-target-dependency` cần Swift 6.0 trở lên (đã xác nhận hoạt động ở Swift 6.2). Từ khoá `public` của Swift export theo từng item — giống `pub` của Rust, đặt trước từng khai báo muốn export chứ không phải cấu hình theo cả module. Mặc định (không ghi gì) là `internal`: thấy được trong toàn bộ module hiện tại, gần giống `pub(crate)` của Rust.
 :::

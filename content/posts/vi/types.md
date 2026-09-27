@@ -234,14 +234,14 @@ void main() {
 :::
 
 :::note
-Go 1.18 thêm `any` làm alias cho `interface{}`; dùng `any` cho code dễ đọc hơn, `interface{}` vẫn hoạt động nhưng là cách viết cũ. Rust và Swift đều không có kiểu complex trong stdlib — ví dụ trên phải dùng crate `num-complex` (Rust) hoặc mention package `swift-numerics` (Swift). Java không có kiểu số nguyên *không dấu* nào cả (chỉ có các phương thức xử lý không dấu như `Integer.toUnsignedLong`), khác hẳn Go/Rust.
+Go 1.18 thêm `any` làm alias cho `interface{}`; dùng `any` cho code dễ đọc hơn, `interface{}` vẫn hoạt động nhưng là cách viết cũ. Rust và Swift đều không có kiểu complex trong stdlib — ví dụ trên phải dùng crate `num-complex` (Rust) hoặc package `swift-numerics` (Swift). Java có 7 kiểu số nguyên thuỷ (`byte`, `short`, `int`, `long`, `float`, `double`, `char`); trong đó `char` là kiểu **duy nhất không dấu** (0..65535, biểu diễn một UTF-16 code unit) — `byte`/`short`/`int`/`long` đều có dấu, khác hẳn Go/Rust.
 :::
 
 ## Khác biệt chính
 
 | | Node.js | Go | Rust | Swift | Java |
 |---|---|---|---|---|---|
-| Kiểu số | 2 kiểu: `number`, `bigint` | hơn chục kiểu: `int8`..`uint64`, `complex64/128` | tương tự Go, trừ complex (crate ngoài) | `Int8`..`UInt64`, `Float`/`Double` | 8 kiểu, không có kiểu không dấu |
+| Kiểu số | 2 kiểu: `number`, `bigint` | hơn chục kiểu: `int8`..`uint64`, `complex64/128` | tương tự Go, cộng thêm `i128`/`u128` (Go không có), trừ complex (crate ngoài) | `Int8`..`UInt64`, `Float`/`Double` | 7 kiểu số nguyên thuỷ, `char` là kiểu không dấu duy nhất |
 | Kiểu bất kỳ | không cần khai báo | `any` (alias `interface{}`, từ 1.18) | `Box<dyn Any>` (hiếm dùng, thường generic hơn) | `Any` | `Object` |
-| Giá trị "chưa có" | `undefined` | zero value theo từng kiểu | không có; biến phải được gán trước khi dùng | `nil` (chỉ với `Optional`) | `null` (reference type), zero value (primitive) |
+| Giá trị "chưa có" | `undefined` | zero value theo từng kiểu | không có — biến phải được gán trước khi dùng (definite assignment); dùng `Option<T>::None` để biểu diễn "không có giá trị" | `nil` (chỉ với `Optional`) | zero value/`null` chỉ áp dụng cho field; biến local cũng phải được gán trước khi dùng (definite assignment), giống Rust |
 | Hàm là first-class value | có | có, kiểu `func()` | có, `fn()` hoặc closure | có, kiểu `() -> Void` | có, qua functional interface/lambda |

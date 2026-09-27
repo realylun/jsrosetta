@@ -141,7 +141,7 @@ received: hello world from 127.0.0.1:55056
 ```
 
 :::note
-Even though the Go code passes `IP: net.ParseIP("0.0.0.0")`, `conn.LocalAddr()` prints `[::]:3000` — with the generic `"udp"` network, Go's dual-stack listener reports the unspecified address in its IPv6 form rather than echoing back the IPv4 address that was requested. Rust and Java print back `0.0.0.0` exactly as bound.
+Even though the Go code passes `IP: net.ParseIP("0.0.0.0")`, `conn.LocalAddr()` prints `[::]:3000` — with the generic `"udp"` network, Go's dual-stack listener reports the unspecified address in its IPv6 form rather than echoing back the IPv4 address that was requested. Rust actually calls `socket.local_addr()`, so it correctly prints `0.0.0.0` as bound. Swift and Java above just print a fixed string that matches the parameters they were given, rather than querying the socket's real state — query it for real with `getLocalSocketAddress()`, and Java's `DatagramSocket(int)` also binds dual-stack by default and reports the same IPv6-form unspecified address, exactly like Go's quirk.
 :::
 
 :::note

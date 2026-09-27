@@ -168,7 +168,7 @@ Rust std không có gì tương đương goroutine: `thread::spawn` tạo một 
 :::
 
 :::note
-Swift không có socket API trong Foundation; ví dụ trên dùng `Network.framework` (chỉ có trên nền tảng Apple, cần macOS 10.14+). Cú pháp `if let data` (không cần `= data`) cần Swift 5.7 trở lên.
+Swift không có socket API trong Foundation; ví dụ trên dùng `Network.framework` (chỉ có trên nền tảng Apple, cần macOS 10.14+). Cú pháp `if let data` (không cần `= data`) cần Swift 5.7 trở lên. Ví dụ trên echo lại theo từng chunk nhận được từ `receive()` (`minimumIncompleteLength: 1`), không gom theo dòng như `bufio`/`BufferedReader` ở các ngôn ngữ khác — với input ngắn một dòng như ở đây thì kết quả giống hệt, nhưng dữ liệu lớn hơn một chunk TCP có thể bị echo thành nhiều lần hoặc một dòng chưa trọn vẹn.
 :::
 
 :::note

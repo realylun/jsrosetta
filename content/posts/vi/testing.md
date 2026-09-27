@@ -15,7 +15,7 @@ tags: [testing, unit-test, table-driven]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#testing"
 ---
 
-Node.js và Go đều có test runner built-in, không cần cài package ngoài; Rust cũng vậy với `#[test]`/`cargo test`. `t.test()` lồng nhau của Node.js gần tương đương `t.Run()` của Go cho **table-driven test** — chạy cùng một test case với nhiều bộ input khác nhau. Rust không có subtest có tên như Go/Node trong `#[test]` thuần std — ví dụ dưới lặp qua từng case trong một test function. Swift Testing (framework mới thay `XCTest`, cần package riêng) hỗ trợ việc này trực tiếp qua `@Test(arguments:)`. Java không có test runner chuẩn trong JDK, nên dùng thư viện phổ biến nhất, JUnit, với `@ParameterizedTest` + `@CsvSource`.
+Node.js và Go đều có test runner built-in, không cần cài package ngoài; Rust cũng vậy với `#[test]`/`cargo test`. `t.test()` lồng nhau của Node.js gần tương đương `t.Run()` của Go cho **table-driven test** — chạy cùng một test case với nhiều bộ input khác nhau. Rust không có subtest có tên như Go/Node trong `#[test]` thuần std — ví dụ dưới lặp qua từng case trong một test function. Swift Testing (framework mới thay `XCTest`, có sẵn trong toolchain từ Swift 6.0 chứ không cần thêm package) hỗ trợ việc này trực tiếp qua `@Test(arguments:)`. Java không có test runner chuẩn trong JDK, nên dùng thư viện phổ biến nhất, JUnit, với `@ParameterizedTest` + `@CsvSource`.
 
 ## Table-driven test
 
@@ -170,13 +170,14 @@ $ swift test
 ```
 ```bash
 $ java -jar junit-platform-console-standalone-6.1.3.jar execute -cp out --scan-class-path --details=tree
+# đã bỏ banner "Thanks for using JUnit!", nhánh JUnit Platform Suite/JUnit Vintage (rỗng, không
+# có test nào chạy qua đó) và các dòng tổng hợp containers/tests found/started/failed ở cuối
 ├─ JUnit Jupiter ✔
 │  └─ SumTest ✔
 │     └─ sum(int, int, int) ✔
 │        ├─ "1" + "1" ✔
 │        ├─ "2" + "3" ✔
 │        └─ "5" + "5" ✔
-# đã bỏ dòng tổng hợp containers/tests found/started/failed
 ```
 
 :::note

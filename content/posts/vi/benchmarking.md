@@ -10,7 +10,7 @@ versions:
   go: "1.24"
   rust: "1.86"
   swift: "5.7"
-  java: "11"
+  java: "8"
 tags: [benchmark, performance, testing]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#benchmarking"
 ---
@@ -94,6 +94,7 @@ func fibLoop(n int) int {
 ```rust
 // Cargo.toml: [dev-dependencies] criterion = "0.8"
 // Cargo.toml: cần thêm khối [[bench]] name = "fib", harness = false
+// Cargo.toml: package.name phải là "example" (khớp với `use example::...` bên dưới) — đổi tên khác thì phải sửa `use` theo
 
 // src/lib.rs
 pub fn fib_rec(n: u64) -> u64 {
@@ -137,6 +138,7 @@ func fibRec(_ n: Int) -> Int {
 }
 
 func fibLoop(_ n: Int) -> Int {
+    guard n >= 2 else { return n } // 2...n sẽ crash nếu n < 2 (lowerBound > upperBound)
     var f = [0, 1]
     for i in 2...n {
         f.append(f[i - 1] + f[i - 2])

@@ -9,13 +9,13 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "1.0"
+  swift: "3.0"
   java: "25"
 tags: [env, environment-variables, config, io]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#env-vars"
 ---
 
-Đọc biến môi trường là một trong những thao tác I/O đơn giản nhất, nhưng cách truy cập khác nhau đôi chút: Node.js coi `process.env` như một object; Go, Rust, Swift và Java đều dùng một hàm nhận vào tên biến. Go trả về chuỗi rỗng nếu biến không tồn tại, Rust trả về `Result` (dùng `unwrap_or_default()` để lấy chuỗi rỗng tương tự), còn Swift và Java trả về `nil`/`null`.
+Đọc biến môi trường là một trong những thao tác I/O đơn giản nhất, nhưng cách truy cập khác nhau đôi chút: Node.js coi `process.env` như một object; Go, Rust và Java đều dùng một hàm nhận vào tên biến, còn Swift lại index vào dictionary `environment` bằng subscript. Go trả về chuỗi rỗng nếu biến không tồn tại, Rust trả về `Result` (dùng `unwrap_or_default()` để lấy chuỗi rỗng tương tự), còn Swift và Java trả về `nil`/`null`.
 
 ## Đọc biến môi trường
 

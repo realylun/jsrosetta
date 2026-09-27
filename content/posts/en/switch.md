@@ -164,11 +164,11 @@ A, B or C
 ```
 
 :::warning
-Rust's `match` **has no fallthrough concept** in any form — there's no keyword to "flow" from one arm into the next. The second example above isn't an equivalent port of the Go/JS example; it just shows how to merge several patterns into one shared body with `|` (an or-pattern) — the result is a SINGLE line of output, not the accumulated output of multiple arms.
+The second `match` example above isn't an equivalent port of the Go/JS example: it just shows how to merge several patterns into one shared body with `|` (an or-pattern), so it produces a SINGLE line of output — not the accumulated output you'd get from real fallthrough.
 :::
 
 :::note
-Since Java 14 (JEP 361), Java has an arrow-based switch expression (`case "a" -> ...`): it never falls through, needs no `break`, and can return a value directly. The example above uses the classic `:`-style `switch` since that's the only form that still has fallthrough behavior to demonstrate.
+Since Java 14 (JEP 361), Java has arrow-based case labels (`case "a" -> ...`): they never fall through and need no `break`. Arrow labels work in both switch **statements** and switch **expressions** — only the expression form returns a value directly; a statement using arrow labels still just runs the case body (the only difference from a colon-style statement is that it doesn't fall through). The example above uses the classic `:`-style `switch` since that's the only form that still has fallthrough behavior to demonstrate.
 :::
 
 ## Key differences

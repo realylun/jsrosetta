@@ -4,7 +4,7 @@ description: "How Node.js's process.env compares to os.Getenv (Go), env::var (Ru
 tags: [env, environment-variables, config, io]
 ---
 
-Reading an environment variable is one of the simplest I/O operations there is, but access differs slightly: Node.js treats `process.env` like an object; Go, Rust, Swift, and Java all use a function that takes the variable's name. Go returns an empty string when the variable doesn't exist, Rust returns a `Result` (use `unwrap_or_default()` to get a similarly empty string), and Swift and Java return `nil`/`null`.
+Reading an environment variable is one of the simplest I/O operations there is, but access differs slightly: Node.js treats `process.env` like an object; Go, Rust, and Java all use a function that takes the variable's name, while Swift indexes the `environment` dictionary with a subscript. Go returns an empty string when the variable doesn't exist, Rust returns a `Result` (use `unwrap_or_default()` to get a similarly empty string), and Swift and Java return `nil`/`null`.
 
 ## Reading an environment variable
 

@@ -8,7 +8,7 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
-  rust: "1.0"
+  rust: "1.19"
   swift: "3.0"
   java: "25"
 tags: [printing, stdout, stderr]
@@ -50,7 +50,7 @@ fn main() {
 import Foundation
 
 print("print to stdout")
-print(String(format: "format %@ %d", "example", 1))
+print(String(format: "format \("example") %d", 1))
 FileHandle.standardError.write(Data("print to stderr".utf8))
 ```
 ```java
@@ -69,5 +69,5 @@ print to stderr
 ```
 
 :::note
-Swift không có hàm in kiểu `printf` hay ghi ra `stderr` trong core stdlib — cả `String(format:)` lẫn `FileHandle.standardError` đều đến từ Foundation (dùng tên kiểu Swift-native như `FileHandle`/`Data`, có từ Swift 3.0; trước đó là `NSFileHandle`/`NSData`).
+Swift không có hàm in kiểu `printf` hay ghi ra `stderr` trong core stdlib — cả `String(format:)` lẫn `FileHandle.standardError` đều đến từ Foundation (dùng tên kiểu Swift-native như `FileHandle`/`Data`, có từ Swift 3.0; trước đó là `NSFileHandle`/`NSData`). Tránh dùng `%@` với một `String` thuần hay `%s` trong `String(format:)` — cả hai đều dựa vào cầu nối Objective-C/con trỏ C và không đáng tin cậy trên mọi nền tảng Swift; ghép phần chuỗi bằng string interpolation trước rồi chỉ dùng `%d`/`%f`… cho phần số là cách portable hơn.
 :::

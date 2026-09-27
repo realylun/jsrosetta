@@ -9,13 +9,13 @@ versions:
   js: "18.11"
   go: "1.0"
   rust: "1.85"
-  swift: "3.0"
+  swift: "4.0"
   java: "25"
 tags: [cli, args, flags, io]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#cli-args"
 ---
 
-Có hai cách nhận input từ dòng lệnh: đọc thẳng mảng đối số thô, hoặc parse thành cờ có tên (`--foo=bar`). Node.js và Go có sẵn cả hai cách trong standard library. Rust std chỉ có `env::args()` (đối số thô) — cờ có tên phải dùng crate `clap`. Swift và Java không có package parse cờ nào trong standard library/Foundation cả; ví dụ bên dưới tự parse `--foo=`/`--qux` bằng tay, còn dự án thật thường dùng gói `swift-argument-parser` (Swift, qua Swift Package Manager) tương ứng.
+Có hai cách nhận input từ dòng lệnh: đọc thẳng mảng đối số thô, hoặc parse thành cờ có tên (`--foo=bar`). Node.js và Go có sẵn cả hai cách trong standard library. Rust std chỉ có `env::args()` (đối số thô) — cờ có tên phải dùng crate `clap`. Swift và Java không có package parse cờ nào trong standard library/Foundation cả; ví dụ bên dưới tự parse `--foo=`/`--qux` bằng tay, còn dự án thật thường dùng gói `swift-argument-parser` (Swift, qua Swift Package Manager) hoặc `picocli` (Java) tương ứng.
 
 ## Đối số dòng lệnh thô
 
@@ -202,5 +202,5 @@ Node.js 18.3 thêm `util.parseArgs()` vào standard library, thay cho các thư 
 :::
 
 :::note
-`CommandLine` (thay cho `Process.arguments`/`C_ARGC`/`C_ARGV` cũ) xuất hiện từ Swift 3 và nằm trong Swift standard library — không cần `import Foundation` để dùng, khác với hầu hết ví dụ I/O khác trong loạt bài này.
+`CommandLine` (thay cho `Process.arguments`/`C_ARGC`/`C_ARGV` cũ) xuất hiện từ Swift 3 và nằm trong Swift standard library — không cần `import Foundation` để dùng, khác với hầu hết ví dụ I/O khác trong loạt bài này. Version sàn của cả ví dụ là Swift 4.0, không phải 3.0: `String` chỉ conform trực tiếp `Collection` (nên `arg.dropFirst(...)` gọi thẳng trên `String` mới hợp lệ, trả về `Substring`) từ Swift 4.0.
 :::

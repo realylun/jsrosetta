@@ -9,7 +9,7 @@ versions:
   js: "14.13.1"
   go: "1.7"
   rust: "1.71"
-  swift: "5.9"
+  swift: "5.7"
   java: "25"
 tags: [exec, subprocess, child-process, io]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#exec-sync"
@@ -53,7 +53,7 @@ fn main() {
         .output() // block cho tới khi tiến trình con thoát
         .unwrap();
 
-    println!("{}", String::from_utf8_lossy(&output.stdout));
+    print!("{}", String::from_utf8_lossy(&output.stdout));
 }
 ```
 ```swift
@@ -70,7 +70,7 @@ try process.run()
 process.waitUntilExit() // block cho tới khi tiến trình con thoát
 
 let data = pipe.fileHandleForReading.readDataToEndOfFile()
-print(String(data: data, encoding: .utf8) ?? "")
+print(String(data: data, encoding: .utf8) ?? "", terminator: "")
 ```
 ```java
 void main() throws Exception {
@@ -137,6 +137,7 @@ use tokio::time::timeout;
 async fn main() {
     let child = Command::new("echo")
         .arg("hello world")
+        .stdout(std::process::Stdio::piped()) // không piped thì stdout kế thừa từ cha, wait_with_output() sẽ trả về rỗng
         .kill_on_drop(true) // hết timeout thì drop future sẽ kill tiến trình con
         .spawn()
         .unwrap();
@@ -169,9 +170,10 @@ process.waitUntilExit() // vẫn block: Process không có API async để chờ
 timeoutTask.cancel()
 
 let data = pipe.fileHandleForReading.readDataToEndOfFile()
-print(String(data: data, encoding: .utf8) ?? "")
+print(String(data: data, encoding: .utf8) ?? "", terminator: "")
 ```
 ```java
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 void main() throws Exception {
@@ -179,15 +181,25 @@ void main() throws Exception {
             .redirectErrorStream(true)
             .start();
 
-    process.onExit() // CompletableFuture<Process>, không block thread hiện tại
-            .orTimeout(5, TimeUnit.SECONDS)
-            .whenComplete((p, err) -> {
-                if (err != null) process.destroyForcibly(); // hết timeout thì kill tiến trình con
-            })
-            .join();
+    // đọc stdout song song ngay từ đầu — nếu đợi tiến trình thoát rồi mới đọc,
+    // tiến trình con có thể bị treo khi buffer output đầy
+    CompletableFuture<String> output = CompletableFuture.supplyAsync(() -> {
+        try {
+            return new String(process.getInputStream().readAllBytes());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    });
 
-    String output = new String(process.getInputStream().readAllBytes());
-    IO.print(output);
+    try {
+        process.onExit() // CompletableFuture<Process>, không block thread gọi cho tới .join()
+                .orTimeout(5, TimeUnit.SECONDS)
+                .join();
+    } catch (Exception timedOut) {
+        process.destroyForcibly(); // hết timeout thì kill tiến trình con
+    }
+
+    IO.print(output.join());
 }
 ```
 :::
@@ -205,5 +217,5 @@ Rust std không có runtime async, nên "async có timeout" cần crate `tokio`.
 :::
 
 :::note
-`Process.executableURL`/`try process.run()` (thay cho `launchPath`/`.launch()` cũ, không ném lỗi) cần macOS 10.13+. `Task.sleep(for:)` cần Swift 5.9 và macOS 13+ — đây là ràng buộc phiên bản cao nhất trong ví dụ Swift ở trên. Foundation's `Process` không có API async chờ tiến trình thoát; cách phổ biến là chạy một `Task` đếm giờ gọi `terminate()` khi hết hạn, song song với `waitUntilExit()` vẫn đang block.
+`Process.executableURL`/`try process.run()` (thay cho `launchPath`/`.launch()` cũ, không ném lỗi) cần macOS 10.13+. `Task.sleep(for:)` (SE-0329) cần Swift 5.7 và macOS 13+ — đây là ràng buộc phiên bản cao nhất trong ví dụ Swift ở trên. Foundation's `Process` không có API async chờ tiến trình thoát; cách phổ biến là chạy một `Task` đếm giờ gọi `terminate()` khi hết hạn, song song với `waitUntilExit()` vẫn đang block.
 :::

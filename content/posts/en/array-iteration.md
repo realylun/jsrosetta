@@ -4,7 +4,7 @@ description: "Node.js's forEach, map, filter, reduce compared to Rust, Swift, an
 tags: [array, iteration, generics, functional]
 ---
 
-Node.js ships `forEach`, `map`, `filter`, and `reduce` right on `Array.prototype`. Go's standard library has none of these for slices, but since Go 1.18 you can write them once using generics and reuse them for any data type. Rust, Swift, and Java all ship `map`/`filter`/`fold` (or `reduce`) right on their iterators/streams — no need to hand-write them like in Go.
+Node.js ships `forEach`, `map`, `filter`, and `reduce` right on `Array.prototype`. Go's standard library has none of these for slices, but since Go 1.18 you can write them once using generics and reuse them for any data type. Rust, Swift, and Java all ship `map`/`filter`/`fold` (or `reduce`) right on their iterators/streams — no need to hand-write them like in Go; Java in particular usually collects results with `collect`/`toList` instead of `Stream.reduce()`, since `reduce()` is meant for folding down to an immutable value (like a sum), not for building up a mutable collection.
 
 ## Iterating over each element (forEach)
 
@@ -182,6 +182,8 @@ List<String> filtered = IntStream.range(0, array.size())
         .toList();
 IO.println(filtered); // [a, c]
 
+// collect via collect()/toList() — Stream.reduce() isn't a good fit for building a (mutable)
+// List; it's meant for folding down to a single immutable value (like a sum)
 List<String> reduced = IntStream.range(0, array.size())
         .filter(i -> i % 2 == 0)
         .mapToObj(i -> array.get(i).toUpperCase())

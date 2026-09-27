@@ -223,14 +223,14 @@ void main() {
 :::
 
 :::note
-Go 1.18 added `any` as an alias for `interface{}`; prefer `any` for readability — `interface{}` still works but is legacy style. Neither Rust nor Swift has a complex number type in their stdlib — the example above needs the `num-complex` crate (Rust) or the `swift-numerics` package (Swift). Java has no unsigned integer types at all (only unsigned-handling methods like `Integer.toUnsignedLong`), unlike Go/Rust.
+Go 1.18 added `any` as an alias for `interface{}`; prefer `any` for readability — `interface{}` still works but is legacy style. Neither Rust nor Swift has a complex number type in their stdlib — the example above needs the `num-complex` crate (Rust) or the `swift-numerics` package (Swift). Java has 7 numeric primitive types (`byte`, `short`, `int`, `long`, `float`, `double`, `char`); `char` is the **only unsigned one** of these (0..65535, a UTF-16 code unit) — `byte`/`short`/`int`/`long` are all signed, unlike Go/Rust.
 :::
 
 ## Key differences
 
 | | Node.js | Go | Rust | Swift | Java |
 |---|---|---|---|---|---|
-| Number types | 2 types: `number`, `bigint` | over a dozen: `int8`..`uint64`, `complex64/128` | similar to Go, except complex (external crate) | `Int8`..`UInt64`, `Float`/`Double` | 8 types, no unsigned type |
+| Number types | 2 types: `number`, `bigint` | over a dozen: `int8`..`uint64`, `complex64/128` | similar to Go, plus `i128`/`u128` (which Go lacks), except complex (external crate) | `Int8`..`UInt64`, `Float`/`Double` | 7 numeric primitives, `char` is the only unsigned one |
 | Any type | no declaration needed | `any` (alias for `interface{}`, since 1.18) | `Box<dyn Any>` (rare; generics are more idiomatic) | `Any` | `Object` |
-| "Not set" value | `undefined` | a per-type zero value | none; a variable must be assigned before use | `nil` (only for `Optional`) | `null` (reference types), zero value (primitives) |
+| "Not set" value | `undefined` | a per-type zero value | none — a variable must be assigned before use (definite assignment); use `Option<T>::None` to represent "no value" | `nil` (only for `Optional`) | zero value/`null` only applies to fields; local variables must also be assigned before use (definite assignment), just like Rust |
 | Functions as first-class values | yes | yes, type `func()` | yes, `fn()` or a closure | yes, type `() -> Void` | yes, via a functional interface/lambda |

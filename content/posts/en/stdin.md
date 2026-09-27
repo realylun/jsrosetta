@@ -79,5 +79,5 @@ Since Node.js 17, `node:readline/promises` replaces the legacy `process.openStdi
 :::
 
 :::note
-`IO.readln(String)` is part of `java.lang.IO` (JEP 512, finalized in Java 25 after several preview rounds starting in Java 21) — it prints the prompt and reads a line from stdin, folding the old two-step `System.out.print` + `BufferedReader.readLine()` into one call.
+`IO.readln(String)` is part of `java.lang.IO`, finalized in Java 25 (JEP 512) — it prints the prompt and reads a line from stdin, folding the old two-step `System.out.print` + `BufferedReader.readLine()` into one call. Preview history: JEP 445 (Java 21) only previewed unnamed classes and instance main methods, with no `IO` class yet (you still had to call `System.out.println`); `IO` first showed up as a preview API, `java.io.IO`, in Java 23 (JEP 477), then moved to `java.lang.IO` once it was finalized in Java 25.
 :::

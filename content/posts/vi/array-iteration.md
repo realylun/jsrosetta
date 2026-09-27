@@ -15,7 +15,7 @@ tags: [array, iteration, generics, functional]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#array-iteration"
 ---
 
-Node.js có sẵn `forEach`, `map`, `filter`, `reduce` ngay trên `Array.prototype`. Go không có các hàm này cho slice trong thư viện chuẩn, nhưng từ Go 1.18 bạn có thể tự viết chúng một lần bằng generic rồi dùng lại cho mọi kiểu dữ liệu. Rust, Swift và Java thì có sẵn `map`/`filter`/`fold` (hoặc `reduce`) ngay trên iterator/stream — không cần tự viết như Go.
+Node.js có sẵn `forEach`, `map`, `filter`, `reduce` ngay trên `Array.prototype`. Go không có các hàm này cho slice trong thư viện chuẩn, nhưng từ Go 1.18 bạn có thể tự viết chúng một lần bằng generic rồi dùng lại cho mọi kiểu dữ liệu. Rust, Swift và Java thì có sẵn `map`/`filter`/`fold` (hoặc `reduce`) ngay trên iterator/stream — không cần tự viết như Go; riêng Java thường gộp kết quả bằng `collect`/`toList` thay vì `Stream.reduce()`, vì `reduce()` chỉ hợp để rút gọn ra một giá trị bất biến (như tính tổng), không nên dùng để build một collection có thể thay đổi.
 
 ## Duyệt qua từng phần tử (forEach)
 
@@ -193,6 +193,8 @@ List<String> filtered = IntStream.range(0, array.size())
         .toList();
 IO.println(filtered); // [a, c]
 
+// gộp bằng collect()/toList() — Stream.reduce() không hợp để build một List (mutable),
+// nó dùng để rút gọn về một giá trị bất biến duy nhất (như tính tổng)
 List<String> reduced = IntStream.range(0, array.size())
         .filter(i -> i % 2 == 0)
         .mapToObj(i -> array.get(i).toUpperCase())

@@ -1,10 +1,10 @@
 ---
 title: "DNS Lookups"
-description: "How Node.js's node:dns/promises compares to the net package (Go), hickory-resolver (Rust), Host (Swift, A/AAAA only), and JNDI (Java) for DNS lookups."
+description: "How Node.js's node:dns/promises compares to the net package (Go), hickory-resolver (Rust), getaddrinfo (Swift, A/AAAA only), and JNDI (Java) for DNS lookups."
 tags: [dns, lookup, networking, io]
 ---
 
-DNS lookups (NS, A/AAAA, MX, TXT) are available in the standard library of both Node.js and Go, with no third-party dependency needed. Rust's std can only look up A/AAAA through `ToSocketAddrs` (using the OS resolver) — NS/MX/TXT need the `hickory-resolver` crate, a pure-Rust, in-process DNS resolver that doesn't go through libc. Swift/Foundation is even more limited: only A/AAAA (via `Host`), with no API at all for NS/MX/TXT. Java has `InetAddress` for A/AAAA and JNDI (`com.sun.jndi.dns.DnsContextFactory`) for every other record type — an old technique, but one that still works fine on modern JDKs.
+DNS lookups (NS, A/AAAA, MX, TXT) are available in the standard library of both Node.js and Go, with no third-party dependency needed. Rust's std can only look up A/AAAA through `ToSocketAddrs` (using the OS resolver) — NS/MX/TXT need the `hickory-resolver` crate, a pure-Rust, in-process DNS resolver that doesn't go through libc. Swift/Foundation is even more limited: only A/AAAA (via `getaddrinfo`, since `Host` is to-be-deprecated and macOS-only), with no API at all for NS/MX/TXT. Java has `InetAddress` for A/AAAA and JNDI (`com.sun.jndi.dns.DnsContextFactory`) for every other record type — an old technique, but one that still works fine on modern JDKs.
 
 ## Looking up NS, IP, MX, and TXT records
 
@@ -63,7 +63,7 @@ func main() {
 }
 ```
 ```rust
-// Cargo.toml: hickory-resolver = "0.25"
+// Cargo.toml: hickory-resolver = "0.26"
 // Cargo.toml: tokio = { version = "1", features = ["full"] }
 use hickory_resolver::Resolver;
 
@@ -71,36 +71,50 @@ use hickory_resolver::Resolver;
 async fn main() {
     // std::net::ToSocketAddrs (via the OS resolver) only gives you A/AAAA;
     // NS/MX/TXT need a real DNS resolver like hickory-resolver.
-    let resolver = Resolver::builder_tokio().unwrap().build();
+    let resolver = Resolver::builder_tokio().unwrap().build().unwrap();
 
     let ns = resolver.ns_lookup("google.com").await.unwrap();
-    for n in ns.iter() {
-        println!("{n}");
+    for n in ns.answers() {
+        println!("{}", n.data); // RData has its own Display; NS/MX print with a trailing dot
     }
 
     let ips = resolver.lookup_ip("google.com").await.unwrap();
     for ip in ips.iter() {
-        println!("{ip}");
+        println!("{ip}"); // one address per line, not gathered into an array like Go/Node
     }
 
     let mx = resolver.mx_lookup("google.com").await.unwrap();
-    for m in mx.iter() {
-        println!("{} {}", m.exchange(), m.preference());
+    for m in mx.answers() {
+        println!("{}", m.data); // "priority host.", e.g. "10 smtp.google.com."
     }
 
     let txt = resolver.txt_lookup("google.com").await.unwrap();
-    for t in txt.iter() {
-        println!("{t}");
+    for t in txt.answers() {
+        println!("{}", t.data);
     }
 }
 ```
 ```swift
 import Foundation
 
-// Foundation/Network.framework has no NS/MX/TXT lookup API -- only A/AAAA.
-// NS/MX/TXT would require the C `dnssd` library (DNSServiceQueryRecord) or a third-party package.
-let host = Host(name: "google.com")
-print(host.addresses)
+// Host is to-be-deprecated (API_TO_BE_DEPRECATED in the header) and macOS-only; getaddrinfo
+// (POSIX, also works on Linux) is the more portable way to look up A/AAAA. Foundation/Network.framework
+// has no NS/MX/TXT lookup API at all -- that would require the C `dnssd` library or a third-party package.
+var hints = addrinfo(ai_flags: 0, ai_family: AF_UNSPEC, ai_socktype: SOCK_STREAM,
+                      ai_protocol: 0, ai_addrlen: 0, ai_canonname: nil, ai_addr: nil, ai_next: nil)
+var info: UnsafeMutablePointer<addrinfo>?
+guard getaddrinfo("google.com", nil, &hints, &info) == 0 else { fatalError("lookup failed") }
+defer { freeaddrinfo(info) }
+
+var addresses: [String] = []
+var node = info
+while let n = node {
+    var buf = [Int8](repeating: 0, count: Int(NI_MAXHOST))
+    getnameinfo(n.pointee.ai_addr, n.pointee.ai_addrlen, &buf, socklen_t(buf.count), nil, 0, NI_NUMERICHOST)
+    addresses.append(String(cString: buf))
+    node = n.pointee.ai_next
+}
+print(addresses)
 ```
 ```java
 import java.net.InetAddress;
@@ -129,8 +143,10 @@ void main() throws Exception {
     }
 
     Attribute txt = ctx.getAttributes("google.com", new String[] { "TXT" }).get("TXT");
-    for (int i = 0; i < txt.size(); i++) {
-        IO.println(txt.get(i));
+    if (txt != null) { // get("TXT") returns null if the domain has no TXT record
+        for (int i = 0; i < txt.size(); i++) {
+            IO.println(txt.get(i));
+        }
     }
 }
 ```
@@ -146,11 +162,15 @@ smtp.google.com. 10
 ```
 
 :::note
+The actual printed format differs across languages more than the block above suggests: Rust prints each IP/record on its own line (no array grouping); Rust and Java print MX in "priority host." order — e.g. `10 smtp.google.com.` — while Go formats it as "host priority" (`smtp.google.com. 10`); Java's `Attribute.toString()` wraps a TXT value in quotes when it contains spaces (e.g. the SPF record), the other languages don't.
+:::
+
+:::note
 Node.js 15 made the promise API importable directly via `node:dns/promises` (before, only as `dns.promises`); with top-level `await`, each lookup runs in the exact order it's awaited, instead of nesting callbacks.
 :::
 
 :::note
-`hickory-resolver` (the successor to `trust-dns-resolver`) is a pure-Rust DNS resolver that sends and receives UDP packets to a nameserver itself, instead of calling libc's `getaddrinfo` like `std::net::ToSocketAddrs` does — which is how it can look up any record type (NS, MX, TXT…), not just A/AAAA. Version 0.25 requires Rust 1.71.1+ (MSRV).
+`hickory-resolver` (the successor to `trust-dns-resolver`) is a pure-Rust DNS resolver that sends and receives UDP packets to a nameserver itself, instead of calling libc's `getaddrinfo` like `std::net::ToSocketAddrs` does — which is how it can look up any record type (NS, MX, TXT…), not just A/AAAA. Version 0.26 requires Rust 1.88+ (MSRV); as of this version `ResolverBuilder::build()` returns a `Result` so it needs an extra `.unwrap()`, and records are read through `.answers()` (returning `&[Record]`, with a `.data` field) instead of the older `.iter()`.
 :::
 
 ## Changing the DNS resolver server
@@ -186,25 +206,25 @@ for _, n := range ns {
 ```rust
 // add this to the same file as the example above
 use std::net::{IpAddr, Ipv4Addr};
-use hickory_resolver::config::{NameServerConfigGroup, ResolverConfig};
-use hickory_resolver::name_server::TokioConnectionProvider;
+use hickory_resolver::config::{NameServerConfig, ResolverConfig};
+use hickory_resolver::net::runtime::TokioRuntimeProvider;
 
-let config = ResolverConfig::from_parts(
-    None,
-    vec![],
-    NameServerConfigGroup::from_ips_clear(&[IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1))], 53, true),
-);
-let resolver = Resolver::builder_with_config(config, TokioConnectionProvider::default()).build();
+let config = ResolverConfig::from_name_servers(vec![
+    NameServerConfig::udp_and_tcp(IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1))),
+]);
+let resolver = Resolver::builder_with_config(config, TokioRuntimeProvider::default())
+    .build()
+    .unwrap();
 
 let ns2 = resolver.ns_lookup("google.com").await.unwrap();
-for n in ns2.iter() {
-    println!("{n}");
+for n in ns2.answers() {
+    println!("{}", n.data);
 }
 ```
 ```swift
-// Foundation/Network.framework always uses the system resolver -- there's no supported API to
-// point lookups at a specific DNS server like Go's net.Resolver{Dial: …}. Doing that would mean
-// hand-rolling a DNS-over-UDP query to 1.1.1.1:53, which is beyond the scope of this short example.
+// Foundation/Network.framework (and getaddrinfo) always use the system resolver -- there's no
+// supported API to point lookups at a specific DNS server like Go's net.Resolver{Dial: …}. Doing
+// that would mean hand-rolling a DNS-over-UDP query to 1.1.1.1:53, beyond this short example's scope.
 ```
 ```java
 // build a fresh InitialDirContext with "java.naming.provider.url" pointed at 1.1.1.1
@@ -225,5 +245,5 @@ The `Dial` field of `net.Resolver` — used above to send queries to `1.1.1.1` i
 :::
 
 :::note
-Swift/Foundation has no concept of a "custom resolver": `Host` and `Network.framework` always look things up through the system resolver, with no parameter to point at a different nameserver — this is a genuine platform limitation, not something missing from the example.
+Swift/Foundation has no concept of a "custom resolver": `getaddrinfo` and `Network.framework` always look things up through the system resolver, with no parameter to point at a different nameserver — this is a genuine platform limitation, not something missing from the example.
 :::

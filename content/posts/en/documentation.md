@@ -115,7 +115,7 @@ impl Person {
 /// `Person` represents a user.
 ///
 /// ```swift
-/// var person = Person(name: "bob")
+/// let person = Person(name: "bob")
 /// print(person.name) // bob
 /// ```
 public struct Person {

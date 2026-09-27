@@ -47,5 +47,5 @@ void main() {
 :::
 
 :::note
-Since Node.js 14.8, ES modules support top-level `await`, so the `(async () => { ... })()` IIFE pattern — used only to get `await` at the top level — usually isn't needed anymore. Rust and Swift call an anonymous closure right at its definition fairly naturally, but in both languages the more common way to scope things off is a `{ ... }` block used as an expression, not an "IIFE". Java has no real IIFE — the example above is just for illustration; real Java code would use a private method or a plain block instead.
+Since Node.js 14.8, ES modules support top-level `await`, so the `(async () => { ... })()` IIFE pattern — used only to get `await` at the top level — usually isn't needed anymore. Rust and Swift call an anonymous closure right at its definition fairly naturally, but in both languages the more common way to scope things off is a `{ ... }` block used as an expression, not an "IIFE". Java has no real IIFE — the example above is just for illustration; real Java code would use a private method or a plain block instead. Clippy flags the Rust example above with the `redundant_closure_call` lint (defining a closure and calling it right away) — a fair warning for real code, but here it's deliberately written as an IIFE to compare against the other languages.
 :::

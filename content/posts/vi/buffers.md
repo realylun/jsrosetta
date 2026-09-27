@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "2.0"
+  swift: "3.0"
   java: "25"
 tags: [buffer, bytes, binary, endianness]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#buffers"

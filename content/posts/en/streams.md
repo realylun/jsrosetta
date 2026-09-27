@@ -77,7 +77,7 @@ fn main() -> io::Result<()> {
     io::copy(&mut in_stream, &mut io::stdout())?; // → foobar
     println!();
 
-    let (reader, mut writer) = io::pipe()?; // io::pipe: an in-memory duplex pipe, stable since 1.87
+    let (reader, mut writer) = io::pipe()?; // io::pipe: an anonymous OS pipe (one-way), stable since 1.87
 
     let handle = thread::spawn(move || {
         writer.write_all(b"abc\n").unwrap();
@@ -96,14 +96,14 @@ fn main() -> io::Result<()> {
 import Foundation
 
 let inData = Data("foobar".utf8)
-FileHandle.standardOutput.write(inData) // → foobar
+try FileHandle.standardOutput.write(contentsOf: inData) // → foobar
 print()
 
 let pipe = Pipe() // Foundation's Pipe/FileHandle: the closest match to Go's io.Pipe
 
 Task {
-    pipe.fileHandleForWriting.write(Data("abc\n".utf8))
-    pipe.fileHandleForWriting.write(Data("xyz\n".utf8))
+    try pipe.fileHandleForWriting.write(contentsOf: Data("abc\n".utf8))
+    try pipe.fileHandleForWriting.write(contentsOf: Data("xyz\n".utf8))
     try? pipe.fileHandleForWriting.close()
 }
 
@@ -296,6 +296,15 @@ static class UppercaseInputStream extends FilterInputStream {
         }
         return n;
     }
+
+    @Override
+    public int read() throws IOException {
+        // single-byte reads need their own override too: FilterInputStream.read()
+        // doesn't go through read(byte[], int, int) above, so skipping it would
+        // leak untransformed bytes to any caller that reads one byte at a time
+        int b = super.read();
+        return b == -1 ? -1 : Character.toUpperCase(b);
+    }
 }
 
 void main() throws Exception {
@@ -312,5 +321,5 @@ void main() throws Exception {
 :::
 
 :::note
-Swift's `FileHandle.bytes`/`.lines` require macOS 12 or later (shipped alongside Swift 5.5).
+Swift's `FileHandle.bytes`/`.lines` require macOS 12 or later (shipped alongside Swift 5.5). `write(contentsOf:)` (the throwing counterpart to the older non-throwing `write(_:)`) throws instead of crashing on a failed write, and has been available since macOS 10.15.4.
 :::

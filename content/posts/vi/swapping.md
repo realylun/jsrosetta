@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.59"
-  swift: "1.0"
+  swift: "2.0"
   java: "25"
 tags: [swap, multiple-assignment]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#swapping"

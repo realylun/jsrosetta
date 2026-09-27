@@ -83,6 +83,7 @@ func fibLoop(n int) int {
 ```rust
 // Cargo.toml: [dev-dependencies] criterion = "0.8"
 // Cargo.toml: also needs a [[bench]] block: name = "fib", harness = false
+// Cargo.toml: package.name must be "example" (matches `use example::...` below) — rename it and you'd need to update the `use` too
 
 // src/lib.rs
 pub fn fib_rec(n: u64) -> u64 {
@@ -126,6 +127,7 @@ func fibRec(_ n: Int) -> Int {
 }
 
 func fibLoop(_ n: Int) -> Int {
+    guard n >= 2 else { return n } // 2...n would crash for n < 2 (lowerBound > upperBound)
     var f = [0, 1]
     for i in 2...n {
         f.append(f[i - 1] + f[i - 2])

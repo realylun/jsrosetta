@@ -134,9 +134,6 @@ let decompressed = gunzipDecompress(compressed, expectedSize: data.count)
 print(String(decoding: decompressed, as: UTF8.self)) // hello world
 ```
 ```java
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
 void main() throws Exception {
     byte[] data = "hello world".getBytes();
 
@@ -144,9 +141,14 @@ void main() throws Exception {
     try (GZIPOutputStream gzip = new GZIPOutputStream(compressed)) {
         gzip.write(data);
     } // try-with-resources calls close() for us, flushing the compressed data
-    IO.println(Arrays.toString(compressed.toByteArray()));
+    byte[] compressedBytes = compressed.toByteArray();
+    int[] unsignedBytes = new int[compressedBytes.length];
+    for (int i = 0; i < compressedBytes.length; i++) {
+        unsignedBytes[i] = compressedBytes[i] & 0xff; // Java's byte is signed; & 0xff to print 0-255 like the other languages
+    }
+    IO.println(Arrays.toString(unsignedBytes));
 
-    try (GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(compressed.toByteArray()))) {
+    try (GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(compressedBytes))) {
         IO.println(new String(gunzip.readAllBytes())); // hello world
     }
 }
@@ -154,7 +156,7 @@ void main() throws Exception {
 :::
 
 :::note
-`compress/flate` (which `compress/gzip` is built on), `flate2`, zlib, and `java.util.zip` all don't guarantee byte-for-byte identical compressed output across each other or across versions — only the round trip is guaranteed (compressing then decompressing yields the original data back). The gzip header/trailer fields (OS byte, mtime, …) differ slightly between the implementations above; the compressed payload itself is identical since they all use the DEFLATE algorithm.
+`compress/flate` (which `compress/gzip` is built on), `flate2`, zlib, and `java.util.zip` all don't guarantee byte-for-byte identical compressed output across each other or across versions — only the round trip is guaranteed (compressing then decompressing yields the original data back). Both the gzip header/trailer fields (OS byte, mtime, …) and the compressed payload itself can differ between the implementations above: each one makes its own choices when encoding DEFLATE — Go, for instance, may store a short input as an uncompressed "stored" block instead of Huffman-encoding it the way zlib does — as long as decompressing it recovers the original data.
 :::
 
 :::note

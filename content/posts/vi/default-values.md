@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.0"
-  swift: "1.0"
+  swift: "5.1"
   java: "25"
 tags: [default-parameters, pointers, nil, overloading]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#default-values"

@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.0"
-  swift: "1.0"
+  swift: "2.0"
   java: "25"
 tags: [switch, fallthrough, control-flow]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#switch"
@@ -175,11 +175,11 @@ A, B or C
 ```
 
 :::warning
-`match` của Rust **không có khái niệm fallthrough** dưới bất kỳ hình thức nào — không có từ khoá nào để "chảy" từ nhánh này sang nhánh kế tiếp. Ví dụ thứ hai ở trên không phải bản dịch tương đương của ví dụ Go/JS; nó chỉ minh hoạ cách gộp nhiều pattern dùng chung một thân nhánh bằng `|` (or-pattern) — kết quả là MỘT dòng output, không phải chuỗi output tích luỹ từ nhiều nhánh.
+Ví dụ `match` thứ hai ở trên không phải bản dịch tương đương của ví dụ Go/JS: nó chỉ minh hoạ cách gộp nhiều pattern dùng chung một thân nhánh bằng `|` (or-pattern), nên chỉ cho ra MỘT dòng output — không phải chuỗi output tích luỹ như khi fall through thật sự.
 :::
 
 :::note
-Từ Java 14 (JEP 361), Java có thêm switch expression dùng mũi tên (`case "a" -> ...`): không bao giờ fall through, không cần `break`, và có thể trả về giá trị trực tiếp. Ví dụ trên dùng `switch` cổ điển (dùng `:`) vì đó là dạng duy nhất còn giữ hành vi fall through để minh hoạ.
+Từ Java 14 (JEP 361), Java có thêm nhãn mũi tên (`case "a" -> ...`): không bao giờ fall through và không cần `break`. Nhãn mũi tên dùng được cả trong switch **statement** lẫn switch **expression** — chỉ dạng expression mới trả về giá trị trực tiếp, còn statement dùng mũi tên vẫn chỉ thực thi thân case như bình thường (chỉ khác là không fall through). Ví dụ trên dùng `switch` cổ điển (dùng `:`) vì đó là dạng duy nhất còn giữ hành vi fall through để minh hoạ.
 :::
 
 ## Khác biệt chính

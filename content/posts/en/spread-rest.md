@@ -48,9 +48,6 @@ let array = [1, 2, 3, 4, 5]
 print(array.map(String.init).joined(separator: " ")) // 1 2 3 4 5
 ```
 ```java
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 static String joinAll(Object... items) {
     return Arrays.stream(items).map(String::valueOf).collect(Collectors.joining(" "));
 }

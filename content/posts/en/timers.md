@@ -4,7 +4,7 @@ description: "How Node.js's setTimeout and setInterval compare to time.AfterFunc
 tags: [timer, settimeout, setinterval, goroutine]
 ---
 
-Node.js runs `setTimeout`/`setInterval` callbacks on the event loop, so the program stays alive until the callback queue is empty. Go, Rust, and Java all run the callback on a separate thread/goroutine — without something to keep the main thread around (`sync.WaitGroup`, `JoinHandle::join`, `CountDownLatch`), the program can exit before the callback runs. Swift is the exception: `Task.sleep` runs directly inside the current task, so no separate waiting mechanism is needed. Go's `time.Ticker` and its Rust/Java counterparts don't "run a callback" at all — they send a tick on a channel/queue that the caller has to read itself.
+Node.js runs `setTimeout`/`setInterval` callbacks on the event loop, so the program stays alive until the callback queue is empty. For the one-shot version, Go, Rust, and Java all run the callback on a separate thread/goroutine — without something to keep the main thread around (`sync.WaitGroup`, `JoinHandle::join`, `CountDownLatch`), the program can exit before the callback runs — while Swift is the exception: `Task.sleep` runs directly inside the current task, so no separate waiting mechanism is needed. The repeating version is different: Go's `time.Ticker` and Rust's channel don't "run a callback" at all — they send a tick on a channel/queue that the caller has to read itself, and Swift's `AsyncStream` works the same way (it yields ticks for a `for await` loop to read); Java, though, still runs a real callback via `scheduleAtFixedRate`, just like `setInterval`.
 
 ## Running something once after a delay (setTimeout / time.AfterFunc)
 
@@ -82,7 +82,7 @@ void main() throws InterruptedException {
 :::
 
 :::note
-Java 21 added virtual threads (`Thread.ofVirtual()`): much cheaper than platform threads, so they're a good fit for a scheduler's background thread, even though `ScheduledExecutorService` itself has been around for a long time.
+Java 21 added virtual threads (`Thread.ofVirtual()`): much cheaper than platform threads, so they're a good fit for a scheduler's background thread, even though `ScheduledExecutorService` itself has been around for a long time. Swift's `Task.sleep(for:)` (taking a plain `Duration`) is a Swift 5.7 language feature, but on Apple platforms it only runs on macOS 13/iOS 16 or later — the `Clock`/`Duration` runtime behind it wasn't back-deployed to older OS releases.
 :::
 
 ## Running on a repeating schedule (setInterval / time.Ticker)
@@ -183,13 +183,22 @@ func ticker(interval: Duration) -> AsyncStream<Int> {
     AsyncStream { continuation in
         let task = Task {
             var i = 0
-            while true {
-                try? await Task.sleep(for: interval)
+            // Task.isCancelled must be checked at the top of every loop: `try?`
+            // swallows CancellationError, so relying on that alone would leave
+            // the loop spinning at full speed (a CPU spin) forever after
+            // cancellation instead of actually stopping.
+            while !Task.isCancelled {
+                do {
+                    try await Task.sleep(for: interval)
+                } catch {
+                    break // cancelled while sleeping: stop for good
+                }
                 continuation.yield(i)
                 i += 1
             }
+            continuation.finish()
         }
-        continuation.onTermination = { _ in task.cancel() } // stop ticking, ~ clearInterval
+        continuation.onTermination = { _ in task.cancel() } // consumer stops pulling values → cancel the background Task, ~ clearInterval
     }
 }
 
@@ -200,7 +209,7 @@ func callback(_ i: Int) {
 for await i in ticker(interval: .seconds(1)) {
     callback(i)
     if i == 3 {
-        break // breaking triggers onTermination, which cancels the ticker's task
+        break // breaking triggers onTermination, which cancels the ticker's task and actually stops the background loop
     }
 }
 // → called 0

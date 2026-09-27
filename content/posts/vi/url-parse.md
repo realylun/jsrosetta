@@ -87,14 +87,10 @@ print(components.port ?? 0) // 8080
 print(components.host ?? "") // sub.example.com
 print(components.path) // /somepath
 
-let query = Dictionary(uniqueKeysWithValues: (components.queryItems ?? []).map { ($0.name, $0.value ?? "") })
+let query = Dictionary((components.queryItems ?? []).map { ($0.name, $0.value ?? "") }, uniquingKeysWith: { _, last in last }) // key trùng thì lấy giá trị cuối, tránh crash như uniqueKeysWithValues
 print(query) // ["foo": "bar"]
 ```
 ```java
-import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 void main() {
     String urlstr = "http://bob:secret@sub.example.com:8080/somepath?foo=bar";
 
@@ -109,7 +105,7 @@ void main() {
     Map<String, String> query = new LinkedHashMap<>();
     for (String pair : u.getQuery().split("&")) {
         String[] kv = pair.split("=", 2);
-        query.put(kv[0], kv[1]);
+        query.put(kv[0], kv.length > 1 ? kv[1] : ""); // cờ trần không có "=" thì giá trị là chuỗi rỗng
     }
     IO.println(query); // {foo=bar}
 }

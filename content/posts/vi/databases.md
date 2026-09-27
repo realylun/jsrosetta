@@ -9,7 +9,7 @@ versions:
   js: "22.13"
   go: "1.21"
   rust: "1.88"
-  swift: "2.0"
+  swift: "3.0"
   java: "25"
 tags: [database, sqlite, sql]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#databases"
@@ -211,7 +211,7 @@ void main() throws Exception {
 :::
 
 :::note
-`rusqlite` với feature `bundled` tự biên dịch mã nguồn SQLite (qua crate `libsqlite3-sys`) nên không cần cài `libsqlite3` trên máy — đổi lại phải có sẵn C toolchain (`cc`). Đây cũng là driver SQLite phổ biến nhất cho Rust vì std không có gì tương đương.
+`rusqlite` với feature `bundled` tự biên dịch mã nguồn SQLite (qua crate `libsqlite3-sys`) nên không cần cài `libsqlite3` trên máy — đổi lại phải có sẵn C toolchain (`cc`). Đây cũng là driver SQLite phổ biến nhất cho Rust vì std không có gì tương đương. `rusqlite` không khai `rust-version` trong `Cargo.toml` — README của nó nói thẳng MSRV là "bản Rust stable mới nhất tại thời điểm release, có thể chạy được với bản cũ hơn nhưng không đảm bảo". Bản phát hành 0.40.2 không có job kiểm MSRV trong CI, nhưng nhánh phát triển hiện tại (sau 0.40.2) đã bắt đầu enforce MSRV 1.88.0 — đó là con số version sàn dùng ở đây.
 :::
 
 :::note

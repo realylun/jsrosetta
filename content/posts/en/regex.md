@@ -82,9 +82,6 @@ let matches = input.matches(of: /([0-9]+)/).map { String($0.output.0) }
 print(matches) // ["111", "222", "333"]
 ```
 ```java
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 void main() {
     String input = "foobar";
     Pattern p = Pattern.compile("foo(.*)", Pattern.CASE_INSENSITIVE);
@@ -110,5 +107,5 @@ Go uses raw string literals (wrapped in backticks) for patterns, so you don't ne
 :::
 
 :::note
-Swift's `/pattern/` regex literal needs the `-enable-bare-slash-regex` flag when compiling directly with `swiftc`/`swift` (already on when building through Swift Package Manager with `swift-tools-version` >= 5.7). `.replacing(_:with:)`, `.matches(of:)`, and `.contains(_:)` with a `RegexComponent` require macOS 13 / iOS 16 or later.
+Swift's `/pattern/` regex literal is on by default in Swift 6 language mode (`-swift-version 6`, or `swift-tools-version: 6.0` or later in Package.swift). In Swift 5 language mode — the default when invoking `swiftc`/`swift` without extra flags — you have to enable it manually with `-enable-bare-slash-regex`, or `.enableUpcomingFeature("BareSlashRegexLiterals")` in a Package.swift target. `.replacing(_:with:)`, `.matches(of:)`, and `.contains(_:)` with a `RegexComponent` require macOS 13 / iOS 16 or later.
 :::

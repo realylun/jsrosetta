@@ -15,7 +15,7 @@ tags: [date, time, timestamp, formatting]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#datetime"
 ---
 
-Node.js biểu diễn thời điểm bằng `Date` — một object có thể mutate qua các hàm `set*`. Go dùng `time.Time`, một struct bất biến: mọi phép cộng/trừ đều trả về giá trị `time.Time` mới thay vì sửa tại chỗ. Rust không có kiểu ngày giờ nào biết lịch trong std, nên phải dùng crate ngoài (`chrono`). Swift dùng `Date` của Foundation (một mốc thời gian đơn thuần) cộng với `Calendar` để cộng/trừ theo lịch. Java dùng `java.time` — cũng bất biến như Go. Cách format cũng khác hẳn giữa các ngôn ngữ: Node.js và Java dùng tên field/pattern, Go dùng "ngày tham chiếu" `2006-01-02` làm layout, còn Rust/Swift dùng specifier kiểu strftime.
+Node.js biểu diễn thời điểm bằng `Date` — một object có thể mutate qua các hàm `set*`. Go dùng `time.Time`, một struct bất biến: mọi phép cộng/trừ đều trả về giá trị `time.Time` mới thay vì sửa tại chỗ. Rust không có kiểu ngày giờ nào biết lịch trong std, nên phải dùng crate ngoài (`chrono`). Swift dùng `Date` của Foundation (một mốc thời gian đơn thuần) cộng với `Calendar` để cộng/trừ theo lịch. Java dùng `java.time` — cũng bất biến như Go. Cách format cũng khác hẳn giữa các ngôn ngữ: Node.js và Java dùng tên field/pattern, Go dùng "ngày tham chiếu" `2006-01-02` làm layout, Rust dùng specifier kiểu strftime, còn Swift dùng `FormatStyle` — một builder có thể chain (`.dateTime.year().month()...`) — chứ không phải strftime.
 
 ## Parse, cộng ngày và format
 
@@ -103,7 +103,7 @@ let nowUnix = Int(Date.now.timeIntervalSince1970) // giây kể từ epoch
 print(nowUnix)
 
 let datestr = "2019-01-17T09:24:23+00:00"
-let date = try Date(datestr, strategy: .iso8601.year().month().day().time(includingFractionalSeconds: false))
+let date = try Date(datestr, strategy: .iso8601)
 print(Int(date.timeIntervalSince1970))
 print(date)
 
@@ -115,11 +115,8 @@ let formatted = date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits
 print(formatted)
 ```
 ```java
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-
 void main() {
-    long nowUnix = Instant.now().getEpochSecond(); // giây kể từ epoch; Instant tự động có sẵn (java.base)
+    long nowUnix = Instant.now().getEpochSecond(); // giây kể từ epoch; OffsetDateTime/Instant/DateTimeFormatter đều ở java.base, tự động có sẵn
     IO.println(nowUnix);
 
     String datestr = "2019-01-17T09:24:23+00:00";
@@ -163,6 +160,7 @@ $ cargo run -q
 
 $ swift main.swift
 1790532172
+1547717063
 2019-01-17 09:24:23 +0000
 2019-01-31 09:24:23 +0000
 01/17/2019
@@ -184,7 +182,7 @@ Node.js 24 chưa có Temporal API nên hướng dẫn này vẫn dùng `Date` v�
 :::
 
 :::tip
-Go, Rust, Swift và Java đều giữ nguyên UTC offset đã parse (`+00:00`/`Z`) khi in ra. `Date.toString()` của JavaScript thì luôn quy đổi sang timezone của máy chạy — đây là lý do dòng output JS ở trên lệch giờ so với các ngôn ngữ còn lại dù cùng một mốc thời gian.
+Go, Rust và Java đều giữ nguyên UTC offset đã parse (`+00:00`/`Z`) khi in ra, vì kiểu ngày giờ của chúng lưu offset kèm theo (`time.Time` có `Location`, `DateTime<FixedOffset>`, `OffsetDateTime`). Swift's `Date` thì khác: nó chỉ là một mốc thời gian thuần túy, không lưu offset, nên luôn in ra UTC (`+0000`) bất kể chuỗi gốc có offset gì — ở ví dụ trên trùng khớp chỉ vì input vốn đã là UTC (`+00:00`). `Date.toString()` của JavaScript thì luôn quy đổi sang timezone của máy chạy — đây là lý do dòng output JS ở trên lệch giờ so với các ngôn ngữ còn lại dù cùng một mốc thời gian.
 :::
 
 :::note

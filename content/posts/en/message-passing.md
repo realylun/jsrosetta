@@ -4,7 +4,7 @@ description: "How Node.js's MessageChannel compares to channels (Go), mpsc (Rust
 tags: [channel, message-passing, goroutine, concurrency]
 ---
 
-Instead of letting two concurrent tasks read and write the same shared variable, all five languages let you send data back and forth between them. Node.js does this through the `MessageChannel`/`postMessage` API. Go and Rust have a built-in channel type (`chan` and `std::sync::mpsc`) with their own syntax for sending, receiving, closing, and waiting with a timeout. Swift has no channel type; `AsyncStream` is the closest thing — an async queue that one side `yield()`s into and the other reads with `for await`, but it doesn't block when full the way a real channel does. Java has `BlockingQueue` (`SynchronousQueue`, `ArrayBlockingQueue`, …) — the closest match to Go's channel among the remaining three languages.
+Instead of letting two concurrent tasks read and write the same shared variable, all five languages let you send data back and forth between them. Node.js does this through the `MessageChannel`/`postMessage` API. Go has channels (`chan`) built into the language itself, with dedicated syntax (`<-`, `select`) for sending, receiving, closing, and waiting with a timeout. Rust has nothing at the language level for this — `std::sync::mpsc` is just an ordinary standard library type, used through regular method calls (`.send()`, `.recv()`, `.recv_timeout()`) with no special syntax at all. Swift has no channel type; `AsyncStream` is the closest thing — an async queue that one side `yield()`s into and the other reads with `for await`, but it doesn't block when full the way a real channel does. Java has `BlockingQueue` (`SynchronousQueue`, `ArrayBlockingQueue`, …) — the closest match to Go's channel among the remaining three languages.
 
 ## Sending data between two tasks (MessageChannel vs channel)
 
@@ -137,8 +137,10 @@ for await n in numbers {
     print("received \(n)") // → received 1, received 2, received 3
 }
 
-// receiving with a timeout: race two Tasks with a TaskGroup, since Swift has no `select`
-func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> String {
+// receiving with a timeout: race two Tasks with a TaskGroup, since Swift has
+// no `select`. Returns nil on timeout instead of baking in a message — the
+// caller is the one who actually knows the timeout value to report.
+func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> String? {
     await withTaskGroup(of: String?.self) { group in
         group.addTask {
             var iterator = stream.makeAsyncIterator()
@@ -150,12 +152,13 @@ func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> 
         }
         let first = await group.next()! // whichever task finishes first wins
         group.cancelAll()
-        return first ?? "timeout: no message after 50ms"
+        return first
     }
 }
 
 let empty = AsyncStream<String> { _ in }
-print(await firstMessage(from: empty, timeout: .milliseconds(50))) // → timeout: no message after 50ms
+let message = await firstMessage(from: empty, timeout: .milliseconds(50))
+print(message ?? "timeout: no message after 50ms") // → timeout: no message after 50ms
 ```
 ```java
 void main() throws InterruptedException {
@@ -211,13 +214,13 @@ A `Worker` talks to its parent the same way — `worker.postMessage()` on one si
 :::
 
 :::warning
-Swift's `AsyncStream.yield()` never blocks: by default it buffers without limit (or drops old elements if you set a policy). This isn't a real backpressure channel like Go's, Rust's, or Java's — it's just the closest async queue Swift has.
+Swift's `AsyncStream.yield()` never blocks: by default it buffers without limit, or drops elements if you set a `bufferingPolicy` — `.bufferingNewest(n)` keeps the `n` newest values (dropping the **oldest** once full), while `.bufferingOldest(n)` keeps the `n` oldest values (dropping the **newest** incoming one once full). This isn't a real backpressure channel like Go's, Rust's, or Java's — it's just the closest async queue Swift has. `Task.sleep(for:)` (used above to wait for the timeout) is a Swift 5.7 language feature, but on Apple platforms it only runs on macOS 13/iOS 16 or later.
 :::
 
 ## Key differences
 
 | | Node.js | Go | Rust | Swift | Java |
 |---|---|---|---|---|---|
-| Mechanism | `MessageChannel`/`postMessage` | channel (`chan`) — a built-in type | `std::sync::mpsc` — a built-in type | `AsyncStream` — never blocks on send | `BlockingQueue` (`SynchronousQueue`, …) |
+| Mechanism | `MessageChannel`/`postMessage` | channel (`chan`) — built into the language's syntax | `std::sync::mpsc` — an ordinary standard library type, no special syntax | `AsyncStream` — never blocks on send | `BlockingQueue` (`SynchronousQueue`, …) |
 | Capacity limit | unbounded, an internal hidden queue | a fixed buffer set at creation (`make(chan T, n)`) | `sync_channel(n)` for a fixed buffer | no real backpressure | `ArrayBlockingQueue(n)` for a fixed buffer |
 | Waiting with a timeout | hand-rolled with `Promise.race` + `setTimeout` | `select` + `time.After` built into the syntax | `recv_timeout(Duration)` | racing with `TaskGroup` + `Task.sleep` | `poll(timeout, unit)` |

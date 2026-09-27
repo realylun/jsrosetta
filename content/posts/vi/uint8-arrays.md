@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "3.0"
+  swift: "4.0"
   java: "25"
 tags: [uint8array, bytes, slice, binary]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#uint8-arrays"
@@ -157,7 +157,7 @@ IO.println(array.length); // 10
 :::
 
 :::note
-`array.subarray()` trong JS, slice `array[2:]` trong Go, `&array[2..]` trong Rust và `array[2...]` trong Swift đều chỉ tạo view, không copy dữ liệu — sửa qua view sẽ ảnh hưởng luôn tới vùng nhớ gốc, giống hệt cách slice hoạt động trong bài "Mảng (Array)". Java là ngoại lệ: `Arrays.copyOfRange` luôn tạo mảng mới.
+`array.subarray()` trong JS và slice `array[2:]` trong Go đều chỉ tạo view, không copy — sửa qua view sẽ ảnh hưởng luôn tới vùng nhớ gốc, giống hệt cách slice hoạt động trong bài "Mảng (Array)". Rust cũng alias cùng vùng nhớ qua `&array[2..]`, nhưng đó là borrow bất biến — muốn sửa phải mượn `&mut`, và borrow checker không cho bạn đụng tới mảng gốc trong lúc slice mutable đó còn sống, nên không có kiểu "sửa ngầm không kiểm soát" như Go. `array[2...]` của Swift trả về `ArraySlice`, ban đầu cũng chia sẻ vùng nhớ với mảng gốc nhưng là copy-on-write: sửa qua slice sẽ kích hoạt sao chép và **không bao giờ** làm thay đổi mảng gốc. `Arrays.copyOfRange` của Java luôn tạo mảng mới, nhưng Java vẫn có view array-backed thật sự nếu cần: `ByteBuffer.wrap(array).slice(2, 2)` (JDK 13+) chia sẻ vùng nhớ với `array`, không copy.
 :::
 
 :::note

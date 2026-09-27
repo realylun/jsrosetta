@@ -4,7 +4,7 @@ description: "Node.js's Date and Intl.DateTimeFormat compared to Go's immutable 
 tags: [date, time, timestamp, formatting]
 ---
 
-Node.js represents a point in time with `Date` — an object you can mutate through `set*` methods. Go uses `time.Time`, an immutable struct: every add/subtract operation returns a new `time.Time` value instead of changing it in place. Rust's std has no calendar-aware date type at all, so it needs an external crate (`chrono`). Swift uses Foundation's `Date` (a plain instant) together with `Calendar` for calendar-based arithmetic. Java uses `java.time`, immutable just like Go's. Formatting differs across the board too: Node.js and Java use named fields/patterns, Go uses a "reference date" (`2006-01-02`) as its layout, and Rust/Swift use strftime-style specifiers.
+Node.js represents a point in time with `Date` — an object you can mutate through `set*` methods. Go uses `time.Time`, an immutable struct: every add/subtract operation returns a new `time.Time` value instead of changing it in place. Rust's std has no calendar-aware date type at all, so it needs an external crate (`chrono`). Swift uses Foundation's `Date` (a plain instant) together with `Calendar` for calendar-based arithmetic. Java uses `java.time`, immutable just like Go's. Formatting differs across the board too: Node.js and Java use named fields/patterns, Go uses a "reference date" (`2006-01-02`) as its layout, Rust uses strftime-style specifiers, and Swift uses `FormatStyle` — a chainable builder (`.dateTime.year().month()...`) — not strftime.
 
 ## Parsing, adding days, and formatting
 
@@ -92,7 +92,7 @@ let nowUnix = Int(Date.now.timeIntervalSince1970) // seconds since the epoch
 print(nowUnix)
 
 let datestr = "2019-01-17T09:24:23+00:00"
-let date = try Date(datestr, strategy: .iso8601.year().month().day().time(includingFractionalSeconds: false))
+let date = try Date(datestr, strategy: .iso8601)
 print(Int(date.timeIntervalSince1970))
 print(date)
 
@@ -104,11 +104,8 @@ let formatted = date.formatted(.dateTime.year().month(.twoDigits).day(.twoDigits
 print(formatted)
 ```
 ```java
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-
 void main() {
-    long nowUnix = Instant.now().getEpochSecond(); // seconds since the epoch; Instant is auto-imported (java.base)
+    long nowUnix = Instant.now().getEpochSecond(); // seconds since the epoch; OffsetDateTime/Instant/DateTimeFormatter are all in java.base, auto-imported
     IO.println(nowUnix);
 
     String datestr = "2019-01-17T09:24:23+00:00";
@@ -152,6 +149,7 @@ $ cargo run -q
 
 $ swift main.swift
 1790532172
+1547717063
 2019-01-17 09:24:23 +0000
 2019-01-31 09:24:23 +0000
 01/17/2019
@@ -173,7 +171,7 @@ The Temporal API isn't available in Node.js 24, so this guide still uses `Date` 
 :::
 
 :::tip
-Go, Rust, Swift, and Java all keep the UTC offset they parsed (`+00:00`/`Z`) when printing. JavaScript's `Date.toString()` always converts to the local machine's timezone instead — that's why the JS output above shows a different clock time even though it's the same instant.
+Go, Rust, and Java all keep the UTC offset they parsed (`+00:00`/`Z`) when printing, because their date types store the offset alongside the instant (`time.Time`'s `Location`, `DateTime<FixedOffset>`, `OffsetDateTime`). Swift's `Date` is different: it's a plain instant with no stored offset, so it always prints in UTC (`+0000`) no matter what offset the original string had — the example above only matches because the input was already UTC (`+00:00`). JavaScript's `Date.toString()` always converts to the local machine's timezone instead — that's why the JS output above shows a different clock time even though it's the same instant.
 :::
 
 :::note

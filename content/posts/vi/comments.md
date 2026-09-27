@@ -8,14 +8,14 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
-  rust: "1.0"
-  swift: "1.0"
+  rust: "1.58"
+  swift: "5.1"
   java: "25"
 tags: [comments, syntax]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#comments"
 ---
 
-JavaScript, Go, Rust, Swift và Java dùng chung một cú pháp comment: `//` cho một dòng, `/* ... */` cho một khối nhiều dòng (Rust còn cho phép lồng comment khối). Không có gì lạ để học ở đây — khác biệt thật sự chỉ lộ ra khi comment đứng ngay trước một khai báo và trở thành doc comment: JSDoc ở Node.js, godoc ở Go, rustdoc ở Rust, doc comment ở Swift, Javadoc ở Java.
+JavaScript, Go, Rust, Swift và Java dùng chung một cú pháp comment: `//` cho một dòng, `/* ... */` cho một khối nhiều dòng (Rust và Swift còn cho phép lồng comment khối, khác với JS/Go/Java). Không có gì lạ để học ở đây — khác biệt thật sự chỉ lộ ra khi comment đứng ngay trước một khai báo và trở thành doc comment: JSDoc ở Node.js, godoc ở Go, rustdoc ở Rust, doc comment ở Swift, Javadoc ở Java.
 
 ## Comment dòng và khối
 
@@ -121,7 +121,7 @@ print(greet("Go")) // Hello, Go!
  * @param name tên cần chào
  * @return chuỗi lời chào
  */
-static String greet(String name) {
+String greet(String name) {
     return "Hello, " + name + "!";
 }
 

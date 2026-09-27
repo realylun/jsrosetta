@@ -8,7 +8,7 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.21"
-  rust: "1.6"
+  rust: "1.58"
   swift: "2.0"
   java: "25"
 tags: [array, slice, immutability, collections]
@@ -130,7 +130,7 @@ IO.println(prepended); // [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
 :::
 
 :::warning
-`array.slice()` trong JavaScript luôn trả về mảng mới. Slice trong Go (`array[2:4]`) và Rust (`&array[2..4]`) chỉ là view trỏ vào cùng vùng nhớ với mảng gốc — sửa phần tử qua `sub` sẽ làm thay đổi luôn `array`, trừ khi bạn sao chép trước (`slices.Clone` ở Go, `.to_vec()` ở Rust). `array.subList()` của Java cũng là view trên list gốc. Riêng `ArraySlice` của Swift chia sẻ vùng nhớ *cho tới khi* một bên bị sửa (copy-on-write), lúc đó mới thực sự tách ra.
+`array.slice()` trong JavaScript luôn trả về mảng mới. Slice của Go (`array[2:4]`) là view trỏ vào cùng vùng nhớ với mảng gốc — sửa phần tử qua `sub` sẽ làm thay đổi luôn `array`, trừ khi bạn sao chép trước (`slices.Clone`). Slice của Rust (`&array[2..4]`) cũng alias cùng vùng nhớ, nhưng để sửa được bạn phải mượn `&mut` (`&mut array[2..4]`), và borrow checker không cho bạn đụng tới `array` gốc trong lúc slice mutable đó còn sống — khác Go, nơi trình biên dịch không hề kiểm tra việc alias. `array.subList()` của Java cũng là view trên list gốc, không được compiler bảo vệ khỏi alias. Riêng `ArraySlice` của Swift chia sẻ vùng nhớ *cho tới khi* một bên bị sửa (copy-on-write), lúc đó mới thực sự tách ra — nghĩa là sửa qua slice không bao giờ làm thay đổi mảng gốc.
 :::
 
 :::note

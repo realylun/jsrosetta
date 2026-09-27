@@ -9,7 +9,7 @@ versions:
   js: "14.13.1"
   go: "1.16"
   rust: "1.58"
-  swift: "2.0"
+  swift: "3.0"
   java: "25"
 tags: [files, fs, filesystem, io]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#files"

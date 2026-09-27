@@ -9,13 +9,13 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "5.9"
+  swift: "5.7"
   java: "25"
 tags: [channel, message-passing, goroutine, concurrency]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#message-passing"
 ---
 
-Thay vì để hai tác vụ chạy song song cùng đọc/ghi một biến chung, cả năm ngôn ngữ đều cho phép gửi dữ liệu qua lại giữa chúng. Node.js làm việc này qua API `MessageChannel`/`postMessage`. Go và Rust có sẵn kiểu channel built-in (`chan` và `std::sync::mpsc`) với cú pháp riêng để gửi, nhận, đóng và chờ có timeout. Swift không có kiểu channel; `AsyncStream` là thứ gần nhất — một hàng đợi bất đồng bộ mà một phía `yield()` vào, phía kia đọc bằng `for await`, nhưng nó không có tính "block khi đầy" như channel thật. Java có `BlockingQueue` (`SynchronousQueue`, `ArrayBlockingQueue`…) — cách gần với channel của Go nhất trong ba ngôn ngữ còn lại.
+Thay vì để hai tác vụ chạy song song cùng đọc/ghi một biến chung, cả năm ngôn ngữ đều cho phép gửi dữ liệu qua lại giữa chúng. Node.js làm việc này qua API `MessageChannel`/`postMessage`. Go có channel (`chan`) ở ngay cấp ngôn ngữ, với cú pháp riêng (`<-`, `select`) để gửi, nhận, đóng và chờ có timeout. Rust không có gì ở cấp ngôn ngữ cho việc này — `std::sync::mpsc` chỉ là một kiểu bình thường của thư viện chuẩn, gọi qua các phương thức thông thường (`.send()`, `.recv()`, `.recv_timeout()`) chứ không có cú pháp đặc biệt nào. Swift không có kiểu channel; `AsyncStream` là thứ gần nhất — một hàng đợi bất đồng bộ mà một phía `yield()` vào, phía kia đọc bằng `for await`, nhưng nó không có tính "block khi đầy" như channel thật. Java có `BlockingQueue` (`SynchronousQueue`, `ArrayBlockingQueue`…) — cách gần với channel của Go nhất trong ba ngôn ngữ còn lại.
 
 ## Gửi dữ liệu giữa hai tác vụ (MessageChannel vs channel)
 
@@ -148,8 +148,10 @@ for await n in numbers {
     print("received \(n)") // → received 1, received 2, received 3
 }
 
-// nhận có timeout: đua hai Task bằng TaskGroup, vì Swift không có `select`
-func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> String {
+// nhận có timeout: đua hai Task bằng TaskGroup, vì Swift không có `select`.
+// Trả về nil khi hết giờ thay vì tự đóng gói sẵn một câu thông báo — caller
+// mới biết giá trị timeout thật để ghép vào message cho đúng.
+func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> String? {
     await withTaskGroup(of: String?.self) { group in
         group.addTask {
             var iterator = stream.makeAsyncIterator()
@@ -161,12 +163,13 @@ func firstMessage(from stream: AsyncStream<String>, timeout: Duration) async -> 
         }
         let first = await group.next()! // task nào xong trước thắng
         group.cancelAll()
-        return first ?? "timeout: no message after 50ms"
+        return first
     }
 }
 
 let empty = AsyncStream<String> { _ in }
-print(await firstMessage(from: empty, timeout: .milliseconds(50))) // → timeout: no message after 50ms
+let message = await firstMessage(from: empty, timeout: .milliseconds(50))
+print(message ?? "timeout: no message after 50ms") // → timeout: no message after 50ms
 ```
 ```java
 void main() throws InterruptedException {
@@ -222,13 +225,13 @@ Một `Worker` giao tiếp với luồng cha (main thread) theo cách tương t�
 :::
 
 :::warning
-`AsyncStream.yield()` của Swift không bao giờ block: mặc định nó đệm không giới hạn (hoặc tự loại bớt phần tử cũ nếu đặt policy). Đây không phải channel "backpressure" thật như của Go/Rust/Java — chỉ là hàng đợi bất đồng bộ gần giống nhất mà Swift có.
+`AsyncStream.yield()` của Swift không bao giờ block: mặc định nó đệm không giới hạn, hoặc tự loại bớt phần tử nếu đặt `bufferingPolicy` — `.bufferingNewest(n)` giữ lại `n` giá trị mới nhất (loại phần tử **cũ** khi đầy), còn `.bufferingOldest(n)` giữ lại `n` giá trị cũ nhất (loại phần tử **mới** vừa đến khi đầy). Đây không phải channel "backpressure" thật như của Go/Rust/Java — chỉ là hàng đợi bất đồng bộ gần giống nhất mà Swift có. `Task.sleep(for:)` (dùng để chờ timeout ở trên) là tính năng ngôn ngữ Swift 5.7, nhưng trên nền tảng Apple chỉ chạy được từ macOS 13/iOS 16 trở lên.
 :::
 
 ## Khác biệt chính
 
 | | Node.js | Go | Rust | Swift | Java |
 |---|---|---|---|---|---|
-| Cơ chế | `MessageChannel`/`postMessage` | channel (`chan`) — kiểu built-in | `std::sync::mpsc` — kiểu built-in | `AsyncStream` — không block khi gửi | `BlockingQueue` (`SynchronousQueue`…) |
+| Cơ chế | `MessageChannel`/`postMessage` | channel (`chan`) — cú pháp built-in của ngôn ngữ | `std::sync::mpsc` — kiểu bình thường của thư viện chuẩn, không có cú pháp riêng | `AsyncStream` — không block khi gửi | `BlockingQueue` (`SynchronousQueue`…) |
 | Giới hạn dung lượng | không giới hạn, hàng đợi ẩn bên trong | đặt buffer cố định lúc tạo (`make(chan T, n)`) | `sync_channel(n)` cho buffer cố định | không có backpressure thật | `ArrayBlockingQueue(n)` cho buffer cố định |
 | Chờ có timeout | tự viết bằng `Promise.race` + `setTimeout` | `select` + `time.After` trong cú pháp | `recv_timeout(Duration)` | đua bằng `TaskGroup` + `Task.sleep` | `poll(timeout, unit)` |

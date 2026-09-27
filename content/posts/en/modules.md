@@ -11,7 +11,7 @@ Each ecosystem has a dependency manifest file (`package.json`, `go.mod`, `Cargo.
 | Task | npm (Node.js) | Go modules | Cargo (Rust) | Swift Package Manager | Maven (Java) |
 |---|---|---|---|---|---|
 | Initialize the dependency file | `npm init` | `go mod init github.com/you/yourmodule` | `cargo new`/`cargo init` | `swift package init` | `mvn archetype:generate` |
-| Install a package | `npm install uuid` | `go get github.com/google/uuid@v1.6.0` | `cargo add uuid` | `swift package add-dependency <url> --from <ver>` | add a `<dependency>` to `pom.xml` |
+| Install a package | `npm install uuid` | `go get github.com/google/uuid@v1.6.0` | `cargo add uuid -F v4` | `swift package add-dependency <url> --from <ver>` | add a `<dependency>` to `pom.xml` |
 | Install a CLI globally | `npm install -g <pkg>` | `go install pkg@latest` | `cargo install <crate>` | — (no standard way; typically Homebrew/Mint) | — (typically SDKMAN/jbang) |
 | Update to the latest version | `npm install uuid@latest` | `go get -u github.com/google/uuid` | `cargo update -p uuid` | `swift package update` | edit the version in `pom.xml` |
 | Remove a package | `npm uninstall uuid` | `go get github.com/google/uuid@none` | `cargo remove uuid` | remove the dependency from `Package.swift` | remove the `<dependency>` from `pom.xml` |
@@ -44,6 +44,7 @@ func main() {
 }
 ```
 ```rust
+// Cargo.toml: uuid = { version = "1", features = ["v4"] }
 // importing a module
 use uuid::Uuid;
 
@@ -176,5 +177,5 @@ The Java example above runs directly thanks to **JEP 458** (Launch Multi-File So
 :::
 
 :::note
-`swift package add-dependency` and `add-target-dependency` require Swift 6.0 or later (confirmed working on Swift 6.2). The `public` keyword marks an API as exported from the module — the default (`internal`) is only visible within the same module, unlike Go/Rust where export is per-item (capitalized name, or `pub`) rather than per-module.
+`swift package add-dependency` and `add-target-dependency` require Swift 6.0 or later (confirmed working on Swift 6.2). Swift's `public` keyword exports per item — just like Rust's `pub`, written before each declaration you want exported, not a whole-module setting. The default (no modifier) is `internal`: visible throughout the current module, close to Rust's `pub(crate)`.
 :::

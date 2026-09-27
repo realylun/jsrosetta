@@ -8,7 +8,7 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "18"
   go: "1.22"
-  rust: "1.80"
+  rust: "1.85"
   swift: "5.7"
   java: "25"
 tags: [http, server, fetch, networking]
@@ -86,16 +86,20 @@ listener.newConnectionHandler = { connection in
         guard let data, let request = String(data: data, encoding: .utf8) else { return }
         let path = request.split(separator: " ")[1] // "GET /hello/neko HTTP/1.1" -> "/hello/neko"
 
+        let status: String
         let body: String
         if path == "/" {
+            status = "200 OK"
             body = "hello world"
         } else if path.hasPrefix("/hello/") {
+            status = "200 OK"
             body = "hello \(path.dropFirst("/hello/".count))"
         } else {
+            status = "404 Not Found"
             body = "not found"
         }
 
-        let response = "HTTP/1.1 200 OK\r\nContent-Length: \(body.utf8.count)\r\n\r\n\(body)"
+        let response = "HTTP/1.1 \(status)\r\nContent-Length: \(body.utf8.count)\r\n\r\n\(body)"
         connection.send(content: response.data(using: .utf8), completion: .contentProcessed { _ in connection.cancel() })
     }
 }
@@ -166,7 +170,7 @@ func main() {
 }
 ```
 ```rust
-// Cargo.toml: reqwest = "0.12"
+// Cargo.toml: reqwest = "0.13"
 // Cargo.toml: tokio = { version = "1", features = ["full"] }
 #[tokio::main]
 async fn main() {
@@ -216,9 +220,9 @@ Go 1.22 thêm hỗ trợ HTTP method và path pattern có wildcard (`{name}`) ng
 :::
 
 :::note
-`axum` 0.8 (đầu 2025) đổi cú pháp path param từ `:name` sang `{name}` để khớp với `format!()` và các framework khác — tình cờ trùng luôn với cú pháp wildcard mới của Go 1.22. `axum` yêu cầu Rust 1.80+ (MSRV).
+`axum` 0.8 (đầu 2025) đổi cú pháp path param từ `:name` sang `{name}` để khớp với `format!()` và các framework khác — tình cờ trùng luôn với cú pháp wildcard mới của Go 1.22. `axum` yêu cầu Rust 1.80+ (MSRV), nhưng `reqwest` 0.13 (dùng ở phần client bên dưới) nâng MSRV lên 1.85 — đó là lý do version sàn của cả bài là 1.85, không phải 1.80.
 :::
 
 :::note
-Swift/Foundation không có kiểu HTTP server nào cả — ví dụ trên chỉ đọc đủ dòng request đầu tiên (`"METHOD /path HTTP/1.1"`) qua `Network.framework` để định tuyến thủ công, không parse header hay hỗ trợ keep-alive; một dự án thật nên dùng package như Hummingbird hoặc Vapor. Cú pháp `guard let data, let request = …` cần Swift 5.7+; `URLSession.shared.data(from:)` (async) cần Swift 5.5+ và macOS 12+.
+Swift/Foundation không có kiểu HTTP server nào cả — ví dụ trên chỉ đọc đủ dòng request đầu tiên (`"METHOD /path HTTP/1.1"`) qua `Network.framework` để định tuyến thủ công, không parse header hay hỗ trợ keep-alive; một dự án thật nên dùng package như Hummingbird hoặc Vapor. Cú pháp `guard let data, let request = …` cần Swift 5.7+ (SE-0345); gọi thẳng `try await` ở top-level trong ví dụ client bên dưới cũng cần Swift 5.7+ (SE-0343 — Concurrency in Top-level Code), dù bản thân `URLSession.shared.data(from:)` (async) chỉ cần Swift 5.5+ và macOS 12+.
 :::

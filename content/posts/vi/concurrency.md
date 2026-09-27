@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.25"
   rust: "1.71"
-  swift: "5.5"
+  swift: "5.7"
   java: "25"
 tags: [concurrency, goroutine, worker-threads, fork]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#concurrency"
@@ -180,8 +180,10 @@ void main() throws InterruptedException {
         int start = w * chunk;
         int end = Math.min(start + chunk, rangeEnd);
         int idx = w;
-        // platform thread, không phải virtual: việc CPU-bound cần chạy song
-        // song thật, còn virtual thread vẫn dùng chung một pool carrier nhỏ
+        // platform thread, không phải virtual: việc CPU-bound này không hưởng
+        // lợi gì từ virtual thread (carrier pool mặc định chỉ to bằng số core),
+        // và một virtual thread chạy CPU-bound liên tục còn có thể "ghim"
+        // (pin) carrier của nó, chặn các virtual thread khác dùng carrier đó
         threads[w] = Thread.ofPlatform().start(() -> {
             partials[idx] = sumRange(start, end);
         });
@@ -343,11 +345,15 @@ if ProcessInfo.processInfo.environment["FORK_CHILD"] == "1" {
     let input = FileHandle.standardInput.readDataToEndOfFile()
     let numbers = try JSONDecoder().decode([Int].self, from: input)
     let squares = numbers.map { $0 * $0 }
-    FileHandle.standardOutput.write(try JSONEncoder().encode(squares))
+    // write(contentsOf:) ném lỗi thay vì crash khi ghi thất bại (macOS 10.15.4+)
+    try FileHandle.standardOutput.write(contentsOf: JSONEncoder().encode(squares))
 } else {
     // chạy với tư cách tiến trình cha: tự thực thi lại chính binary này làm tiến trình con
     let process = Process()
-    process.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+    // Bundle.main.executableURL trỏ đúng tới file thực thi đang chạy; chỉ có
+    // giá trị khi chương trình được compile bằng swiftc — chạy qua interpreter
+    // (`swift main.swift`) không có một binary thật để tự re-exec kiểu này.
+    process.executableURL = Bundle.main.executableURL!
     process.environment = ProcessInfo.processInfo.environment.merging(["FORK_CHILD": "1"]) { _, new in new }
 
     let stdin = Pipe()
@@ -356,7 +362,7 @@ if ProcessInfo.processInfo.environment["FORK_CHILD"] == "1" {
     process.standardOutput = stdout
 
     try process.run()
-    stdin.fileHandleForWriting.write("[1, 2, 3, 4, 5]".data(using: .utf8)!)
+    try stdin.fileHandleForWriting.write(contentsOf: "[1, 2, 3, 4, 5]".data(using: .utf8)!)
     try stdin.fileHandleForWriting.close()
 
     let output = stdout.fileHandleForReading.readDataToEndOfFile()
@@ -411,7 +417,7 @@ static String join(int[] values) {
 :::
 
 :::note
-Java không có thư viện JSON trong `java.base`, nên bản Java ở đây dùng một chuỗi số cách nhau bởi dấu phẩy thay vì JSON thật — cùng vai trò, chỉ khác định dạng trao đổi. `ProcessHandle.current().info()` cho biết đường dẫn `java` và các đối số gốc (gồm cả tên source file), đủ để tái tạo đúng lệnh `java Main.java` ban đầu làm tiến trình con.
+Java không có thư viện JSON trong `java.base`, nên bản Java ở đây dùng một chuỗi số cách nhau bởi dấu phẩy thay vì JSON thật — cùng vai trò, chỉ khác định dạng trao đổi. `ProcessHandle.current().info()` cho biết đường dẫn `java` và các đối số gốc (gồm cả tên source file), đủ để tái tạo đúng lệnh `java Main.java` ban đầu làm tiến trình con. Lưu ý: `Info.arguments()` có thể trả về rỗng trên một số nền tảng/thiết lập bảo mật — nên kiểm tra và có phương án dự phòng thay vì giả định nó luôn có giá trị.
 :::
 
 ## Khác biệt chính

@@ -8,8 +8,8 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.22"
-  rust: "1.0"
-  swift: "1.0"
+  rust: "1.58"
+  swift: "2.0"
   java: "25"
 tags: [for-loop, range, control-flow]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#for"
@@ -78,7 +78,7 @@ void main() {
 :::
 
 ```bash
-# Node.js / Java
+# Node.js
 0
 1
 2
@@ -86,7 +86,7 @@ void main() {
 4
 5
 
-# Go / Rust / Swift
+# Go / Rust / Swift / Java
 0
 1
 2
@@ -106,5 +106,5 @@ Go 1.22 thêm `for i := range N` (range trên một số nguyên) làm cách vi�
 :::
 
 :::note
-Rust chưa bao giờ có `for` kiểu C ba phần — range (`0..6` không bao gồm 6, `0..=6` có bao gồm) là cách lặp số duy nhất từ Rust 1.0. Swift thì **từng có** `for` kiểu C giống JavaScript nhưng bỏ hẳn từ Swift 3.0 (đề xuất SE-0007), chuyển hẳn sang range. Nói cách khác, Go 1.22 chỉ vừa bắt kịp thứ mà Rust và Swift (thời kỳ đầu) đã có từ lâu.
+Trong Rust, `0..6` loại trừ 6 còn `0..=6` bao gồm 6; Swift dùng `..<` và `...` cho cùng ý nghĩa đó. Nói cách khác, Go 1.22 chỉ vừa bắt kịp thứ mà Rust và Swift (thời kỳ đầu) đã có từ lâu.
 :::

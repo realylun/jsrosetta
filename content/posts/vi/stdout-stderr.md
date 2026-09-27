@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.0"
-  swift: "1.0"
+  swift: "3.0"
   java: "25"
 tags: [stdout, stderr, io, printing]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#stdout"
@@ -39,13 +39,15 @@ func main() {
 use std::io::{self, Write};
 
 fn main() {
-    write!(io::stdout(), "hello world\n").unwrap();
+    // .write_all() với byte string thay vì write!(...,"…\n") — tránh cùng lúc
+    // hai clippy lint write_with_newline và explicit_write
+    io::stdout().write_all(b"hello world\n").unwrap();
 }
 ```
 ```swift
 import Foundation
 
-FileHandle.standardOutput.write("hello world\n".data(using: .utf8)!)
+try FileHandle.standardOutput.write(contentsOf: "hello world\n".data(using: .utf8)!)
 ```
 ```java
 void main() throws Exception {
@@ -81,13 +83,13 @@ func main() {
 use std::io::{self, Write};
 
 fn main() {
-    write!(io::stderr(), "hello error\n").unwrap();
+    io::stderr().write_all(b"hello error\n").unwrap();
 }
 ```
 ```swift
 import Foundation
 
-FileHandle.standardError.write("hello error\n".data(using: .utf8)!)
+try FileHandle.standardError.write(contentsOf: "hello error\n".data(using: .utf8)!)
 ```
 ```java
 void main() throws Exception {

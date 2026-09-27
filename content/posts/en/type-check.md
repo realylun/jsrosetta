@@ -261,9 +261,13 @@ ES modules always run in strict mode, so an undeclared loop variable (`for (valu
 :::
 
 :::warning
-Rust has no way to get a `dyn Any` value's type name at runtime on stable — `type_name_of_val` is still unstable. `std::any::type_name::<T>()` only works because `T` is known at compile time at each call site (through monomorphization), so the code above calls it repeatedly by hand instead of looping over a heterogeneous collection like Go/Swift/Java do. The returned name is also an internal module path (not stable across crate versions), so treat it as debug-only output.
+Since Rust 1.76, `std::any::type_name_of_val` is stable, but it's still resolved at compile time from the parameter's *static* type, not its runtime type: calling it on a `&dyn Any` always returns `"dyn core::any::Any"`, regardless of whether the value inside is an `i32` or a `String`. So a Go-style loop (iterate a heterogeneous collection and print each element's type name) is still impossible — the code above has to call `std::any::type_name::<T>()` by hand for each concrete type (which only works because `T` is known at compile time at each call site, through monomorphization). The returned name is also an internal module path (not stable across crate versions), so treat it as debug-only output.
 :::
 
 :::note
 Java's `List.of()`/`Map.of()` return their own private implementation classes (`ListN`, `Map1`…), not `ArrayList`/`HashMap` — a common surprise when printing `getClass()` on an immutable collection.
+:::
+
+:::note
+Swift's `Regex` type compiles starting with Swift 5.7, but at runtime it needs macOS 13+ (iOS 16+…) — running the binary on an older OS crashes even though it was built with a newer toolchain.
 :::

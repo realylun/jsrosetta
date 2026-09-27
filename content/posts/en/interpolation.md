@@ -4,7 +4,7 @@ description: "How JavaScript's template literals (`${}`) compare to Go's fmt.Spr
 tags: [string, template-literal, sprintf]
 ---
 
-JavaScript has string interpolation built right into the language via template literals (backtick strings). Go has no dedicated syntax for this — you use `fmt.Sprintf` with format verbs (`%s`, `%d`, …), similar to C's `printf`. Rust and Swift both have real string interpolation built into the language (`format!`/`println!` with `{name}`, and `\(name)`). Java doesn't — even the String Templates feature that was previewed in Java 21/22 was withdrawn — so it's still `String.format`/`.formatted()` in the `printf` style, just like Go.
+JavaScript has string interpolation built right into the language via template literals (backtick strings). Go has no dedicated syntax for this — you use `fmt.Sprintf` with format verbs (`%s`, `%d`, …), similar to C's `printf`. Swift has real string interpolation built into the language: `\(...)` accepts any expression. Rust is different: `format!`/`println!` are just standard-library macros, not core language syntax; since Rust 1.58 they let you capture a plain identifier already in scope directly inside the braces (`{name}`), but they don't accept expressions or field access there — `{user.name}` or `{a + b}` simply won't compile, so you have to bind a local variable first or use positional/named arguments (`format!("{}", user.name)`). Java has no string interpolation at all — even the String Templates feature that was previewed in Java 21/22 was withdrawn — so it's still `String.format`/`.formatted()` in the `printf` style, just like Go.
 
 ## String interpolation
 

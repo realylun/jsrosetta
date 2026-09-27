@@ -79,7 +79,7 @@ print(found) // true
 var item = map1["foo"]
 print(item as Any) // Optional("bar")
 
-map1.removeValue(forKey: "foo")
+map1.removeValue(forKey: "foo") // shorter, equally idiomatic: map1["foo"] = nil
 
 found = map1["foo"] != nil
 print(found) // false
@@ -107,6 +107,10 @@ void main() {
     IO.println(item); // null
 }
 ```
+:::
+
+:::note
+Java's `map1.get(key)` returns `null` both when the key is missing and when the key exists but its value really is `null` — the two cases are indistinguishable from `get()` alone. To tell them apart, use `containsKey(key)` to check existence, or `getOrDefault(key, fallback)` to get a default value when the key is missing.
 :::
 
 ## Iterating over a map

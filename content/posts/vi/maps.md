@@ -90,7 +90,7 @@ print(found) // true
 var item = map1["foo"]
 print(item as Any) // Optional("bar")
 
-map1.removeValue(forKey: "foo")
+map1.removeValue(forKey: "foo") // cách ngắn hơn, cũng idiomatic: map1["foo"] = nil
 
 found = map1["foo"] != nil
 print(found) // false
@@ -118,6 +118,10 @@ void main() {
     IO.println(item); // null
 }
 ```
+:::
+
+:::note
+`map1.get(key)` của Java trả về `null` cả khi key không tồn tại lẫn khi key tồn tại nhưng giá trị thật sự là `null` — hai trường hợp này không phân biệt được chỉ từ `get()`. Muốn phân biệt, dùng `containsKey(key)` để kiểm tra sự tồn tại, hoặc `getOrDefault(key, fallback)` để lấy giá trị mặc định khi thiếu key.
 :::
 
 ## Duyệt qua map

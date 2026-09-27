@@ -67,7 +67,7 @@ void main() {
 :::
 
 ```bash
-# Node.js / Java
+# Node.js
 0
 1
 2
@@ -75,7 +75,7 @@ void main() {
 4
 5
 
-# Go / Rust / Swift
+# Go / Rust / Swift / Java
 0
 1
 2
@@ -95,5 +95,5 @@ Go 1.22 added `for i := range N` (ranging over an integer) as a concise way to l
 :::
 
 :::note
-Rust never had a three-part C-style `for` — a range (`0..6` excludes 6, `0..=6` includes it) has been the only way to loop a fixed number of times since Rust 1.0. Swift **used to have** a C-style `for` just like JavaScript but removed it entirely in Swift 3.0 (SE-0007 proposal), moving fully to ranges. In other words, Go 1.22 only just caught up with what Rust and (early) Swift already had for years.
+In Rust, `0..6` excludes 6 while `0..=6` includes it; Swift uses `..<` and `...` for the same idea. In other words, Go 1.22 only just caught up with what Rust and (early) Swift already had for years.
 :::

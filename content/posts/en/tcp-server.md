@@ -157,7 +157,7 @@ Rust's std has nothing equivalent to a goroutine: `thread::spawn` creates a real
 :::
 
 :::note
-Swift has no socket API in Foundation; the example above uses `Network.framework` (Apple platforms only, requires macOS 10.14+). The `if let data` shorthand (no `= data` needed) requires Swift 5.7 or later.
+Swift has no socket API in Foundation; the example above uses `Network.framework` (Apple platforms only, requires macOS 10.14+). The `if let data` shorthand (no `= data` needed) requires Swift 5.7 or later. The example echoes back whatever chunk `receive()` hands it (`minimumIncompleteLength: 1`), rather than buffering by line like `bufio`/`BufferedReader` in the other languages — for a short one-line input like this one the result looks identical, but data spanning more than one TCP chunk could get echoed back split across multiple sends, or as a partial line.
 :::
 
 :::note

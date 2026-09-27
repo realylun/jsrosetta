@@ -8,7 +8,7 @@ languages: [js, go, rust, swift, java]
 versions:
   js: "12.20"
   go: "1.0"
-  rust: "1.58"
+  rust: "1.26"
   swift: "2.0"
   java: "25"
 tags: [closure, higher-order-function, currying, bind]

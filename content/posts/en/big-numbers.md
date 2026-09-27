@@ -255,5 +255,5 @@ true
 :::
 
 :::warning
-Swift has no arbitrary-precision integer type in either its stdlib or Foundation. The example above only uses `UInt64` because the values are small; anything that truly needs more than 64 bits requires a third-party package like [attaswift/BigInt](https://github.com/attaswift/BigInt) via Swift Package Manager.
+Swift has no arbitrary-precision integer type in either its stdlib or Foundation. The example above only uses `UInt64` because the values are small; anything that truly needs more than 64 bits requires a third-party package like [attaswift/BigInt](https://github.com/attaswift/BigInt) via Swift Package Manager. Swift 6 (SE-0425) added built-in `Int128`/`UInt128` (needs a macOS 15+ runtime), but that's still a **fixed-width 128-bit** integer, not arbitrary-precision like `BigInt`. Foundation also has `Decimal` (a ~38-significant-digit decimal type, often used for currency math), which likewise isn't an arbitrary-precision integer.
 :::

@@ -4,7 +4,7 @@ description: "Line (`//`) and block (`/* */`) comments use the exact same syntax
 tags: [comments, syntax]
 ---
 
-JavaScript, Go, Rust, Swift, and Java all share the exact same comment syntax: `//` for a single line, `/* ... */` for a multi-line block (Rust even allows nesting block comments). There's nothing new to learn here — the real difference only shows up once a comment sits right above a declaration and becomes a doc comment: JSDoc in Node.js, godoc in Go, rustdoc in Rust, doc comments in Swift, Javadoc in Java.
+JavaScript, Go, Rust, Swift, and Java all share the exact same comment syntax: `//` for a single line, `/* ... */` for a multi-line block (Rust and Swift both allow nesting block comments, unlike JS/Go/Java). There's nothing new to learn here — the real difference only shows up once a comment sits right above a declaration and becomes a doc comment: JSDoc in Node.js, godoc in Go, rustdoc in Rust, doc comments in Swift, Javadoc in Java.
 
 ## Line and block comments
 
@@ -110,7 +110,7 @@ print(greet("Go")) // Hello, Go!
  * @param name the name to greet
  * @return the greeting string
  */
-static String greet(String name) {
+String greet(String name) {
     return "Hello, " + name + "!";
 }
 

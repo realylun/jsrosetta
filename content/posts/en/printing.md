@@ -39,7 +39,7 @@ fn main() {
 import Foundation
 
 print("print to stdout")
-print(String(format: "format %@ %d", "example", 1))
+print(String(format: "format \("example") %d", 1))
 FileHandle.standardError.write(Data("print to stderr".utf8))
 ```
 ```java
@@ -58,5 +58,5 @@ print to stderr
 ```
 
 :::note
-Swift has no `printf`-style formatting or stderr writer in the core stdlib — both `String(format:)` and `FileHandle.standardError` come from Foundation (using the Swift-native names `FileHandle`/`Data`, available since Swift 3.0; before that they were `NSFileHandle`/`NSData`).
+Swift has no `printf`-style formatting or stderr writer in the core stdlib — both `String(format:)` and `FileHandle.standardError` come from Foundation (using the Swift-native names `FileHandle`/`Data`, available since Swift 3.0; before that they were `NSFileHandle`/`NSData`). Avoid `%@` with a plain `String` or `%s` in `String(format:)` — both rely on the Objective-C bridge or a raw C pointer and aren't reliable across every Swift platform; composing the string part with interpolation first and only using `%d`/`%f`… for the numeric part is more portable.
 :::

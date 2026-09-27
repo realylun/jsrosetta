@@ -169,8 +169,11 @@ void main() throws InterruptedException {
         int start = w * chunk;
         int end = Math.min(start + chunk, rangeEnd);
         int idx = w;
-        // platform threads, not virtual ones: CPU-bound work needs real
-        // parallelism, and virtual threads still share a small carrier pool
+        // platform threads, not virtual ones: this CPU-bound work gets no
+        // benefit from virtual threads (the default carrier pool is only as
+        // big as the core count), and a virtual thread that runs CPU-bound
+        // work continuously can "pin" its carrier, blocking other virtual
+        // threads from using it
         threads[w] = Thread.ofPlatform().start(() -> {
             partials[idx] = sumRange(start, end);
         });
@@ -332,11 +335,15 @@ if ProcessInfo.processInfo.environment["FORK_CHILD"] == "1" {
     let input = FileHandle.standardInput.readDataToEndOfFile()
     let numbers = try JSONDecoder().decode([Int].self, from: input)
     let squares = numbers.map { $0 * $0 }
-    FileHandle.standardOutput.write(try JSONEncoder().encode(squares))
+    // write(contentsOf:) throws instead of crashing on a failed write (macOS 10.15.4+)
+    try FileHandle.standardOutput.write(contentsOf: JSONEncoder().encode(squares))
 } else {
     // running as the parent: re-execute this binary as the child
     let process = Process()
-    process.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+    // Bundle.main.executableURL points at the currently running executable;
+    // it's only meaningful when compiled with swiftc — running through the
+    // interpreter (`swift main.swift`) has no real binary to re-exec this way.
+    process.executableURL = Bundle.main.executableURL!
     process.environment = ProcessInfo.processInfo.environment.merging(["FORK_CHILD": "1"]) { _, new in new }
 
     let stdin = Pipe()
@@ -345,7 +352,7 @@ if ProcessInfo.processInfo.environment["FORK_CHILD"] == "1" {
     process.standardOutput = stdout
 
     try process.run()
-    stdin.fileHandleForWriting.write("[1, 2, 3, 4, 5]".data(using: .utf8)!)
+    try stdin.fileHandleForWriting.write(contentsOf: "[1, 2, 3, 4, 5]".data(using: .utf8)!)
     try stdin.fileHandleForWriting.close()
 
     let output = stdout.fileHandleForReading.readDataToEndOfFile()
@@ -400,7 +407,7 @@ static String join(int[] values) {
 :::
 
 :::note
-Java has no JSON library in `java.base`, so the Java version here uses a comma-separated string instead of real JSON — same role, just a different wire format. `ProcessHandle.current().info()` reports the `java` executable's path and its original arguments (including the source file name), which is enough to reconstruct the original `java Main.java` command as the child.
+Java has no JSON library in `java.base`, so the Java version here uses a comma-separated string instead of real JSON — same role, just a different wire format. `ProcessHandle.current().info()` reports the `java` executable's path and its original arguments (including the source file name), which is enough to reconstruct the original `java Main.java` command as the child. Note: `Info.arguments()` can come back empty on some platforms/security setups — check for that and have a fallback instead of assuming it's always present.
 :::
 
 ## Key differences

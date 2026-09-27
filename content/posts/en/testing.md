@@ -4,7 +4,7 @@ description: "Node.js's node:test + node:assert compared to Go's testing, Rust's
 tags: [testing, unit-test, table-driven]
 ---
 
-Node.js and Go both have a built-in test runner, no external package required; Rust does too, with `#[test]`/`cargo test`. Node.js's nested `t.test()` is roughly equivalent to Go's `t.Run()` for **table-driven tests** — running the same test case against multiple sets of input. Rust's plain std `#[test]` has no named subtests like Go/Node — the example below just loops over cases inside one test function. Swift Testing (the newer framework replacing `XCTest`, which lives in its own package) supports this directly through `@Test(arguments:)`. Java has no standard test runner in the JDK, so the example uses the most common library, JUnit, with `@ParameterizedTest` + `@CsvSource`.
+Node.js and Go both have a built-in test runner, no external package required; Rust does too, with `#[test]`/`cargo test`. Node.js's nested `t.test()` is roughly equivalent to Go's `t.Run()` for **table-driven tests** — running the same test case against multiple sets of input. Rust's plain std `#[test]` has no named subtests like Go/Node — the example below just loops over cases inside one test function. Swift Testing (the newer framework replacing `XCTest`, bundled with the toolchain since Swift 6.0 rather than a separate package) supports this directly through `@Test(arguments:)`. Java has no standard test runner in the JDK, so the example uses the most common library, JUnit, with `@ParameterizedTest` + `@CsvSource`.
 
 ## Table-driven tests
 
@@ -159,13 +159,14 @@ $ swift test
 ```
 ```bash
 $ java -jar junit-platform-console-standalone-6.1.3.jar execute -cp out --scan-class-path --details=tree
+# trimmed the "Thanks for using JUnit!" banner, the JUnit Platform Suite/JUnit Vintage branches
+# (empty, no test runs through them), and the containers/tests found/started/failed summary lines
 ├─ JUnit Jupiter ✔
 │  └─ SumTest ✔
 │     └─ sum(int, int, int) ✔
 │        ├─ "1" + "1" ✔
 │        ├─ "2" + "3" ✔
 │        └─ "5" + "5" ✔
-# trimmed the containers/tests found/started/failed summary lines
 ```
 
 :::note

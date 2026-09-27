@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.65"
-  swift: "2.0"
+  swift: "5.1"
   java: "25"
 tags: [stack-trace, debugging, panic, error-handling]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#stack-trace"

@@ -126,7 +126,7 @@ impl Person {
 /// `Person` đại diện cho một người dùng.
 ///
 /// ```swift
-/// var person = Person(name: "bob")
+/// let person = Person(name: "bob")
 /// print(person.name) // bob
 /// ```
 public struct Person {

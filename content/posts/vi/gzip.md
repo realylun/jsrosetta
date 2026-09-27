@@ -9,7 +9,7 @@ versions:
   js: "14.13.1"
   go: "1.0"
   rust: "1.67"
-  swift: "2.0"
+  swift: "4.0"
   java: "25"
 tags: [gzip, compression, zlib]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#gzip"
@@ -145,9 +145,6 @@ let decompressed = gunzipDecompress(compressed, expectedSize: data.count)
 print(String(decoding: decompressed, as: UTF8.self)) // hello world
 ```
 ```java
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
 void main() throws Exception {
     byte[] data = "hello world".getBytes();
 
@@ -155,9 +152,14 @@ void main() throws Exception {
     try (GZIPOutputStream gzip = new GZIPOutputStream(compressed)) {
         gzip.write(data);
     } // try-with-resources tự close() để flush hết dữ liệu nén
-    IO.println(Arrays.toString(compressed.toByteArray()));
+    byte[] compressedBytes = compressed.toByteArray();
+    int[] unsignedBytes = new int[compressedBytes.length];
+    for (int i = 0; i < compressedBytes.length; i++) {
+        unsignedBytes[i] = compressedBytes[i] & 0xff; // byte của Java có dấu; & 0xff để in giá trị 0-255 như các ngôn ngữ khác
+    }
+    IO.println(Arrays.toString(unsignedBytes));
 
-    try (GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(compressed.toByteArray()))) {
+    try (GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(compressedBytes))) {
         IO.println(new String(gunzip.readAllBytes())); // hello world
     }
 }
@@ -165,7 +167,7 @@ void main() throws Exception {
 :::
 
 :::note
-`compress/flate` (nền tảng của `compress/gzip`), `flate2`, zlib và `java.util.zip` đều không đảm bảo output nén giống hệt byte-by-byte lẫn nhau hay giữa các phiên bản — chỉ đảm bảo round-trip (nén rồi giải nén đúng ra dữ liệu gốc). Phần header/trailer của gzip (byte OS, mtime…) khác nhau chút ít giữa các implementation ở ví dụ trên, phần dữ liệu nén thì giống hệt vì cùng thuật toán DEFLATE.
+`compress/flate` (nền tảng của `compress/gzip`), `flate2`, zlib và `java.util.zip` đều không đảm bảo output nén giống hệt byte-by-byte lẫn nhau hay giữa các phiên bản — chỉ đảm bảo round-trip (nén rồi giải nén đúng ra dữ liệu gốc). Cả header/trailer của gzip (byte OS, mtime…) lẫn phần dữ liệu nén đều có thể khác nhau giữa các implementation ở ví dụ trên: mỗi implementation tự quyết định cách encode DEFLATE — ví dụ Go có thể lưu một block "stored" không nén cho input ngắn thay vì Huffman-encode như zlib — miễn giải nén ra đúng lại dữ liệu gốc.
 :::
 
 :::note

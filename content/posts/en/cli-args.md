@@ -4,7 +4,7 @@ description: "How Node.js's process.argv/util.parseArgs compares to os.Args/flag
 tags: [cli, args, flags, io]
 ---
 
-There are two ways to get input from the command line: read the raw argument array directly, or parse it into named flags (`--foo=bar`). Node.js and Go ship both options in their standard library. Rust's std only has `env::args()` (raw arguments) — named flags need the `clap` crate. Swift and Java have no flag-parsing package in their standard library/Foundation at all; the examples below parse `--foo=`/`--qux` by hand, while real projects typically reach for the `swift-argument-parser` package (Swift, via Swift Package Manager) for that.
+There are two ways to get input from the command line: read the raw argument array directly, or parse it into named flags (`--foo=bar`). Node.js and Go ship both options in their standard library. Rust's std only has `env::args()` (raw arguments) — named flags need the `clap` crate. Swift and Java have no flag-parsing package in their standard library/Foundation at all; the examples below parse `--foo=`/`--qux` by hand, while real projects typically reach for the `swift-argument-parser` package (Swift, via Swift Package Manager) or `picocli` (Java) for that.
 
 ## Raw command-line arguments
 
@@ -191,5 +191,5 @@ Node.js 18.3 added `util.parseArgs()` to the standard library, replacing third-p
 :::
 
 :::note
-`CommandLine` (replacing the older `Process.arguments`/`C_ARGC`/`C_ARGV`) arrived in Swift 3 and lives in the Swift standard library — no `import Foundation` needed to use it, unlike most other I/O examples in this series.
+`CommandLine` (replacing the older `Process.arguments`/`C_ARGC`/`C_ARGV`) arrived in Swift 3 and lives in the Swift standard library — no `import Foundation` needed to use it, unlike most other I/O examples in this series. This example's actual floor is Swift 4.0, not 3.0: `String` only conforms to `Collection` directly (so calling `arg.dropFirst(...)` straight on a `String`, returning a `Substring`, is valid) starting in Swift 4.0.
 :::

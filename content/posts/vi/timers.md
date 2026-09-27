@@ -9,13 +9,13 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "5.9"
+  swift: "5.7"
   java: "25"
 tags: [timer, settimeout, setinterval, goroutine]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#timeout"
 ---
 
-Node.js chạy callback của `setTimeout`/`setInterval` trên event loop, nên chương trình vẫn sống cho tới khi hàng đợi callback trống. Go, Rust và Java đều chạy callback trên một thread/goroutine riêng — nếu không có gì giữ luồng chính lại (`sync.WaitGroup`, `JoinHandle::join`, `CountDownLatch`), chương trình có thể thoát trước khi callback kịp chạy. Swift là ngoại lệ: `Task.sleep` chạy ngay trong task hiện tại nên không cần cơ chế chờ riêng. `time.Ticker` của Go và bản Rust/Java tương ứng không "chạy callback" — chúng gửi tick qua một channel/hàng đợi mà code gọi phải tự đọc.
+Node.js chạy callback của `setTimeout`/`setInterval` trên event loop, nên chương trình vẫn sống cho tới khi hàng đợi callback trống. Ở phần chạy một lần, Go, Rust và Java đều chạy callback trên một thread/goroutine riêng — nếu không có gì giữ luồng chính lại (`sync.WaitGroup`, `JoinHandle::join`, `CountDownLatch`), chương trình có thể thoát trước khi callback kịp chạy — còn Swift là ngoại lệ: `Task.sleep` chạy ngay trong task hiện tại nên không cần cơ chế chờ riêng. Ở phần lặp lại thì khác: `time.Ticker` của Go và channel của Rust không "chạy callback" — chúng gửi tick qua một channel/hàng đợi mà code gọi phải tự đọc, `AsyncStream` của Swift cũng vậy (yield tick cho vòng `for await` đọc); riêng Java vẫn dùng callback thật qua `scheduleAtFixedRate`, giống hệt `setInterval`.
 
 ## Chạy một lần sau một khoảng thời gian (setTimeout / time.AfterFunc)
 
@@ -92,7 +92,7 @@ void main() throws InterruptedException {
 :::
 
 :::note
-Java 21 thêm virtual thread (`Thread.ofVirtual()`): rẻ hơn nhiều so với platform thread nên rất hợp để làm "thread nền" cho một scheduler, dù bản thân `ScheduledExecutorService` đã có từ lâu.
+Java 21 thêm virtual thread (`Thread.ofVirtual()`): rẻ hơn nhiều so với platform thread nên rất hợp để làm "thread nền" cho một scheduler, dù bản thân `ScheduledExecutorService` đã có từ lâu. `Task.sleep(for:)` của Swift (nhận thẳng `Duration`) có từ ngôn ngữ Swift 5.7, nhưng trên nền tảng Apple chỉ chạy được từ macOS 13/iOS 16 trở lên — phần runtime `Clock`/`Duration` đứng sau nó không được back-deploy về OS cũ hơn.
 :::
 
 ## Chạy lặp lại theo chu kỳ (setInterval / time.Ticker)
@@ -193,13 +193,21 @@ func ticker(interval: Duration) -> AsyncStream<Int> {
     AsyncStream { continuation in
         let task = Task {
             var i = 0
-            while true {
-                try? await Task.sleep(for: interval)
+            // Task.isCancelled phải được kiểm tra ở đầu mỗi vòng: `try?` nuốt
+            // luôn CancellationError, nên nếu chỉ dựa vào đó vòng lặp sẽ chạy
+            // full tốc độ (CPU spin) mãi mãi sau khi bị huỷ thay vì dừng lại.
+            while !Task.isCancelled {
+                do {
+                    try await Task.sleep(for: interval)
+                } catch {
+                    break // bị huỷ trong lúc ngủ: dừng hẳn
+                }
                 continuation.yield(i)
                 i += 1
             }
+            continuation.finish()
         }
-        continuation.onTermination = { _ in task.cancel() } // dừng tick, ~ clearInterval
+        continuation.onTermination = { _ in task.cancel() } // consumer dừng lấy giá trị → huỷ Task nền, ~ clearInterval
     }
 }
 
@@ -210,7 +218,7 @@ func callback(_ i: Int) {
 for await i in ticker(interval: .seconds(1)) {
     callback(i)
     if i == 3 {
-        break // break kích hoạt onTermination, hủy Task của ticker
+        break // break kích hoạt onTermination, huỷ Task của ticker và dừng hẳn vòng lặp nền
     }
 }
 // → called 0

@@ -146,7 +146,7 @@ IO.println(array.length); // 10
 :::
 
 :::note
-JS's `array.subarray()`, Go's slice `array[2:]`, Rust's `&array[2..]`, and Swift's `array[2...]` all only create a view, not a copy — mutating through the view also changes the underlying memory, exactly like slices behave in the "Arrays" post. Java is the exception: `Arrays.copyOfRange` always makes a new array.
+JS's `array.subarray()` and Go's slice `array[2:]` both only create a view, not a copy — mutating through the view also changes the underlying memory, exactly like slices behave in the "Arrays" post. Rust's `&array[2..]` aliases the same memory too, but it's an immutable borrow — mutating requires a `&mut` borrow, and the borrow checker won't let you touch the original array while that mutable slice is alive, so there's no uncontrolled aliasing the way there is in Go. Swift's `array[2...]` returns an `ArraySlice`, which initially shares memory with the original array but is copy-on-write: mutating through the slice triggers a copy and **never** changes the original array. Java's `Arrays.copyOfRange` always makes a new array, but Java does have a real array-backed view when you need one: `ByteBuffer.wrap(array).slice(2, 2)` (JDK 13+) shares memory with `array` instead of copying it.
 :::
 
 :::note

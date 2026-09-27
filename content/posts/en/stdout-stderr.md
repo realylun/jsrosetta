@@ -28,13 +28,15 @@ func main() {
 use std::io::{self, Write};
 
 fn main() {
-    write!(io::stdout(), "hello world\n").unwrap();
+    // .write_all() with a byte string instead of write!(...,"…\n") avoids
+    // tripping both the write_with_newline and explicit_write clippy lints
+    io::stdout().write_all(b"hello world\n").unwrap();
 }
 ```
 ```swift
 import Foundation
 
-FileHandle.standardOutput.write("hello world\n".data(using: .utf8)!)
+try FileHandle.standardOutput.write(contentsOf: "hello world\n".data(using: .utf8)!)
 ```
 ```java
 void main() throws Exception {
@@ -70,13 +72,13 @@ func main() {
 use std::io::{self, Write};
 
 fn main() {
-    write!(io::stderr(), "hello error\n").unwrap();
+    io::stderr().write_all(b"hello error\n").unwrap();
 }
 ```
 ```swift
 import Foundation
 
-FileHandle.standardError.write("hello error\n".data(using: .utf8)!)
+try FileHandle.standardError.write(contentsOf: "hello error\n".data(using: .utf8)!)
 ```
 ```java
 void main() throws Exception {

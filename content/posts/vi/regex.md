@@ -93,9 +93,6 @@ let matches = input.matches(of: /([0-9]+)/).map { String($0.output.0) }
 print(matches) // ["111", "222", "333"]
 ```
 ```java
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 void main() {
     String input = "foobar";
     Pattern p = Pattern.compile("foo(.*)", Pattern.CASE_INSENSITIVE);
@@ -121,5 +118,5 @@ Go dùng raw string literal (đặt trong dấu backtick) cho pattern, nên kh�
 :::
 
 :::note
-Regex literal `/pattern/` của Swift cần cờ `-enable-bare-slash-regex` khi chạy trực tiếp bằng `swiftc`/`swift` (đã bật sẵn khi build qua Swift Package Manager với `swift-tools-version` ≥ 5.7). `.replacing(_:with:)`, `.matches(of:)` và `.contains(_:)` với `RegexComponent` cần macOS 13 / iOS 16 trở lên.
+Regex literal `/pattern/` của Swift được bật sẵn mặc định ở ngôn ngữ mode Swift 6 (`-swift-version 6`, hoặc `swift-tools-version: 6.0` trở lên trong Package.swift). Ở ngôn ngữ mode Swift 5 — mặc định khi gọi thẳng `swiftc`/`swift` không kèm cờ — phải bật thủ công bằng `-enable-bare-slash-regex`, hoặc `.enableUpcomingFeature("BareSlashRegexLiterals")` trong target của Package.swift. `.replacing(_:with:)`, `.matches(of:)` và `.contains(_:)` với `RegexComponent` cần macOS 13 / iOS 16 trở lên.
 :::

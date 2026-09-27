@@ -154,10 +154,11 @@ async fn main() {
         Err(err) => eprintln!("{err}"),
     }
 
-    let (a, b, c) = tokio::join!(async_method("A"), async_method("B"), async_method("C"));
-    let results: Result<Vec<_>, _> = [a, b, c].into_iter().collect(); // the first Err short-circuits, like Promise.all
-    match results {
-        Ok(values) => println!("{values:?}"), // → ["resolved: A", "resolved: B", "resolved: C"]
+    // try_join! (unlike join!) returns as soon as the first future fails,
+    // without waiting for the rest to finish — this is what actually
+    // matches Promise.all's short-circuiting behavior
+    match tokio::try_join!(async_method("A"), async_method("B"), async_method("C")) {
+        Ok((a, b, c)) => println!("{:?}", [a, b, c]), // → ["resolved: A", "resolved: B", "resolved: C"]
         Err(err) => eprintln!("{err}"),
     }
 }
@@ -205,9 +206,9 @@ void main() {
 :::
 
 :::note
-Go 1.25 added `sync.WaitGroup.Go(func())`, replacing the earlier manual `wg.Add(1)` + `go func(){ …; wg.Done() }()` pattern — so a goroutine can no longer be started without a matching `Done()`.
+Go 1.25 added `sync.WaitGroup.Go(func())`, replacing the earlier manual `wg.Add(1)` + `go func(){ …; wg.Done() }()` pattern — so a goroutine can no longer be started without a matching `Done()`. Swift's `Task.sleep(for:)` is a Swift 5.7 language feature, but on Apple platforms it only runs on macOS 13/iOS 16 or later.
 :::
 
 :::note
-`CompletableFuture` has no hidden "microtask queue" like Promise: `.thenAccept()`/`.thenRun()` run on `ForkJoinPool.commonPool()`, a pool of daemon threads. If `main()` doesn't call `.join()` to wait, the program can exit before the callback runs — the same reason Go needs a `sync.WaitGroup`.
+`CompletableFuture` has no hidden "microtask queue" like Promise: `.thenAccept()`/`.thenRun()` (no `Async` suffix) run right on whichever thread completes the future, or synchronously on the calling thread if the future is already complete — only the `...Async` variants (`.thenAcceptAsync()`, `.thenRunAsync()`) default to running on `ForkJoinPool.commonPool()`. In the example above, `asyncMethod` itself runs via `supplyAsync` on the `commonPool` (a pool of daemon threads), so if `main()` doesn't call `.join()` to wait, the program can exit before the callback runs — the same reason Go needs a `sync.WaitGroup`.
 :::

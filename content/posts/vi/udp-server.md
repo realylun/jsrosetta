@@ -152,7 +152,7 @@ received: hello world from 127.0.0.1:55056
 ```
 
 :::note
-Dù code Go truyền `IP: net.ParseIP("0.0.0.0")`, `conn.LocalAddr()` lại in ra `[::]:3000` — với network chung `"udp"`, listener dual-stack của Go báo địa chỉ "unspecified" theo dạng IPv6 thay vì lặp lại đúng địa chỉ IPv4 đã yêu cầu. Rust và Java in lại đúng `0.0.0.0` như đã bind.
+Dù code Go truyền `IP: net.ParseIP("0.0.0.0")`, `conn.LocalAddr()` lại in ra `[::]:3000` — với network chung `"udp"`, listener dual-stack của Go báo địa chỉ "unspecified" theo dạng IPv6 thay vì lặp lại đúng địa chỉ IPv4 đã yêu cầu. Rust thật sự gọi `socket.local_addr()` nên in đúng `0.0.0.0` như đã bind. Swift và Java ở trên chỉ in ra một chuỗi cố định khớp với tham số đã truyền vào chứ không query lại trạng thái socket thật — nếu query thật bằng `getLocalSocketAddress()`, `DatagramSocket(int)` của Java cũng bind dual-stack mặc định và trả về địa chỉ "unspecified" dạng IPv6, giống hệt quirk của Go.
 :::
 
 :::note

@@ -75,16 +75,20 @@ listener.newConnectionHandler = { connection in
         guard let data, let request = String(data: data, encoding: .utf8) else { return }
         let path = request.split(separator: " ")[1] // "GET /hello/neko HTTP/1.1" -> "/hello/neko"
 
+        let status: String
         let body: String
         if path == "/" {
+            status = "200 OK"
             body = "hello world"
         } else if path.hasPrefix("/hello/") {
+            status = "200 OK"
             body = "hello \(path.dropFirst("/hello/".count))"
         } else {
+            status = "404 Not Found"
             body = "not found"
         }
 
-        let response = "HTTP/1.1 200 OK\r\nContent-Length: \(body.utf8.count)\r\n\r\n\(body)"
+        let response = "HTTP/1.1 \(status)\r\nContent-Length: \(body.utf8.count)\r\n\r\n\(body)"
         connection.send(content: response.data(using: .utf8), completion: .contentProcessed { _ in connection.cancel() })
     }
 }
@@ -155,7 +159,7 @@ func main() {
 }
 ```
 ```rust
-// Cargo.toml: reqwest = "0.12"
+// Cargo.toml: reqwest = "0.13"
 // Cargo.toml: tokio = { version = "1", features = ["full"] }
 #[tokio::main]
 async fn main() {
@@ -205,9 +209,9 @@ The global `fetch()` is available without a flag since Node.js 18 — used here 
 :::
 
 :::note
-`axum` 0.8 (early 2025) changed its path parameter syntax from `:name` to `{name}` to match `format!()` and other frameworks — which happens to line up neatly with Go 1.22's new wildcard syntax. `axum` requires Rust 1.80+ (MSRV).
+`axum` 0.8 (early 2025) changed its path parameter syntax from `:name` to `{name}` to match `format!()` and other frameworks — which happens to line up neatly with Go 1.22's new wildcard syntax. `axum` requires Rust 1.80+ (MSRV), but `reqwest` 0.13 (used in the client below) raises the MSRV to 1.85 — that's why this guide's floor is 1.85, not 1.80.
 :::
 
 :::note
-Swift/Foundation has no HTTP server type at all — the example above only reads enough of the first request line (`"METHOD /path HTTP/1.1"`) over `Network.framework` to route manually; it doesn't parse headers or support keep-alive. A real project should reach for a package like Hummingbird or Vapor instead. The `guard let data, let request = …` shorthand needs Swift 5.7+; `URLSession.shared.data(from:)` (async) needs Swift 5.5+ and macOS 12+.
+Swift/Foundation has no HTTP server type at all — the example above only reads enough of the first request line (`"METHOD /path HTTP/1.1"`) over `Network.framework` to route manually; it doesn't parse headers or support keep-alive. A real project should reach for a package like Hummingbird or Vapor instead. The `guard let data, let request = …` shorthand needs Swift 5.7+ (SE-0345); calling `try await` directly at the top level in the client example below also needs Swift 5.7+ (SE-0343 — Concurrency in Top-level Code), even though `URLSession.shared.data(from:)` (async) itself only needs Swift 5.5+ and macOS 12+.
 :::

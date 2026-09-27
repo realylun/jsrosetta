@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.18"
   rust: "1.58"
-  swift: "3.0"
+  swift: "5.1"
   java: "25"
 tags: [spread, rest, variadic, slice]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#spread-operator"
@@ -58,9 +58,6 @@ let array = [1, 2, 3, 4, 5]
 print(array.map(String.init).joined(separator: " ")) // 1 2 3 4 5
 ```
 ```java
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 static String joinAll(Object... items) {
     return Arrays.stream(items).map(String::valueOf).collect(Collectors.joining(" "));
 }

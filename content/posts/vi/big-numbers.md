@@ -9,7 +9,7 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.60"
-  swift: "1.0"
+  swift: "2.0"
   java: "25"
 tags: [bigint, math-big, numbers]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#big-numbers"
@@ -265,5 +265,5 @@ true
 :::
 
 :::warning
-Swift không có kiểu số nguyên lớn tuỳ ý trong cả stdlib lẫn Foundation. Ví dụ trên chỉ dùng `UInt64` vì các giá trị đều nhỏ; số thật sự vượt 64-bit thì phải thêm package ngoài như [attaswift/BigInt](https://github.com/attaswift/BigInt) qua Swift Package Manager.
+Swift không có kiểu số nguyên lớn tuỳ ý trong cả stdlib lẫn Foundation. Ví dụ trên chỉ dùng `UInt64` vì các giá trị đều nhỏ; số thật sự vượt 64-bit thì phải thêm package ngoài như [attaswift/BigInt](https://github.com/attaswift/BigInt) qua Swift Package Manager. Swift 6 (SE-0425) có thêm `Int128`/`UInt128` dựng sẵn (cần runtime macOS 15+), nhưng đó vẫn chỉ là số nguyên **128-bit cố định**, không phải arbitrary-precision như `BigInt`. Foundation cũng có `Decimal` (số thập phân ~38 chữ số có nghĩa, hay dùng cho tính toán tiền tệ) nhưng cũng không phải số nguyên lớn tuỳ ý.
 :::

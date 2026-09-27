@@ -9,13 +9,13 @@ versions:
   js: "12.20"
   go: "1.0"
   rust: "1.58"
-  swift: "1.0"
+  swift: "2.0"
   java: "25"
 tags: [string, template-literal, sprintf]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#interpolation"
 ---
 
-JavaScript có cú pháp nội suy chuỗi ngay trong ngôn ngữ bằng template literal (chuỗi bọc dấu backtick). Go không có cú pháp riêng cho việc này — bạn dùng `fmt.Sprintf` với các format verb (`%s`, `%d`, …), giống `printf` của C. Rust và Swift đều có nội suy chuỗi thật trong ngôn ngữ (`format!`/`println!` với `{name}`, và `\(name)`). Java thì không — kể cả String Templates từng được preview ở Java 21/22 rồi bị rút lại — nên vẫn phải dùng `String.format`/`.formatted()` kiểu `printf`, giống Go.
+JavaScript có cú pháp nội suy chuỗi ngay trong ngôn ngữ bằng template literal (chuỗi bọc dấu backtick). Go không có cú pháp riêng cho việc này — bạn dùng `fmt.Sprintf` với các format verb (`%s`, `%d`, …), giống `printf` của C. Swift có nội suy chuỗi thật trong ngôn ngữ: `\(...)` chấp nhận bất kỳ biểu thức nào. Rust thì khác: `format!`/`println!` chỉ là macro của thư viện chuẩn (std), không phải cú pháp lõi của ngôn ngữ; từ Rust 1.58 nó cho phép "capture" trực tiếp một identifier đơn giản đang có sẵn trong scope (`{name}`), nhưng không chấp nhận biểu thức hay truy cập field bên trong dấu ngoặc — `{user.name}` hay `{a + b}` đều không biên dịch, phải gán ra biến cục bộ trước hoặc dùng đối số vị trí/đặt tên (`format!("{}", user.name)`). Java thì không có nội suy chuỗi — kể cả String Templates từng được preview ở Java 21/22 rồi bị rút lại — nên vẫn phải dùng `String.format`/`.formatted()` kiểu `printf`, giống Go.
 
 ## Nội suy chuỗi
 

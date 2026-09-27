@@ -272,9 +272,13 @@ ES module luôn chạy ở strict mode, nên một loop variable chưa khai báo
 :::
 
 :::warning
-Rust không có cách nào lấy tên kiểu của một `dyn Any` lúc chạy trên stable — `type_name_of_val` vẫn unstable. `std::any::type_name::<T>()` chỉ hoạt động vì `T` được biết tại compile-time ở từng lời gọi (generic đơn hình hoá), nên đoạn code trên gọi lặp lại thủ công thay vì lặp qua một collection không đồng nhất như Go/Swift/Java. Tên kiểu trả về cũng là đường dẫn module nội bộ (không ổn định giữa các phiên bản crate), chỉ nên dùng để debug.
+Từ Rust 1.76, `std::any::type_name_of_val` đã stable, nhưng nó vẫn được phân giải tại compile-time theo kiểu *tĩnh* của tham số chứ không phải kiểu runtime thật sự: gọi trên `&dyn Any` luôn trả về `"dyn core::any::Any"`, bất kể bên trong là `i32` hay `String`. Vì vậy một vòng lặp kiểu Go (lặp qua collection không đồng nhất rồi lấy tên kiểu từng phần tử) vẫn bất khả thi — đoạn code trên phải gọi `std::any::type_name::<T>()` lặp lại thủ công cho từng kiểu cụ thể (nhờ `T` được biết tại compile-time ở từng lời gọi qua generic đơn hình hoá). Tên kiểu trả về cũng là đường dẫn module nội bộ (không ổn định giữa các phiên bản crate), chỉ nên dùng để debug.
 :::
 
 :::note
 `List.of()`/`Map.of()` của Java trả về các lớp implementation riêng (`ListN`, `Map1`…), không phải `ArrayList`/`HashMap` — một bất ngờ thường gặp khi in `getClass()` trên bộ sưu tập bất biến.
+:::
+
+:::note
+Kiểu `Regex` của Swift biên dịch được từ Swift 5.7, nhưng lúc chạy nó cần macOS 13+ (hoặc iOS 16+…) — chạy binary trên OS cũ hơn sẽ crash dù đã build bằng toolchain mới.
 :::

@@ -200,7 +200,7 @@ void main() throws Exception {
 :::
 
 :::note
-`rusqlite`'s `bundled` feature compiles SQLite's source itself (via the `libsqlite3-sys` crate), so no system `libsqlite3` needs to be installed — in exchange, a working C toolchain (`cc`) must be available. It's the standard SQLite driver for Rust, since std has nothing comparable.
+`rusqlite`'s `bundled` feature compiles SQLite's source itself (via the `libsqlite3-sys` crate), so no system `libsqlite3` needs to be installed — in exchange, a working C toolchain (`cc`) must be available. It's the standard SQLite driver for Rust, since std has nothing comparable. `rusqlite` declares no `rust-version` in its `Cargo.toml` — its README says outright that its MSRV is "the latest stable Rust release at the time of publishing, might work with older ones but that's not guaranteed." The 0.40.2 release itself had no MSRV check in CI, but the current development branch (past 0.40.2) has started enforcing an MSRV of 1.88.0 — that's the floor used here.
 :::
 
 :::note

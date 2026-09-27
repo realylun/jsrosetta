@@ -88,7 +88,7 @@ fn main() -> io::Result<()> {
     io::copy(&mut in_stream, &mut io::stdout())?; // → foobar
     println!();
 
-    let (reader, mut writer) = io::pipe()?; // io::pipe: ống nối đôi trong bộ nhớ, ổn định từ 1.87
+    let (reader, mut writer) = io::pipe()?; // io::pipe: pipe ẩn danh của OS (một chiều), ổn định từ 1.87
 
     let handle = thread::spawn(move || {
         writer.write_all(b"abc\n").unwrap();
@@ -107,14 +107,14 @@ fn main() -> io::Result<()> {
 import Foundation
 
 let inData = Data("foobar".utf8)
-FileHandle.standardOutput.write(inData) // → foobar
+try FileHandle.standardOutput.write(contentsOf: inData) // → foobar
 print()
 
 let pipe = Pipe() // Pipe/FileHandle của Foundation: gần nhất với io.Pipe của Go
 
 Task {
-    pipe.fileHandleForWriting.write(Data("abc\n".utf8))
-    pipe.fileHandleForWriting.write(Data("xyz\n".utf8))
+    try pipe.fileHandleForWriting.write(contentsOf: Data("abc\n".utf8))
+    try pipe.fileHandleForWriting.write(contentsOf: Data("xyz\n".utf8))
     try? pipe.fileHandleForWriting.close()
 }
 
@@ -307,6 +307,15 @@ static class UppercaseInputStream extends FilterInputStream {
         }
         return n;
     }
+
+    @Override
+    public int read() throws IOException {
+        // đọc từng byte một cũng phải override riêng: FilterInputStream.read()
+        // không gọi qua read(byte[], int, int) ở trên nên bỏ qua nó sẽ làm rò
+        // rỉ byte gốc (chưa viết hoa) nếu caller đọc bằng read() thay vì đọc theo mảng
+        int b = super.read();
+        return b == -1 ? -1 : Character.toUpperCase(b);
+    }
 }
 
 void main() throws Exception {
@@ -323,5 +332,5 @@ void main() throws Exception {
 :::
 
 :::note
-`FileHandle.bytes`/`.lines` của Swift cần macOS 12 trở lên (đi cùng Swift 5.5).
+`FileHandle.bytes`/`.lines` của Swift cần macOS 12 trở lên (đi cùng Swift 5.5). `write(contentsOf:)` (bản throwing, thay cho `write(_:)` không throw kiểu cũ) ném lỗi thay vì crash khi ghi thất bại, có từ macOS 10.15.4.
 :::
