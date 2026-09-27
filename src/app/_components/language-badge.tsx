@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { LANGUAGES, SOURCE_LANGUAGE, type LanguageId } from "@/lib/languages";
 
 type Props = {
@@ -36,8 +37,9 @@ export function LanguageBadge({ id, linked = false }: Props) {
 }
 
 export function LanguageList({ ids, linked }: { ids: readonly LanguageId[]; linked?: boolean }) {
+  const t = useTranslations("Post");
   return (
-    <ul className="flex flex-wrap gap-1.5" aria-label="Ngôn ngữ trong bài">
+    <ul className="flex flex-wrap gap-1.5" aria-label={t("languagesLabel")}>
       {ids.map((id) => (
         <li key={id}>
           <LanguageBadge id={id} linked={linked} />

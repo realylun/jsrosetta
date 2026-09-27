@@ -1,7 +1,8 @@
 "use client";
 
-import styles from "./switch.module.css";
+import { useTranslations } from "next-intl";
 import { memo, useEffect, useState } from "react";
+import styles from "./switch.module.css";
 
 declare global {
   var updateDOM: () => void;
@@ -57,6 +58,7 @@ let updateDOM: () => void;
  * Switch button to quickly toggle user preference.
  */
 const Switch = () => {
+  const t = useTranslations("Theme");
   // null until mounted: the server can't know the stored preference, so read it after hydration.
   const [mode, setMode] = useState<ColorSchemePreference | null>(null);
 
@@ -93,8 +95,8 @@ const Switch = () => {
       suppressHydrationWarning
       className={styles.switch}
       onClick={handleModeSwitch}
-      aria-label={`Giao diện: ${current}`}
-      title={`Giao diện: ${current}`}
+      aria-label={t("label", { mode: current })}
+      title={t("label", { mode: current })}
     />
   );
 };

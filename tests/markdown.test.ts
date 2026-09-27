@@ -26,6 +26,12 @@ describe("markdownToHtml", () => {
     expect(html).toContain('aria-selected="true"');
   });
 
+  it("labels the tab list in the requested locale", async () => {
+    expect(await markdownToHtml(tabs)).toContain('aria-label="Languages"');
+    const html = await markdownToHtml(tabs, { tablistLabel: "Ngôn ngữ" });
+    expect(html).toContain('role="tablist" aria-label="Ngôn ngữ"');
+  });
+
   it("shows only the first panel without JavaScript", async () => {
     const html = await markdownToHtml(tabs);
     expect(html.match(/role="tabpanel"[^>]*hidden/g)).toHaveLength(2);
@@ -74,6 +80,11 @@ describe("markdownToHtml", () => {
     const html = await markdownToHtml("## Hello World");
     expect(html).toContain('id="hello-world"');
     expect(html).toContain('class="heading-anchor"');
+  });
+
+  it("wraps tables in a horizontally scrollable container", async () => {
+    const html = await markdownToHtml("| a | b |\n| - | - |\n| 1 | 2 |");
+    expect(html).toMatch(/^<div class="table-scroll"><table>[\s\S]*<\/table><\/div>$/);
   });
 });
 

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Post } from "@/lib/content";
 import type { LanguageId } from "@/lib/languages";
 import { LanguageList } from "./language-badge";

@@ -1,10 +1,10 @@
 ---
 title: "Biến và hằng"
-description: "const, let trong Node.js tương ứng với gì ở Go, Rust, Swift, Kotlin và Java."
+description: "const, let trong Node.js tương ứng với gì ở Go, Rust, Swift và Java."
 date: "2026-09-27"
 order: 10
 category: basics
-languages: [js, go, rust, swift, kotlin, java]
+languages: [js, go, rust, swift, java]
 tags: [const, let, immutability, type-inference]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#variables"
 ---
@@ -52,15 +52,6 @@ count += 1
 
 print(name, count)
 ```
-```kotlin
-fun main() {
-    val name = "neko" // read-only, giống const
-    var count = 0     // mutable, giống let
-    count += 1
-
-    println("$name $count")
-}
-```
 ```java
 public class Main {
     public static void main(String[] args) {
@@ -74,10 +65,10 @@ public class Main {
 ```
 :::
 
-| Node.js | Go | Rust | Swift | Kotlin | Java |
-|---|---|---|---|---|---|
-| `const` | `const` (chỉ giá trị compile-time) | `let` | `let` | `val` | `final` |
-| `let` | `var` / `:=` | `let mut` | `var` | `var` | biến thường / `var` |
+| Node.js | Go | Rust | Swift | Java |
+|---|---|---|---|---|
+| `const` | `const` (chỉ giá trị compile-time) | `let` | `let` | `final` |
+| `let` | `var` / `:=` | `let mut` | `var` | biến thường / `var` |
 
 :::note
 Rust là ngôn ngữ duy nhất trong danh sách mà **bất biến là mặc định**. Muốn thay đổi giá trị, bạn phải xin phép bằng `mut`.
@@ -109,11 +100,6 @@ fn main() {
 ```swift
 let maxUsers = 100
 let startedAt = Date() // `let` nhận cả giá trị lúc chạy
-```
-```kotlin
-const val MAX_USERS = 100 // chỉ ở top-level hoặc object, kiểu nguyên thuỷ/String
-
-val startedAt = System.currentTimeMillis() // `val` nhận giá trị lúc chạy
 ```
 ```java
 static final int MAX_USERS = 100;
@@ -151,10 +137,6 @@ func example() {
     print(title ?? "-", label)
 }
 ```
-```kotlin
-var title: String? = null  // phải gán tường minh
-lateinit var label: String // hứa sẽ gán sau (chỉ với var, kiểu non-null)
-```
 ```java
 String title;      // biến cục bộ: phải gán trước khi đọc
 static int count;  // field: mặc định 0, object: null
@@ -188,12 +170,6 @@ struct User { var name: String } // struct là value type
 
 let user = User(name: "neko")
 // user.name = "tama" // lỗi: `let` khoá cả struct
-```
-```kotlin
-data class User(val name: String) // `val` property: không đổi được
-
-val user = User("neko")
-val renamed = user.copy(name = "tama") // tạo bản sao mới
 ```
 ```java
 record User(String name) {} // record: field final

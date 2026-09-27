@@ -37,3 +37,38 @@ describe("site url validation", () => {
     await expect(load()).rejects.toThrow(/must not contain a path/);
   });
 });
+
+describe("locale urls", () => {
+  it("leaves the default locale un-prefixed and prefixes the others", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://reallylun.com");
+    const { localizePath, localeUrl } = await load();
+    expect(localizePath("vi", "/")).toBe("/");
+    expect(localizePath("vi", "/posts/a")).toBe("/posts/a");
+    expect(localizePath("en", "/")).toBe("/en");
+    expect(localizePath("en", "/posts/a")).toBe("/en/posts/a");
+    expect(localeUrl("vi", "/posts/a")).toBe("https://reallylun.com/posts/a");
+    expect(localeUrl("en", "/posts/a")).toBe("https://reallylun.com/en/posts/a");
+  });
+
+  it("rejects relative pathnames", async () => {
+    const { localizePath } = await load();
+    expect(() => localizePath("en", "posts/a")).toThrow(/must start with/);
+  });
+
+  it("points RSS discovery at the per-locale feed", async () => {
+    const { rssAlternate } = await load();
+    expect(rssAlternate("vi")["application/rss+xml"][0].url).toBe("/feed.xml");
+    expect(rssAlternate("en")["application/rss+xml"][0].url).toBe("/en/feed.xml");
+  });
+
+  it("maps locales to Open Graph locales with the others as alternates", async () => {
+    const { baseOpenGraph } = await load();
+    expect(baseOpenGraph("vi")).toEqual({
+      siteName: "jsrosetta",
+      locale: "vi_VN",
+      alternateLocale: ["en_US"],
+    });
+    expect(baseOpenGraph("en", ["vi", "en"]).alternateLocale).toEqual(["vi_VN"]);
+    expect(baseOpenGraph("vi", ["vi"]).alternateLocale).toEqual([]);
+  });
+});

@@ -1,10 +1,15 @@
-const formatter = new Intl.DateTimeFormat("vi-VN", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
+import { useFormatter } from "next-intl";
 
 export function DateFormatter({ dateString }: { dateString: string }) {
-  return <time dateTime={dateString}>{formatter.format(new Date(dateString))}</time>;
+  const format = useFormatter();
+  return (
+    <time dateTime={dateString}>
+      {format.dateTime(new Date(dateString), {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      })}
+    </time>
+  );
 }

@@ -1,11 +1,15 @@
 import type { MetadataRoute } from "next";
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { SITE } from "@/lib/site";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  // The manifest is locale-agnostic, so it uses the default locale.
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "Site" });
   return {
-    name: SITE.title,
+    name: t("title"),
     short_name: SITE.name,
-    description: SITE.description,
+    description: t("description"),
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

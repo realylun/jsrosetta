@@ -1,20 +1,15 @@
 ---
-title: "Xử lý lỗi và try/catch"
-description: "throw, try/catch/finally của Node.js so với error value (Go), Result (Rust), throws (Swift), exception (Kotlin, Java)."
-date: "2026-09-27"
-order: 70
-category: errors
-languages: [js, go, rust, swift, kotlin, java]
+title: "Error Handling and try/catch"
+description: "How Node.js's throw and try/catch/finally compare to error values in Go, Result in Rust, throws in Swift, and exceptions in Java."
 tags: [error, exception, try-catch, result]
-credits: "https://github.com/miguelmota/golang-for-nodejs-developers#errors"
 ---
 
-JavaScript cho phép `throw` bất cứ thứ gì, ở bất cứ đâu, và người gọi không hề biết hàm có thể ném lỗi. Các ngôn ngữ dưới đây chia thành hai trường phái:
+JavaScript lets you `throw` anything, anywhere, and the caller has no way of knowing a function might throw. The languages below split into two camps:
 
-- **Lỗi là giá trị trả về**: Go, Rust. Người gọi buộc phải xử lý.
-- **Exception**: Swift, Kotlin, Java. Giống JavaScript nhưng chặt hơn về kiểu.
+- **Errors are return values**: Go, Rust. The caller is forced to handle them.
+- **Exceptions**: Swift, Java. Similar to JavaScript, but stricter about types.
 
-## Định nghĩa, ném và bắt lỗi
+## Defining, throwing, and catching errors
 
 :::tabs
 ```js
@@ -55,19 +50,19 @@ type User struct {
 	Name string
 }
 
-// Lỗi là giá trị trả về cuối cùng.
+// The error is the final return value.
 func findUser(id int) (User, error) {
 	if id != 1 {
-		return User{}, fmt.Errorf("user %d: %w", id, ErrNotFound) // %w: bọc lỗi gốc
+		return User{}, fmt.Errorf("user %d: %w", id, ErrNotFound) // %w: wraps the underlying error
 	}
 	return User{ID: id, Name: "neko"}, nil
 }
 
 func main() {
-	defer fmt.Println("done") // gần giống finally
+	defer fmt.Println("done") // roughly equivalent to finally
 
 	user, err := findUser(2)
-	if errors.Is(err, ErrNotFound) { // ~ instanceof, xuyên qua các lớp bọc
+	if errors.Is(err, ErrNotFound) { // ~ instanceof, sees through wrapping layers
 		fmt.Println(err) // user 2: not found
 		return
 	}
@@ -109,7 +104,7 @@ fn find_user(id: u32) -> Result<User, UserError> {
 fn main() {
     match find_user(2) {
         Ok(user) => println!("{}", user.name),
-        Err(err) => eprintln!("{err}"), // compiler bắt bạn xử lý cả hai nhánh
+        Err(err) => eprintln!("{err}"), // the compiler forces you to handle both branches
     }
     println!("done");
 }
@@ -124,7 +119,7 @@ struct User {
     let name: String
 }
 
-// `throws` bắt buộc khai báo; người gọi phải dùng `try`.
+// `throws` must be declared; the caller has to use `try`.
 func findUser(id: Int) throws -> User {
     guard id == 1 else { throw UserError.notFound(id: id) }
     return User(id: id, name: "neko")
@@ -136,34 +131,13 @@ do {
 } catch UserError.notFound(let id) {
     print("user \(id) not found")
 } catch {
-    print("unexpected: \(error)") // `error` có sẵn trong catch cuối
+    print("unexpected: \(error)") // `error` is available in the final catch
 }
-print("done") // Swift không có finally, dùng `defer` trong hàm
-```
-```kotlin
-class NotFoundException(id: Int) : Exception("user $id not found")
-
-data class User(val id: Int, val name: String)
-
-fun findUser(id: Int): User {
-    if (id != 1) throw NotFoundException(id)
-    return User(id, "neko")
-}
-
-fun main() {
-    try {
-        val user = findUser(2)
-        println(user.name)
-    } catch (e: NotFoundException) {
-        println(e.message)
-    } finally {
-        println("done")
-    }
-}
+print("done") // Swift has no finally, use `defer` inside the function
 ```
 ```java
 public class Main {
-    // Checked exception: compiler bắt khai báo `throws` hoặc bắt lỗi.
+    // Checked exception: the compiler requires declaring `throws` or catching it.
     static class NotFoundException extends Exception {
         NotFoundException(int id) {
             super("user " + id + " not found");
@@ -191,14 +165,14 @@ public class Main {
 ```
 :::
 
-## Ném lỗi tiếp lên trên (rethrow)
+## Propagating errors upward (rethrow)
 
-Trong JavaScript, lỗi không bắt sẽ tự nổi lên người gọi. Go và Rust bắt bạn viết rõ điều đó:
+In JavaScript, an uncaught error automatically propagates up to the caller. Go and Rust make you write that out explicitly:
 
 :::tabs
 ```js
 function greet(id) {
-  const user = findUser(id); // lỗi tự nổi lên
+  const user = findUser(id); // the error propagates automatically
   return `hi ${user.name}`;
 }
 ```
@@ -206,38 +180,32 @@ function greet(id) {
 func greet(id int) (string, error) {
 	user, err := findUser(id)
 	if err != nil {
-		return "", fmt.Errorf("greet: %w", err) // trả lỗi lên, kèm ngữ cảnh
+		return "", fmt.Errorf("greet: %w", err) // pass the error up, with added context
 	}
 	return "hi " + user.Name, nil
 }
 ```
 ```rust
 fn greet(id: u32) -> Result<String, UserError> {
-    let user = find_user(id)?; // `?`: có lỗi thì return Err ngay
+    let user = find_user(id)?; // `?`: returns Err immediately on error
     Ok(format!("hi {}", user.name))
 }
 ```
 ```swift
 func greet(id: Int) throws -> String {
-    let user = try findUser(id: id) // `try` đánh dấu chỗ có thể ném
+    let user = try findUser(id: id) // `try` marks where something might throw
     return "hi \(user.name)"
 }
 ```
-```kotlin
-fun greet(id: Int): String {
-    val user = findUser(id) // exception tự nổi lên, không cần khai báo
-    return "hi ${user.name}"
-}
-```
 ```java
-static String greet(int id) throws NotFoundException { // phải khai báo tiếp
+static String greet(int id) throws NotFoundException { // must keep declaring it
     User user = findUser(id);
     return "hi " + user.name();
 }
 ```
 :::
 
-## Lấy giá trị mặc định khi lỗi
+## Falling back to a default value on error
 
 :::tabs
 ```js
@@ -262,10 +230,6 @@ let name = find_user(2)
 ```swift
 let name = (try? findUser(id: 2))?.name ?? "guest"
 ```
-```kotlin
-val name = runCatching { findUser(2).name }.getOrDefault("guest")
-// hoặc: val name = try { findUser(2).name } catch (e: NotFoundException) { "guest" }
-```
 ```java
 String name;
 try {
@@ -276,6 +240,3 @@ try {
 ```
 :::
 
-:::note
-Kotlin **không có checked exception** dù chạy trên JVM. Code Kotlin gọi một hàm Java có `throws` cũng không bị bắt phải `catch`.
-:::

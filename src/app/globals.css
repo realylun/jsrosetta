@@ -63,6 +63,16 @@ pre {
   color: var(--shiki-dark);
 }
 
+/* Wide comparison tables scroll inside the column instead of widening the page on mobile. */
+.prose .table-scroll {
+  overflow-x: auto;
+  margin: 2em 0;
+}
+
+.prose .table-scroll > table {
+  margin: 0;
+}
+
 /* ---------- Code tabs ---------- */
 .code-tabs {
   margin: 1.5rem 0;
@@ -168,10 +178,6 @@ pre {
 
 [data-lang="swift"] {
   --lang-color: #f05138;
-}
-
-[data-lang="kotlin"] {
-  --lang-color: #7f52ff;
 }
 
 [data-lang="java"] {
