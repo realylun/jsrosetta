@@ -56,7 +56,7 @@ describe("buildAlternates", () => {
 
 describe("buildSitemapEntries", () => {
   it("creates one absolute entry per locale with xhtml alternates", () => {
-    const entries = seo.buildSitemapEntries("/lang/go", ["vi", "en"], { priority: 0.7 });
+    const entries = seo.buildSitemapEntries("/lang/go", ["vi", "en"], () => ({ priority: 0.7 }));
     const languages = {
       vi: "https://reallylun.com/lang/go",
       en: "https://reallylun.com/en/lang/go",
@@ -68,8 +68,15 @@ describe("buildSitemapEntries", () => {
     ]);
   });
 
+  it("takes per-locale fields", () => {
+    const entries = seo.buildSitemapEntries("/", ["vi", "en"], (locale) => ({
+      lastModified: locale === "vi" ? "2026-01-01" : "2026-02-01",
+    }));
+    expect(entries.map((entry) => entry.lastModified)).toEqual(["2026-01-01", "2026-02-01"]);
+  });
+
   it("omits alternates for untranslated pages", () => {
-    expect(seo.buildSitemapEntries("/posts/a", ["vi"], {})).toEqual([
+    expect(seo.buildSitemapEntries("/posts/a", ["vi"], () => ({}))).toEqual([
       { url: "https://reallylun.com/posts/a" },
     ]);
   });

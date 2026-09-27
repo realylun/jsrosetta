@@ -37,16 +37,19 @@ export function buildAlternates({ pathname, locale, locales }: AlternatesInput) 
   };
 }
 
-/** One sitemap entry per existing locale, each listing the others as xhtml:link alternates. */
+/**
+ * One sitemap entry per existing locale, each listing the others as xhtml:link alternates.
+ * `extraFor` supplies per-locale fields such as lastModified.
+ */
 export function buildSitemapEntries<Extra extends object>(
   pathname: string,
   locales: readonly Locale[],
-  extra: Extra,
+  extraFor: (locale: Locale) => Extra,
 ) {
   const languages = languageMap(pathname, locales, localeUrl);
   return locales.map((locale) => ({
     url: localeUrl(locale, pathname),
-    ...extra,
+    ...extraFor(locale),
     ...(languages && { alternates: { languages } }),
   }));
 }
