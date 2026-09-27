@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { LANGUAGES, SOURCE_LANGUAGE, type LanguageId } from "@/lib/languages";
 
 type Props = {
