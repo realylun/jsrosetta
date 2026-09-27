@@ -16,19 +16,6 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
-export const CATEGORY_LABELS: Readonly<Record<Category, string>> = {
-  basics: "Cơ bản",
-  types: "Kiểu dữ liệu",
-  "control-flow": "Luồng điều khiển",
-  collections: "Collections",
-  functions: "Hàm",
-  oop: "Hướng đối tượng",
-  async: "Bất đồng bộ",
-  errors: "Xử lý lỗi",
-  io: "I/O",
-  stdlib: "Thư viện chuẩn",
-};
-
 /** YAML turns unquoted dates into Date objects; normalise both forms to a real YYYY-MM-DD. */
 const isoDate = z
   .union([z.string(), z.date()])

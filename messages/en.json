@@ -1,0 +1,61 @@
+{
+  "Site": {
+    "title": "jsrosetta — Node.js to Go, Rust, Swift, Kotlin, Java",
+    "description": "Translate Node.js/JavaScript syntax into Go, Rust, Swift, Kotlin and Java. One concept per post, compared side by side across languages."
+  },
+  "Home": {
+    "heading": "Write Node.js? Read every other language.",
+    "intro": "Each post takes a familiar JavaScript concept and sets it next to the equivalent code in other languages. Pick a language in any code block and the whole page follows.",
+    "empty": "No posts yet."
+  },
+  "Lang": {
+    "title": "Node.js → {label}",
+    "description": "Every Node.js/JavaScript concept alongside its equivalent in {label}.",
+    "count": "{count, plural, one {# concept} other {# concepts}} with {label} examples.",
+    "empty": "No posts for {label} yet."
+  },
+  "Post": {
+    "previous": "← Previous",
+    "next": "Next →",
+    "credits": "Reference:",
+    "navLabel": "Post navigation",
+    "languagesLabel": "Languages in this post"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "backHome": "Back to home"
+  },
+  "Header": {
+    "navLabel": "Languages"
+  },
+  "LocaleSwitcher": {
+    "label": "Site language",
+    "unavailable": "Not translated yet",
+    "names": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    }
+  },
+  "Footer": {
+    "license": "Code: MIT · Content: CC BY 4.0 · Inspired by"
+  },
+  "Theme": {
+    "label": "Theme: {mode}"
+  },
+  "Categories": {
+    "basics": "Basics",
+    "types": "Types",
+    "control-flow": "Control flow",
+    "collections": "Collections",
+    "functions": "Functions",
+    "oop": "Object-oriented",
+    "async": "Async",
+    "errors": "Error handling",
+    "io": "I/O",
+    "stdlib": "Standard library"
+  },
+  "Og": {
+    "homeTitle": "Node.js to Go, Rust, Swift, Kotlin, Java",
+    "postAlt": "Cover image for a jsrosetta post"
+  }
+}

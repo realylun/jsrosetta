@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Container } from "@/app/_components/container";
 import { PostGrid } from "@/app/_components/post-grid";
+import { routing } from "@/i18n/routing";
 import { getPostsByLanguage } from "@/lib/content";
 import { LANGUAGE_IDS, LANGUAGES, SOURCE_LANGUAGE, isLanguageId } from "@/lib/languages";
-import { BASE_OPEN_GRAPH, RSS_ALTERNATE, SITE } from "@/lib/site";
+import { SITE, baseOpenGraph, localizePath, rssAlternate } from "@/lib/site";
 
 type Props = {
-  params: Promise<{ lang: string }>;
+  params: Promise<{ locale: string; lang: string }>;
 };
 
 export const dynamicParams = false;
@@ -17,19 +20,21 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { lang } = await params;
-  if (!isLanguageId(lang)) return {};
+  const { locale, lang } = await params;
+  if (!hasLocale(routing.locales, locale) || !isLanguageId(lang)) return {};
+  const t = await getTranslations({ locale, namespace: "Lang" });
   const label = LANGUAGES[lang].label;
-  const title = `Node.js → ${label}`;
-  const description = `Tất cả khái niệm Node.js/JavaScript kèm cách viết tương đương trong ${label}.`;
+  const title = t("title", { label });
+  const description = t("description", { label });
+  const pathname = localizePath(locale, `/lang/${lang}`);
   return {
     title,
     description,
-    alternates: { canonical: `/lang/${lang}`, types: RSS_ALTERNATE },
+    alternates: { canonical: pathname, types: rssAlternate(locale) },
     openGraph: {
-      ...BASE_OPEN_GRAPH,
+      ...baseOpenGraph(locale),
       type: "website",
-      url: `/lang/${lang}`,
+      url: pathname,
       title: `${title} · ${SITE.name}`,
       description,
     },
@@ -39,6 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LanguagePage({ params }: Props) {
   const { lang } = await params;
   if (!isLanguageId(lang)) notFound();
+  const t = await getTranslations("Lang");
   const language = LANGUAGES[lang];
   const posts = getPostsByLanguage(lang);
 
@@ -49,13 +55,13 @@ export default async function LanguagePage({ params }: Props) {
           Node.js <span className="text-(--lang-color)">→</span> {language.label}
         </h1>
         <p className="mt-3 text-gray-600 dark:text-gray-400">
-          {posts.length} khái niệm có ví dụ {language.label}.
+          {t("count", { count: posts.length, label: language.label })}
         </p>
         <div className="mt-10">
           {posts.length > 0 ? (
             <PostGrid posts={posts} lang={lang} />
           ) : (
-            <p className="text-gray-500">Chưa có bài nào cho {language.label}.</p>
+            <p className="text-gray-500">{t("empty", { label: language.label })}</p>
           )}
         </div>
       </Container>

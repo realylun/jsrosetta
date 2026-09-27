@@ -1,0 +1,61 @@
+{
+  "Site": {
+    "title": "jsrosetta — Node.js sang Go, Rust, Swift, Kotlin, Java",
+    "description": "Chuyển cú pháp Node.js/JavaScript sang Go, Rust, Swift, Kotlin và Java. Mỗi bài một khái niệm, so sánh song song từng ngôn ngữ."
+  },
+  "Home": {
+    "heading": "Viết Node.js? Đọc hiểu mọi ngôn ngữ còn lại.",
+    "intro": "Mỗi bài là một khái niệm quen thuộc trong JavaScript, đặt cạnh cách viết tương đương ở các ngôn ngữ khác. Chọn một ngôn ngữ ở bất kỳ khối code nào, cả trang sẽ đổi theo.",
+    "empty": "Chưa có bài viết nào."
+  },
+  "Lang": {
+    "title": "Node.js → {label}",
+    "description": "Tất cả khái niệm Node.js/JavaScript kèm cách viết tương đương trong {label}.",
+    "count": "{count} khái niệm có ví dụ {label}.",
+    "empty": "Chưa có bài nào cho {label}."
+  },
+  "Post": {
+    "previous": "← Bài trước",
+    "next": "Bài tiếp →",
+    "credits": "Tham khảo:",
+    "navLabel": "Điều hướng bài viết",
+    "languagesLabel": "Ngôn ngữ trong bài"
+  },
+  "NotFound": {
+    "title": "Không tìm thấy trang",
+    "backHome": "Về trang chủ"
+  },
+  "Header": {
+    "navLabel": "Ngôn ngữ"
+  },
+  "LocaleSwitcher": {
+    "label": "Ngôn ngữ hiển thị",
+    "unavailable": "Chưa có bản dịch",
+    "names": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    }
+  },
+  "Footer": {
+    "license": "Code: MIT · Nội dung: CC BY 4.0 · Cảm hứng từ"
+  },
+  "Theme": {
+    "label": "Giao diện: {mode}"
+  },
+  "Categories": {
+    "basics": "Cơ bản",
+    "types": "Kiểu dữ liệu",
+    "control-flow": "Luồng điều khiển",
+    "collections": "Collections",
+    "functions": "Hàm",
+    "oop": "Hướng đối tượng",
+    "async": "Bất đồng bộ",
+    "errors": "Xử lý lỗi",
+    "io": "I/O",
+    "stdlib": "Thư viện chuẩn"
+  },
+  "Og": {
+    "homeTitle": "Node.js sang Go, Rust, Swift, Kotlin, Java",
+    "postAlt": "Ảnh bìa bài viết trên jsrosetta"
+  }
+}
