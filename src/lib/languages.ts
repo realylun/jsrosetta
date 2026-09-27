@@ -3,7 +3,6 @@ export const LANGUAGE_IDS = [
   "go",
   "rust",
   "swift",
-  "kotlin",
   "java",
 ] as const;
 
@@ -29,12 +28,6 @@ export const LANGUAGES: Readonly<Record<LanguageId, Language>> = {
   go: { id: "go", label: "Go", aliases: ["go", "golang"], color: "#00add8" },
   rust: { id: "rust", label: "Rust", aliases: ["rust", "rs"], color: "#dea584" },
   swift: { id: "swift", label: "Swift", aliases: ["swift"], color: "#f05138" },
-  kotlin: {
-    id: "kotlin",
-    label: "Kotlin",
-    aliases: ["kotlin", "kt"],
-    color: "#7f52ff",
-  },
   java: { id: "java", label: "Java", aliases: ["java"], color: "#b07219" },
 };
 

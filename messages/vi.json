@@ -1,7 +1,7 @@
 {
   "Site": {
-    "title": "jsrosetta — Node.js sang Go, Rust, Swift, Kotlin, Java",
-    "description": "Chuyển cú pháp Node.js/JavaScript sang Go, Rust, Swift, Kotlin và Java. Mỗi bài một khái niệm, so sánh song song từng ngôn ngữ."
+    "title": "jsrosetta — Node.js sang Go, Rust, Swift, Java",
+    "description": "Chuyển cú pháp Node.js/JavaScript sang Go, Rust, Swift và Java. Mỗi bài một khái niệm, so sánh song song từng ngôn ngữ."
   },
   "Home": {
     "heading": "Viết Node.js? Đọc hiểu mọi ngôn ngữ còn lại.",
@@ -56,7 +56,7 @@
     "stdlib": "Thư viện chuẩn"
   },
   "Og": {
-    "homeTitle": "Node.js sang Go, Rust, Swift, Kotlin, Java",
+    "homeTitle": "Node.js sang Go, Rust, Swift, Java",
     "postAlt": "Ảnh bìa bài viết trên jsrosetta"
   }
 }

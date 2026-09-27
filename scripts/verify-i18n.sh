@@ -97,7 +97,7 @@ if [[ -n "$UNTRANSLATED" ]]; then
   expect_missing "untranslated post not in /en/feed.xml" "$en_feed" "/posts/$UNTRANSLATED"
   expect_missing "untranslated post has no EN sitemap entry" "$sitemap" "/en/posts/$UNTRANSLATED"
   expect_contains "untranslated post has a VI sitemap entry" "$sitemap" "$SITE/posts/$UNTRANSLATED"
-  for lang in go rust swift kotlin java; do
+  for lang in go rust swift java; do
     expect_missing "untranslated post not on /en/lang/$lang" "$(body "/en/lang/$lang")" "/posts/$UNTRANSLATED"
   done
 fi

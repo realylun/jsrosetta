@@ -1,13 +1,13 @@
 ---
 title: "Error Handling and try/catch"
-description: "How Node.js's throw and try/catch/finally compare to error values in Go, Result in Rust, throws in Swift, and exceptions in Kotlin and Java."
+description: "How Node.js's throw and try/catch/finally compare to error values in Go, Result in Rust, throws in Swift, and exceptions in Java."
 tags: [error, exception, try-catch, result]
 ---
 
 JavaScript lets you `throw` anything, anywhere, and the caller has no way of knowing a function might throw. The languages below split into two camps:
 
 - **Errors are return values**: Go, Rust. The caller is forced to handle them.
-- **Exceptions**: Swift, Kotlin, Java. Similar to JavaScript, but stricter about types.
+- **Exceptions**: Swift, Java. Similar to JavaScript, but stricter about types.
 
 ## Defining, throwing, and catching errors
 
@@ -135,27 +135,6 @@ do {
 }
 print("done") // Swift has no finally, use `defer` inside the function
 ```
-```kotlin
-class NotFoundException(id: Int) : Exception("user $id not found")
-
-data class User(val id: Int, val name: String)
-
-fun findUser(id: Int): User {
-    if (id != 1) throw NotFoundException(id)
-    return User(id, "neko")
-}
-
-fun main() {
-    try {
-        val user = findUser(2)
-        println(user.name)
-    } catch (e: NotFoundException) {
-        println(e.message)
-    } finally {
-        println("done")
-    }
-}
-```
 ```java
 public class Main {
     // Checked exception: the compiler requires declaring `throws` or catching it.
@@ -218,12 +197,6 @@ func greet(id: Int) throws -> String {
     return "hi \(user.name)"
 }
 ```
-```kotlin
-fun greet(id: Int): String {
-    val user = findUser(id) // the exception propagates automatically, no declaration needed
-    return "hi ${user.name}"
-}
-```
 ```java
 static String greet(int id) throws NotFoundException { // must keep declaring it
     User user = findUser(id);
@@ -257,10 +230,6 @@ let name = find_user(2)
 ```swift
 let name = (try? findUser(id: 2))?.name ?? "guest"
 ```
-```kotlin
-val name = runCatching { findUser(2).name }.getOrDefault("guest")
-// or: val name = try { findUser(2).name } catch (e: NotFoundException) { "guest" }
-```
 ```java
 String name;
 try {
@@ -271,6 +240,3 @@ try {
 ```
 :::
 
-:::note
-Kotlin **has no checked exceptions**, even though it runs on the JVM. Kotlin code calling a Java function with `throws` isn't forced to `catch` it either.
-:::

@@ -1,6 +1,6 @@
 # jsrosetta
 
-Blog so sánh cú pháp **Node.js/JavaScript** với **Go, Rust, Swift, Kotlin, Java**. Mỗi bài là một khái niệm (biến, async/await, xử lý lỗi…), mỗi ngôn ngữ là một tab. Chọn một ngôn ngữ ở bất kỳ khối code nào thì cả trang đổi theo, và lựa chọn được nhớ cho lần sau.
+Blog so sánh cú pháp **Node.js/JavaScript** với **Go, Rust, Swift, Java**. Mỗi bài là một khái niệm (biến, async/await, xử lý lỗi…), mỗi ngôn ngữ là một tab. Chọn một ngôn ngữ ở bất kỳ khối code nào thì cả trang đổi theo, và lựa chọn được nhớ cho lần sau.
 
 Stack: Next.js 16 (App Router, static) · Tailwind CSS v4 · unified/remark/rehype · Shiki (qua rehype-pretty-code) · zod · Vitest.
 
@@ -29,7 +29,7 @@ date: "2026-09-27"
 updated: "2026-10-01"          # tuỳ chọn
 order: 60                      # thứ tự trên trang chủ
 category: async                # basics | types | control-flow | collections | functions | oop | async | errors | io | stdlib
-languages: [js, go, rust, swift, kotlin, java]
+languages: [js, go, rust, swift, java]
 tags: [promise, concurrency]   # tuỳ chọn
 draft: false                   # true: chỉ hiện khi chạy dev
 credits: "https://…"           # tuỳ chọn: link nguồn tham khảo
@@ -40,7 +40,7 @@ Frontmatter được validate bằng zod. Sai trường nào thì build fail và
 
 ### Tab ngôn ngữ
 
-Bọc các code block liền nhau trong `:::tabs`. Tên fence quyết định nhãn tab (`js`/`ts` → Node.js, `rs` → Rust, `kt` → Kotlin…, xem `src/lib/languages.ts`).
+Bọc các code block liền nhau trong `:::tabs`. Tên fence quyết định nhãn tab (`js`/`ts` → Node.js, `rs` → Rust…, xem `src/lib/languages.ts`).
 
 ````md
 :::tabs

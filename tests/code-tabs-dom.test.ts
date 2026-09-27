@@ -58,8 +58,8 @@ describe("code tabs DOM", () => {
 
   it("persists the chosen language", () => {
     expect(readStoredLang()).toBeNull();
-    storeLang("kotlin");
-    expect(localStorage.getItem(LANG_STORAGE_KEY)).toBe("kotlin");
-    expect(readStoredLang()).toBe("kotlin");
+    storeLang("java");
+    expect(localStorage.getItem(LANG_STORAGE_KEY)).toBe("java");
+    expect(readStoredLang()).toBe("java");
   });
 });

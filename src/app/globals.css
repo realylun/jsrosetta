@@ -180,10 +180,6 @@ pre {
   --lang-color: #f05138;
 }
 
-[data-lang="kotlin"] {
-  --lang-color: #7f52ff;
-}
-
 [data-lang="java"] {
   --lang-color: #b07219;
 }

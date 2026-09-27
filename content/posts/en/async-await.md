@@ -1,6 +1,6 @@
 ---
 title: "Async/Await"
-description: "How Node.js's Promise and async/await compare to goroutines (Go), Future + tokio (Rust), Swift concurrency, coroutines (Kotlin), and CompletableFuture (Java)."
+description: "How Node.js's Promise and async/await compare to goroutines (Go), Future + tokio (Rust), Swift concurrency, and CompletableFuture (Java)."
 tags: [promise, async, await, concurrency]
 ---
 
@@ -84,23 +84,6 @@ struct App {
     }
 }
 ```
-```kotlin
-// build.gradle.kts: implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<version>")
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-
-data class User(val id: Int, val name: String)
-
-suspend fun fetchUser(id: Int): User {
-    delay(100)
-    return User(id, "user-$id")
-}
-
-fun main() = runBlocking {
-    val user = fetchUser(1) // call a suspend fun like a normal function, there's no `await` keyword
-    println(user.name)
-}
-```
 ```java
 import java.util.concurrent.CompletableFuture;
 
@@ -168,18 +151,6 @@ async let c = fetchUser(id: 3)
 let users = try await [a, b, c]
 print(users.count)
 ```
-```kotlin
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
-
-fun main() = runBlocking { // `async` needs a CoroutineScope, runBlocking provides that scope
-    val users = listOf(1, 2, 3)
-        .map { id -> async { fetchUser(id) } }
-        .awaitAll()
-    println(users.size)
-}
-```
 ```java
 import java.util.List;
 
@@ -195,12 +166,12 @@ System.out.println(users.size());
 
 ## Key differences to remember
 
-| | Node.js | Go | Rust | Swift | Kotlin | Java |
-|---|---|---|---|---|---|---|
-| Async unit | `Promise` | goroutine | `Future` | `Task` | coroutine | `CompletableFuture` |
-| Starts running when | Promise is created | `go` is called | `.await`ed/polled | `async let`/`Task` is called | `async`/`launch` is called | `supplyAsync` is called |
-| Runtime | built-in event loop | built-in | choose your own (tokio…) | built-in | kotlinx library | built-in thread pool |
-| True multithreading | no (except workers) | yes | yes | yes | yes | yes |
+| | Node.js | Go | Rust | Swift | Java |
+|---|---|---|---|---|---|
+| Async unit | `Promise` | goroutine | `Future` | `Task` | `CompletableFuture` |
+| Starts running when | Promise is created | `go` is called | `.await`ed/polled | `async let`/`Task` is called | `supplyAsync` is called |
+| Runtime | built-in event loop | built-in | choose your own (tokio…) | built-in | built-in thread pool |
+| True multithreading | no (except workers) | yes | yes | yes | yes |
 
 :::warning
 Rust's Future is **lazy**: calling `fetch_user(1)` without `.await` runs nothing at all. A JavaScript Promise, by contrast, starts running as soon as it's created.

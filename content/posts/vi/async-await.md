@@ -1,10 +1,10 @@
 ---
 title: "Async/Await"
-description: "Promise và async/await của Node.js so với goroutine (Go), Future + tokio (Rust), Swift concurrency, coroutine (Kotlin) và CompletableFuture (Java)."
+description: "Promise và async/await của Node.js so với goroutine (Go), Future + tokio (Rust), Swift concurrency và CompletableFuture (Java)."
 date: "2026-09-27"
 order: 60
 category: async
-languages: [js, go, rust, swift, kotlin, java]
+languages: [js, go, rust, swift, java]
 tags: [promise, async, await, concurrency]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#asyncawait"
 ---
@@ -89,23 +89,6 @@ struct App {
     }
 }
 ```
-```kotlin
-// build.gradle.kts: implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<version>")
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-
-data class User(val id: Int, val name: String)
-
-suspend fun fetchUser(id: Int): User {
-    delay(100)
-    return User(id, "user-$id")
-}
-
-fun main() = runBlocking {
-    val user = fetchUser(1) // gọi suspend fun như hàm thường, không có từ khoá `await`
-    println(user.name)
-}
-```
 ```java
 import java.util.concurrent.CompletableFuture;
 
@@ -173,18 +156,6 @@ async let c = fetchUser(id: 3)
 let users = try await [a, b, c]
 print(users.count)
 ```
-```kotlin
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
-
-fun main() = runBlocking { // `async` cần một CoroutineScope, runBlocking cung cấp scope đó
-    val users = listOf(1, 2, 3)
-        .map { id -> async { fetchUser(id) } }
-        .awaitAll()
-    println(users.size)
-}
-```
 ```java
 import java.util.List;
 
@@ -200,12 +171,12 @@ System.out.println(users.size());
 
 ## Khác biệt cần nhớ
 
-| | Node.js | Go | Rust | Swift | Kotlin | Java |
-|---|---|---|---|---|---|---|
-| Đơn vị bất đồng bộ | `Promise` | goroutine | `Future` | `Task` | coroutine | `CompletableFuture` |
-| Bắt đầu chạy khi | tạo Promise | gọi `go` | bị `.await`/poll | gọi `async let`/`Task` | gọi `async`/`launch` | gọi `supplyAsync` |
-| Runtime | event loop có sẵn | có sẵn | tự chọn (tokio…) | có sẵn | thư viện kotlinx | thread pool có sẵn |
-| Đa luồng thật | không (trừ worker) | có | có | có | có | có |
+| | Node.js | Go | Rust | Swift | Java |
+|---|---|---|---|---|---|
+| Đơn vị bất đồng bộ | `Promise` | goroutine | `Future` | `Task` | `CompletableFuture` |
+| Bắt đầu chạy khi | tạo Promise | gọi `go` | bị `.await`/poll | gọi `async let`/`Task` | gọi `supplyAsync` |
+| Runtime | event loop có sẵn | có sẵn | tự chọn (tokio…) | có sẵn | thread pool có sẵn |
+| Đa luồng thật | không (trừ worker) | có | có | có | có |
 
 :::warning
 Future của Rust là **lazy**: gọi `fetch_user(1)` mà không `.await` thì không có gì chạy cả. Ngược lại, Promise trong JavaScript bắt đầu chạy ngay khi được tạo.

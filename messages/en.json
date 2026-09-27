@@ -1,7 +1,7 @@
 {
   "Site": {
-    "title": "jsrosetta — Node.js to Go, Rust, Swift, Kotlin, Java",
-    "description": "Translate Node.js/JavaScript syntax into Go, Rust, Swift, Kotlin and Java. One concept per post, compared side by side across languages."
+    "title": "jsrosetta — Node.js to Go, Rust, Swift, Java",
+    "description": "Translate Node.js/JavaScript syntax into Go, Rust, Swift and Java. One concept per post, compared side by side across languages."
   },
   "Home": {
     "heading": "Write Node.js? Read every other language.",
@@ -56,7 +56,7 @@
     "stdlib": "Standard library"
   },
   "Og": {
-    "homeTitle": "Node.js to Go, Rust, Swift, Kotlin, Java",
+    "homeTitle": "Node.js to Go, Rust, Swift, Java",
     "postAlt": "Cover image for a jsrosetta post"
   }
 }

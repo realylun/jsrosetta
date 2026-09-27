@@ -1,10 +1,10 @@
 ---
 title: "Xử lý lỗi và try/catch"
-description: "throw, try/catch/finally của Node.js so với error value (Go), Result (Rust), throws (Swift), exception (Kotlin, Java)."
+description: "throw, try/catch/finally của Node.js so với error value (Go), Result (Rust), throws (Swift), exception (Java)."
 date: "2026-09-27"
 order: 70
 category: errors
-languages: [js, go, rust, swift, kotlin, java]
+languages: [js, go, rust, swift, java]
 tags: [error, exception, try-catch, result]
 credits: "https://github.com/miguelmota/golang-for-nodejs-developers#errors"
 ---
@@ -12,7 +12,7 @@ credits: "https://github.com/miguelmota/golang-for-nodejs-developers#errors"
 JavaScript cho phép `throw` bất cứ thứ gì, ở bất cứ đâu, và người gọi không hề biết hàm có thể ném lỗi. Các ngôn ngữ dưới đây chia thành hai trường phái:
 
 - **Lỗi là giá trị trả về**: Go, Rust. Người gọi buộc phải xử lý.
-- **Exception**: Swift, Kotlin, Java. Giống JavaScript nhưng chặt hơn về kiểu.
+- **Exception**: Swift, Java. Giống JavaScript nhưng chặt hơn về kiểu.
 
 ## Định nghĩa, ném và bắt lỗi
 
@@ -140,27 +140,6 @@ do {
 }
 print("done") // Swift không có finally, dùng `defer` trong hàm
 ```
-```kotlin
-class NotFoundException(id: Int) : Exception("user $id not found")
-
-data class User(val id: Int, val name: String)
-
-fun findUser(id: Int): User {
-    if (id != 1) throw NotFoundException(id)
-    return User(id, "neko")
-}
-
-fun main() {
-    try {
-        val user = findUser(2)
-        println(user.name)
-    } catch (e: NotFoundException) {
-        println(e.message)
-    } finally {
-        println("done")
-    }
-}
-```
 ```java
 public class Main {
     // Checked exception: compiler bắt khai báo `throws` hoặc bắt lỗi.
@@ -223,12 +202,6 @@ func greet(id: Int) throws -> String {
     return "hi \(user.name)"
 }
 ```
-```kotlin
-fun greet(id: Int): String {
-    val user = findUser(id) // exception tự nổi lên, không cần khai báo
-    return "hi ${user.name}"
-}
-```
 ```java
 static String greet(int id) throws NotFoundException { // phải khai báo tiếp
     User user = findUser(id);
@@ -262,10 +235,6 @@ let name = find_user(2)
 ```swift
 let name = (try? findUser(id: 2))?.name ?? "guest"
 ```
-```kotlin
-val name = runCatching { findUser(2).name }.getOrDefault("guest")
-// hoặc: val name = try { findUser(2).name } catch (e: NotFoundException) { "guest" }
-```
 ```java
 String name;
 try {
@@ -276,6 +245,3 @@ try {
 ```
 :::
 
-:::note
-Kotlin **không có checked exception** dù chạy trên JVM. Code Kotlin gọi một hàm Java có `throws` cũng không bị bắt phải `catch`.
-:::

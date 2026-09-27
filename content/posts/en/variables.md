@@ -1,6 +1,6 @@
 ---
 title: "Variables and Constants"
-description: "What const and let in Node.js correspond to in Go, Rust, Swift, Kotlin, and Java."
+description: "What const and let in Node.js correspond to in Go, Rust, Swift, and Java."
 tags: [const, let, immutability, type-inference]
 ---
 
@@ -47,15 +47,6 @@ count += 1
 
 print(name, count)
 ```
-```kotlin
-fun main() {
-    val name = "neko" // read-only, like const
-    var count = 0     // mutable, like let
-    count += 1
-
-    println("$name $count")
-}
-```
 ```java
 public class Main {
     public static void main(String[] args) {
@@ -69,10 +60,10 @@ public class Main {
 ```
 :::
 
-| Node.js | Go | Rust | Swift | Kotlin | Java |
-|---|---|---|---|---|---|
-| `const` | `const` (compile-time values only) | `let` | `let` | `val` | `final` |
-| `let` | `var` / `:=` | `let mut` | `var` | `var` | regular variable / `var` |
+| Node.js | Go | Rust | Swift | Java |
+|---|---|---|---|---|
+| `const` | `const` (compile-time values only) | `let` | `let` | `final` |
+| `let` | `var` / `:=` | `let mut` | `var` | regular variable / `var` |
 
 :::note
 Rust is the only language on this list where **immutability is the default**. To change a value, you have to ask permission with `mut`.
@@ -104,11 +95,6 @@ fn main() {
 ```swift
 let maxUsers = 100
 let startedAt = Date() // `let` also accepts runtime values
-```
-```kotlin
-const val MAX_USERS = 100 // only at top-level or inside an object, primitive/String types only
-
-val startedAt = System.currentTimeMillis() // `val` accepts runtime values
 ```
 ```java
 static final int MAX_USERS = 100;
@@ -146,10 +132,6 @@ func example() {
     print(title ?? "-", label)
 }
 ```
-```kotlin
-var title: String? = null  // must be assigned explicitly
-lateinit var label: String // promises to assign later (only for var, non-null types)
-```
 ```java
 String title;      // local variable: must be assigned before reading
 static int count;  // field: defaults to 0, object: null
@@ -183,12 +165,6 @@ struct User { var name: String } // struct is a value type
 
 let user = User(name: "neko")
 // user.name = "tama" // error: `let` locks the whole struct
-```
-```kotlin
-data class User(val name: String) // `val` property: cannot be changed
-
-val user = User("neko")
-val renamed = user.copy(name = "tama") // creates a new copy
 ```
 ```java
 record User(String name) {} // record: fields are final
