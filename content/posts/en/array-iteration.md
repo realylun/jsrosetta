@@ -1,0 +1,108 @@
+---
+title: "Iterating arrays (map, filter, reduce)"
+description: "Node.js's forEach, map, filter, reduce compared to hand-written generic Map/Filter/Reduce functions in Go."
+tags: [array, iteration, generics, functional]
+---
+
+Node.js ships `forEach`, `map`, `filter`, and `reduce` right on `Array.prototype`. Go's standard library has none of these for slices, but since Go 1.18 you can write them once using generics and reuse them for any data type.
+
+## Iterating over each element (forEach)
+
+:::tabs
+```js
+const array = ['a', 'b', 'c'];
+
+array.forEach((value, i) => {
+  console.log(i, value);
+});
+// 0 'a'
+// 1 'b'
+// 2 'c'
+```
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	array := []string{"a", "b", "c"}
+
+	for i, value := range array {
+		fmt.Println(i, value)
+	}
+	// 0 a
+	// 1 b
+	// 2 c
+}
+```
+:::
+
+## map, filter, reduce with generics
+
+:::tabs
+```js
+const mapped = array.map((value) => value.toUpperCase());
+console.log(mapped); // ['A', 'B', 'C']
+
+const filtered = array.filter((value, i) => i % 2 == 0);
+console.log(filtered); // ['a', 'c']
+
+const reduced = array.reduce((acc, value, i) => {
+  if (i % 2 == 0) acc.push(value.toUpperCase());
+  return acc;
+}, []);
+console.log(reduced); // ['A', 'C']
+```
+```go
+func Map[T, U any](s []T, f func(value T, i int) U) []U {
+	result := make([]U, len(s))
+	for i, value := range s {
+		result[i] = f(value, i)
+	}
+	return result
+}
+
+func Filter[T any](s []T, f func(value T, i int) bool) []T {
+	var result []T
+	for i, value := range s {
+		if f(value, i) {
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
+func Reduce[T, U any](s []T, initial U, f func(acc U, value T, i int) U) U {
+	acc := initial
+	for i, value := range s {
+		acc = f(acc, value, i)
+	}
+	return acc
+}
+
+mapped := Map(array, func(value string, _ int) string {
+	return strings.ToUpper(value)
+})
+fmt.Println(mapped) // [A B C]
+
+filtered := Filter(array, func(_ string, i int) bool {
+	return i%2 == 0
+})
+fmt.Println(filtered) // [a c]
+
+reduced := Reduce(array, []string{}, func(acc []string, value string, i int) []string {
+	if i%2 == 0 {
+		acc = append(acc, strings.ToUpper(value))
+	}
+	return acc
+})
+fmt.Println(reduced) // [A C]
+```
+:::
+
+:::note
+Go 1.18 added generics (type parameters). Before that you'd write a `for` loop by hand for every type; now `Map`/`Filter`/`Reduce` are written once with `[T, U any]` and reused for `[]string`, `[]int`, and so on — they're not in the standard library, so you (or a package) have to define them yourself.
+:::
