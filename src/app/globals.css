@@ -12,12 +12,14 @@
   --code-bg: #f6f8fa;
   --code-border: #e5e7eb;
   --tab-active: #111827;
+  --tab-idle: var(--color-gray-500);
 }
 
 .dark {
   --code-bg: #0d1117;
   --code-border: #1f2937;
   --tab-active: #f9fafb;
+  --tab-idle: var(--color-gray-400);
 }
 
 /* ---------- Shiki dual theme (rehype-pretty-code) ---------- */
@@ -73,6 +75,15 @@ pre {
   margin: 0;
 }
 
+/* Row labels are <th scope="row"> for screen readers; keep them looking like the body cells. */
+.prose tbody th[scope="row"] {
+  padding: 0.5714286em;
+  padding-inline-start: 0;
+  vertical-align: baseline;
+  text-align: start;
+  font-weight: inherit;
+}
+
 /* ---------- Code tabs ---------- */
 .code-tabs {
   margin: 1.5rem 0;
@@ -93,7 +104,7 @@ pre {
   margin-bottom: -1px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-gray-500);
+  color: var(--tab-idle);
   cursor: pointer;
 }
 

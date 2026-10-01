@@ -83,7 +83,7 @@ function AdjacentLink({
       href={`/posts/${post.slug}`}
       className={`flex flex-col rounded-lg border border-gray-200 p-4 hover:border-gray-400 dark:border-gray-800 dark:hover:border-gray-600 ${isNext ? "text-right" : ""}`}
     >
-      <span className="text-xs text-gray-500">{label}</span>
+      <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
       <span className="font-medium">{post.title}</span>
     </Link>
   );
@@ -108,10 +108,10 @@ export default async function PostPage({ params }: Props) {
       <Container className="py-12">
         <article className="mx-auto max-w-3xl">
           <header className="mb-10 border-b border-gray-200 pb-8 dark:border-gray-800">
-            <p className="text-sm font-medium text-gray-500">{tCategory(post.category)}</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{tCategory(post.category)}</p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight">{post.title}</h1>
             <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">{post.description}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
               <span>
                 {t("byline")}{" "}
                 <a className="underline hover:text-gray-900 dark:hover:text-gray-100" href={AUTHOR.url} rel="author">
@@ -127,7 +127,7 @@ export default async function PostPage({ params }: Props) {
           <PostBody html={html} />
 
           {post.credits && (
-            <p className="mt-12 text-sm text-gray-500">
+            <p className="mt-12 text-sm text-gray-500 dark:text-gray-400">
               {t("credits")}{" "}
               <a className="underline" href={post.credits}>
                 {post.credits.replace(/^https?:\/\//, "")}
