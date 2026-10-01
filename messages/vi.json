@@ -64,6 +64,7 @@
     "async": "Bất đồng bộ",
     "errors": "Xử lý lỗi",
     "io": "I/O",
-    "stdlib": "Thư viện chuẩn"
+    "stdlib": "Thư viện chuẩn",
+    "data-structures": "Cấu trúc dữ liệu"
   }
 }

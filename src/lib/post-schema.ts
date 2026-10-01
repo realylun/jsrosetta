@@ -12,6 +12,7 @@ export const CATEGORIES = [
   "errors",
   "io",
   "stdlib",
+  "data-structures",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
