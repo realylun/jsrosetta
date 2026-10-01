@@ -15,18 +15,18 @@ The JavaScript examples in this post call `globalThis.gc()`, which only exists w
 :::tabs
 ```js
 // run: node --expose-gc weakref.mjs
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-let user = { name: 'neko' }
-const ref = new WeakRef(user) // doesn't keep user alive
+let user = { name: "neko" };
+const ref = new WeakRef(user); // doesn't keep user alive
 
-console.log(ref.deref()?.name) // → neko
+console.log(ref.deref()?.name); // → neko
 
-user = null // drop the last strong reference
-await tick() // let the sync code and the microtask queue finish: only now may the WeakRef let go of its target
-globalThis.gc() // force a GC, only available with --expose-gc
+user = null; // drop the last strong reference
+await tick(); // let the sync code and the microtask queue finish: only now may the WeakRef let go of its target
+globalThis.gc(); // force a GC, only available with --expose-gc
 
-console.log(ref.deref()) // → undefined
+console.log(ref.deref()); // → undefined
 ```
 ```go
 package main
@@ -64,25 +64,25 @@ Why does JS need `await tick()` before `gc()`? The spec says that creating a `We
 :::tabs
 ```js
 // run: node --expose-gc registry.mjs
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const registry = new FinalizationRegistry((heldValue) => {
-  console.log('cleaning up', heldValue) // receives heldValue, NOT the reclaimed object
-})
+  console.log("cleaning up", heldValue); // receives heldValue, NOT the reclaimed object
+});
 
-let a = { id: 1 }
-let b = { id: 2 }
-const token = {} // used to unregister later
-registry.register(a, 'conn#1')
-registry.register(b, 'conn#2', token)
+let a = { id: 1 };
+let b = { id: 2 };
+const token = {}; // used to unregister later
+registry.register(a, "conn#1");
+registry.register(b, "conn#2", token);
 
-console.log(registry.unregister(token)) // → true: conn#2 will no longer be cleaned up via the registry
+console.log(registry.unregister(token)); // → true: conn#2 will no longer be cleaned up via the registry
 
-a = null
-b = null
-await tick()
-globalThis.gc()
-await tick() // the callback runs in a later task after GC, not inside gc() itself
+a = null;
+b = null;
+await tick();
+globalThis.gc();
+await tick(); // the callback runs in a later task after GC, not inside gc() itself
 // → cleaning up conn#1
 ```
 ```go
@@ -143,45 +143,45 @@ The typical use case: a cache whose values can be reclaimed by the GC once nobod
 ```js
 // run: node --expose-gc cache.mjs
 class WeakCache {
-  #refs = new Map() // key → WeakRef(value): the Map holds the key, not the value
+  #refs = new Map(); // key → WeakRef(value): the Map holds the key, not the value
   #registry = new FinalizationRegistry((key) => {
     // only delete if the key still points to an emptied WeakRef: it may have been set to a new value since
     if (this.#refs.get(key)?.deref() === undefined) {
-      this.#refs.delete(key)
+      this.#refs.delete(key);
     }
-  })
+  });
 
   get(key) {
-    return this.#refs.get(key)?.deref()
+    return this.#refs.get(key)?.deref();
   }
 
   set(key, value) {
-    this.#refs.set(key, new WeakRef(value))
-    this.#registry.register(value, key)
+    this.#refs.set(key, new WeakRef(value));
+    this.#registry.register(value, key);
   }
 
   get size() {
-    return this.#refs.size
+    return this.#refs.size;
   }
 }
 
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
-const cache = new WeakCache()
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const cache = new WeakCache();
 
-let report = { title: 'Q3', rows: new Array(1_000_000).fill(0) }
-const logo = { title: 'logo' }
-cache.set('report', report)
-cache.set('logo', logo)
+let report = { title: "Q3", rows: new Array(1_000_000).fill(0) };
+const logo = { title: "logo" };
+cache.set("report", report);
+cache.set("logo", logo);
 
-report = null // only the cache holds report now, and it holds it weakly
-await tick()
-globalThis.gc()
+report = null; // only the cache holds report now, and it holds it weakly
+await tick();
+globalThis.gc();
 
-console.log(cache.get('report')) // → undefined
-console.log(cache.get('logo')) // → { title: 'logo' }
+console.log(cache.get("report")); // → undefined
+console.log(cache.get("logo")); // → { title: 'logo' }
 
-await tick() // wait for the FinalizationRegistry callback to delete the 'report' key
-console.log(cache.size) // → 1
+await tick(); // wait for the FinalizationRegistry callback to delete the 'report' key
+console.log(cache.size); // → 1
 ```
 ```go
 package main

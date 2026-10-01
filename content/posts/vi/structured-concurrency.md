@@ -28,36 +28,38 @@ async function work({ name, ms, fail }, signal) {
 }
 
 // all: như Promise.all, nhưng lỗi đầu tiên abort các task anh em, và chỉ
-// trả về khi MỌI task đã dừng hẳn (giống errgroup.Wait).
-async function all(tasks) {
+// trả về khi MỌI task đã dừng hẳn (giống errgroup.Wait). Trạng thái của task i
+// được ghi vào statuses[i], như mảng statuses mà main bên Go cấp sẵn.
+async function all(tasks, statuses) {
   const controller = new AbortController();
   const settled = await Promise.allSettled(
-    tasks.map(async (task) => {
+    tasks.map(async (task, i) => {
       try {
-        return await work(task, controller.signal);
+        const value = await work(task, controller.signal);
+        statuses[i] = "ok";
+        return value;
       } catch (err) {
+        statuses[i] = err.name === "AbortError" ? "cancelled" : "failed";
         controller.abort(err); // abort lần hai trở đi không làm gì: reason giữ lỗi đầu tiên
         throw err;
       }
     }),
   );
-  if (controller.signal.aborted) {
-    const statuses = settled.map((s) =>
-      s.status === "fulfilled" ? "ok" : s.reason.name === "AbortError" ? "cancelled" : "failed",
-    );
-    console.log(statuses); // → [ 'cancelled', 'failed', 'cancelled' ]
-    throw controller.signal.reason;
-  }
+  if (controller.signal.aborted) throw controller.signal.reason;
   return settled.map((s) => s.value);
 }
 
+const tasks = [
+  { name: "A", ms: 100 },
+  { name: "B", ms: 50, fail: true }, // B lỗi ở ~50ms, trước khi A và C xong
+  { name: "C", ms: 300 },
+];
+const statuses = new Array(tasks.length);
+
 try {
-  await all([
-    { name: "A", ms: 100 },
-    { name: "B", ms: 50, fail: true }, // B lỗi ở ~50ms, trước khi A và C xong
-    { name: "C", ms: 300 },
-  ]);
+  await all(tasks, statuses); // chờ MỌI task dừng hẳn, rồi ném lỗi đầu tiên
 } catch (err) {
+  console.log(statuses); // → [ 'cancelled', 'failed', 'cancelled' ]
   console.log("error:", err.message); // → error: B failed
 }
 ```

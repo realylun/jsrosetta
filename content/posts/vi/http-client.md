@@ -17,12 +17,12 @@ Node.js có `fetch()` toàn cục (dựng trên undici) — cùng API với trì
 
 :::tabs
 ```js
-const res = await fetch('https://jsonplaceholder.typicode.com/todos/1')
-console.log(res.status) // → 200
-console.log(res.headers.get('content-type')) // → application/json; charset=utf-8
+const res = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+console.log(res.status); // → 200
+console.log(res.headers.get("content-type")); // → application/json; charset=utf-8
 
-const todo = await res.json() // đọc body và parse JSON
-console.log(todo)
+const todo = await res.json(); // đọc body và parse JSON
+console.log(todo);
 // → { userId: 1, id: 1, title: 'delectus aut autem', completed: false }
 ```
 ```go
@@ -69,17 +69,17 @@ func main() {
 
 :::tabs
 ```js
-const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
-  method: 'POST',
+const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    "Content-Type": "application/json",
+    "Accept": "application/json",
   },
-  body: JSON.stringify({ title: 'hello', userId: 1 }), // body nhận string, Buffer/TypedArray/ArrayBuffer, Blob, FormData, URLSearchParams hoặc stream; object thường bị ép thành "[object Object]", không phải JSON
-})
+  body: JSON.stringify({ title: "hello", userId: 1 }), // body nhận string, Buffer/TypedArray/ArrayBuffer, Blob, FormData, URLSearchParams hoặc stream; object thường bị ép thành "[object Object]", không phải JSON
+});
 
-console.log(res.status) // → 201
-console.log(await res.json()) // → { title: 'hello', userId: 1, id: 101 }
+console.log(res.status); // → 201
+console.log(await res.json()); // → { title: 'hello', userId: 1, id: 101 }
 ```
 ```go
 package main
@@ -136,18 +136,18 @@ Chỉ cần POST với một header `Content-Type` thì Go có lối tắt `http
 
 :::tabs
 ```js
-const res = await fetch('https://jsonplaceholder.typicode.com/todos/9999')
-console.log(res.ok, res.status) // → false 404 (không throw!)
+const res = await fetch("https://jsonplaceholder.typicode.com/todos/9999");
+console.log(res.ok, res.status); // → false 404 (không throw!)
 
 if (!res.ok) {
-  console.log(`HTTP ${res.status} ${res.statusText}`) // → HTTP 404 Not Found
+  console.log(`HTTP ${res.status} ${res.statusText}`); // → HTTP 404 Not Found
 }
 
 try {
-  await fetch('http://does-not-exist.invalid') // tên miền không tồn tại: lỗi mạng thật
+  await fetch("http://does-not-exist.invalid"); // tên miền không tồn tại: lỗi mạng thật
 } catch (err) {
-  console.log(err.name, err.message) // → TypeError fetch failed
-  console.log(err.cause.code) // → ENOTFOUND
+  console.log(err.name, err.message); // → TypeError fetch failed
+  console.log(err.cause.code); // → ENOTFOUND
 }
 ```
 ```go
@@ -191,24 +191,24 @@ func main() {
 
 :::tabs
 ```js
-import http from 'node:http'
-import { once } from 'node:events'
+import http from "node:http";
+import { once } from "node:events";
 
 // server giả lập chậm: 2 giây mới trả lời
 const server = http.createServer((req, res) => {
-  const timer = setTimeout(() => res.end('late'), 2000)
-  res.on('close', () => clearTimeout(timer)) // client bỏ đi: huỷ timer để tiến trình thoát ngay
-})
-server.listen(0) // port 0: để hệ điều hành chọn port trống
-await once(server, 'listening')
-const url = `http://127.0.0.1:${server.address().port}`
+  const timer = setTimeout(() => res.end("late"), 2000);
+  res.on("close", () => clearTimeout(timer)); // client bỏ đi: huỷ timer để tiến trình thoát ngay
+});
+server.listen(0); // port 0: để hệ điều hành chọn port trống
+await once(server, "listening");
+const url = `http://127.0.0.1:${server.address().port}`;
 
 try {
-  await fetch(url, { signal: AbortSignal.timeout(500) }) // huỷ sau 500ms
+  await fetch(url, { signal: AbortSignal.timeout(500) }); // huỷ sau 500ms
 } catch (err) {
-  console.log(err.name) // → TimeoutError
+  console.log(err.name); // → TimeoutError
 } finally {
-  server.close()
+  server.close();
 }
 ```
 ```go
@@ -256,23 +256,23 @@ func main() {
 
 :::tabs
 ```js
-import { createWriteStream } from 'node:fs'
-import { rm, stat } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { Readable } from 'node:stream'
-import { pipeline } from 'node:stream/promises'
+import { createWriteStream } from "node:fs";
+import { rm, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 
-const res = await fetch('https://jsonplaceholder.typicode.com/photos')
+const res = await fetch("https://jsonplaceholder.typicode.com/photos");
 
 // res.body là web ReadableStream: ghi dần ra file, không giữ cả body trong RAM
-const path = join(tmpdir(), 'jsrosetta-photos.json')
+const path = join(tmpdir(), "jsrosetta-photos.json");
 try {
-  await pipeline(Readable.fromWeb(res.body), createWriteStream(path))
-  const { size } = await stat(path)
-  console.log(size) // → 1039898 (byte, đã giải nén gzip)
+  await pipeline(Readable.fromWeb(res.body), createWriteStream(path));
+  const { size } = await stat(path);
+  console.log(size); // → 1039898 (byte, đã giải nén gzip)
 } finally {
-  await rm(path, { force: true }) // dọn file tạm
+  await rm(path, { force: true }); // dọn file tạm
 }
 ```
 ```go

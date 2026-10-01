@@ -23,18 +23,18 @@ Các ví dụ JavaScript trong bài gọi `globalThis.gc()`, hàm này chỉ có
 :::tabs
 ```js
 // chạy: node --expose-gc weakref.mjs
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-let user = { name: 'neko' }
-const ref = new WeakRef(user) // không giữ user sống
+let user = { name: "neko" };
+const ref = new WeakRef(user); // không giữ user sống
 
-console.log(ref.deref()?.name) // → neko
+console.log(ref.deref()?.name); // → neko
 
-user = null // bỏ tham chiếu mạnh cuối cùng
-await tick() // hết code đồng bộ và hàng đợi microtask: WeakRef mới được phép nhả target
-globalThis.gc() // ép GC, chỉ có khi chạy với --expose-gc
+user = null; // bỏ tham chiếu mạnh cuối cùng
+await tick(); // hết code đồng bộ và hàng đợi microtask: WeakRef mới được phép nhả target
+globalThis.gc(); // ép GC, chỉ có khi chạy với --expose-gc
 
-console.log(ref.deref()) // → undefined
+console.log(ref.deref()); // → undefined
 ```
 ```go
 package main
@@ -72,25 +72,25 @@ Vì sao JS cần `await tick()` trước `gc()`? Spec quy định: tạo `WeakRe
 :::tabs
 ```js
 // chạy: node --expose-gc registry.mjs
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const registry = new FinalizationRegistry((heldValue) => {
-  console.log('dọn dẹp', heldValue) // nhận heldValue, KHÔNG nhận lại object đã bị thu hồi
-})
+  console.log("dọn dẹp", heldValue); // nhận heldValue, KHÔNG nhận lại object đã bị thu hồi
+});
 
-let a = { id: 1 }
-let b = { id: 2 }
-const token = {} // dùng để huỷ đăng ký sau này
-registry.register(a, 'conn#1')
-registry.register(b, 'conn#2', token)
+let a = { id: 1 };
+let b = { id: 2 };
+const token = {}; // dùng để huỷ đăng ký sau này
+registry.register(a, "conn#1");
+registry.register(b, "conn#2", token);
 
-console.log(registry.unregister(token)) // → true: conn#2 sẽ không được dọn qua registry nữa
+console.log(registry.unregister(token)); // → true: conn#2 sẽ không được dọn qua registry nữa
 
-a = null
-b = null
-await tick()
-globalThis.gc()
-await tick() // callback chạy ở một task sau GC, không chạy ngay trong gc()
+a = null;
+b = null;
+await tick();
+globalThis.gc();
+await tick(); // callback chạy ở một task sau GC, không chạy ngay trong gc()
 // → dọn dẹp conn#1
 ```
 ```go
@@ -151,45 +151,45 @@ Trường hợp dùng điển hình: cache mà value có thể bị GC thu hồi
 ```js
 // chạy: node --expose-gc cache.mjs
 class WeakCache {
-  #refs = new Map() // key → WeakRef(value): Map giữ key, không giữ value
+  #refs = new Map(); // key → WeakRef(value): Map giữ key, không giữ value
   #registry = new FinalizationRegistry((key) => {
     // chỉ xoá nếu key vẫn trỏ tới WeakRef đã rỗng: có thể key đã được set lại value mới
     if (this.#refs.get(key)?.deref() === undefined) {
-      this.#refs.delete(key)
+      this.#refs.delete(key);
     }
-  })
+  });
 
   get(key) {
-    return this.#refs.get(key)?.deref()
+    return this.#refs.get(key)?.deref();
   }
 
   set(key, value) {
-    this.#refs.set(key, new WeakRef(value))
-    this.#registry.register(value, key)
+    this.#refs.set(key, new WeakRef(value));
+    this.#registry.register(value, key);
   }
 
   get size() {
-    return this.#refs.size
+    return this.#refs.size;
   }
 }
 
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
-const cache = new WeakCache()
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const cache = new WeakCache();
 
-let report = { title: 'Q3', rows: new Array(1_000_000).fill(0) }
-const logo = { title: 'logo' }
-cache.set('report', report)
-cache.set('logo', logo)
+let report = { title: "Q3", rows: new Array(1_000_000).fill(0) };
+const logo = { title: "logo" };
+cache.set("report", report);
+cache.set("logo", logo);
 
-report = null // chỉ còn cache giữ report, mà cache giữ yếu
-await tick()
-globalThis.gc()
+report = null; // chỉ còn cache giữ report, mà cache giữ yếu
+await tick();
+globalThis.gc();
 
-console.log(cache.get('report')) // → undefined
-console.log(cache.get('logo')) // → { title: 'logo' }
+console.log(cache.get("report")); // → undefined
+console.log(cache.get("logo")); // → { title: 'logo' }
 
-await tick() // chờ callback của FinalizationRegistry xoá key 'report'
-console.log(cache.size) // → 1
+await tick(); // chờ callback của FinalizationRegistry xoá key 'report'
+console.log(cache.size); // → 1
 ```
 ```go
 package main

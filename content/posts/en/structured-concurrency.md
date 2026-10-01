@@ -21,36 +21,38 @@ async function work({ name, ms, fail }, signal) {
 }
 
 // all: like Promise.all, but the first error aborts the sibling tasks, and it
-// only returns once EVERY task has actually stopped (like errgroup.Wait).
-async function all(tasks) {
+// only returns once EVERY task has actually stopped (like errgroup.Wait). Task i
+// records its outcome in statuses[i], like the statuses slice main allocates in Go.
+async function all(tasks, statuses) {
   const controller = new AbortController();
   const settled = await Promise.allSettled(
-    tasks.map(async (task) => {
+    tasks.map(async (task, i) => {
       try {
-        return await work(task, controller.signal);
+        const value = await work(task, controller.signal);
+        statuses[i] = "ok";
+        return value;
       } catch (err) {
+        statuses[i] = err.name === "AbortError" ? "cancelled" : "failed";
         controller.abort(err); // later aborts are no-ops: reason keeps the first error
         throw err;
       }
     }),
   );
-  if (controller.signal.aborted) {
-    const statuses = settled.map((s) =>
-      s.status === "fulfilled" ? "ok" : s.reason.name === "AbortError" ? "cancelled" : "failed",
-    );
-    console.log(statuses); // → [ 'cancelled', 'failed', 'cancelled' ]
-    throw controller.signal.reason;
-  }
+  if (controller.signal.aborted) throw controller.signal.reason;
   return settled.map((s) => s.value);
 }
 
+const tasks = [
+  { name: "A", ms: 100 },
+  { name: "B", ms: 50, fail: true }, // B fails at ~50ms, before A and C finish
+  { name: "C", ms: 300 },
+];
+const statuses = new Array(tasks.length);
+
 try {
-  await all([
-    { name: "A", ms: 100 },
-    { name: "B", ms: 50, fail: true }, // B fails at ~50ms, before A and C finish
-    { name: "C", ms: 300 },
-  ]);
+  await all(tasks, statuses); // waits for EVERY task to stop, then throws the first error
 } catch (err) {
+  console.log(statuses); // → [ 'cancelled', 'failed', 'cancelled' ]
   console.log("error:", err.message); // → error: B failed
 }
 ```
