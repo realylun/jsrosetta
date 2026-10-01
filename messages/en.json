@@ -12,7 +12,13 @@
     "title": "Node.js → {label}",
     "description": "Every Node.js/JavaScript concept alongside its equivalent in {label}.",
     "count": "{count, plural, one {# concept} other {# concepts}} with {label} examples.",
-    "empty": "No posts for {label} yet."
+    "empty": "No posts for {label} yet.",
+    "intro": {
+      "go": "Go is a compiled, statically typed language that handles concurrency with goroutines and channels instead of Node.js's event loop. Each post below puts a JavaScript concept next to its Go equivalent, along with the differences that trip people up, such as errors returned as values and slices in place of arrays.",
+      "rust": "Rust manages memory with ownership and the borrow checker instead of a garbage collector, and models errors and missing values with Result and Option. Each post below puts a JavaScript concept next to its Rust equivalent so you can see what carries over and what needs a different mindset.",
+      "swift": "Swift is statically typed, uses optionals instead of null/undefined, treats structs as value types and supports async/await with structured concurrency. Each post below puts a JavaScript concept next to its Swift equivalent, with a note wherever an API is Apple-only.",
+      "java": "Modern Java has records, the Stream API, pattern matching and virtual threads, and is far leaner than its old reputation. Each post below puts a JavaScript concept next to its Java equivalent, along with the differences in static typing, exceptions and concurrency."
+    }
   },
   "Post": {
     "previous": "← Previous",
@@ -24,7 +30,8 @@
     "codeTabsLabel": "Languages",
     "minVersions": "Minimum versions",
     "verifiedOn": "Verified on",
-    "esmNote": "Node.js code is an ES module: save it as .mjs or set \"type\": \"module\" in package.json."
+    "esmNote": "Node.js code is an ES module: save it as .mjs or set \"type\": \"module\" in package.json.",
+    "byline": "By"
   },
   "NotFound": {
     "title": "Page not found",

@@ -6,7 +6,7 @@ import { Container } from "@/app/_components/container";
 import { PostGrid } from "@/app/_components/post-grid";
 import { routing } from "@/i18n/routing";
 import { getPostsByLanguage } from "@/lib/content";
-import { LANGUAGE_IDS, LANGUAGES, SOURCE_LANGUAGE, isLanguageId } from "@/lib/languages";
+import { LANGUAGE_IDS, LANGUAGES, SOURCE_LANGUAGE, isTargetLanguageId } from "@/lib/languages";
 import { buildAlternates } from "@/lib/seo";
 import { SITE, baseOpenGraph, localizePath } from "@/lib/site";
 
@@ -22,7 +22,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, lang } = await params;
-  if (!hasLocale(routing.locales, locale) || !isLanguageId(lang)) return {};
+  if (!hasLocale(routing.locales, locale) || !isTargetLanguageId(lang)) return {};
   const t = await getTranslations({ locale, namespace: "Lang" });
   const label = LANGUAGES[lang].label;
   const title = t("title", { label });
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LanguagePage({ params }: Props) {
   const { locale, lang } = await params;
-  if (!hasLocale(routing.locales, locale) || !isLanguageId(lang)) notFound();
+  if (!hasLocale(routing.locales, locale) || !isTargetLanguageId(lang)) notFound();
   const t = await getTranslations("Lang");
   const language = LANGUAGES[lang];
   const posts = getPostsByLanguage(lang, locale);
@@ -55,7 +55,8 @@ export default async function LanguagePage({ params }: Props) {
         <h1 data-lang={lang} className="text-4xl font-bold tracking-tight">
           Node.js <span className="text-(--lang-color)">→</span> {language.label}
         </h1>
-        <p className="mt-3 text-gray-600 dark:text-gray-400">
+        <p className="mt-3 max-w-2xl text-lg text-gray-600 dark:text-gray-400">{t(`intro.${lang}`)}</p>
+        <p className="mt-3 text-sm text-gray-500">
           {t("count", { count: posts.length, label: language.label })}
         </p>
         <div className="mt-10">

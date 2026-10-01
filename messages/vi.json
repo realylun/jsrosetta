@@ -12,7 +12,13 @@
     "title": "Node.js → {label}",
     "description": "Tất cả khái niệm Node.js/JavaScript kèm cách viết tương đương trong {label}.",
     "count": "{count} khái niệm có ví dụ {label}.",
-    "empty": "Chưa có bài nào cho {label}."
+    "empty": "Chưa có bài nào cho {label}.",
+    "intro": {
+      "go": "Go là ngôn ngữ biên dịch, kiểu tĩnh, xử lý đồng thời bằng goroutine và channel thay cho event loop của Node.js. Mỗi bài dưới đây đặt một khái niệm JavaScript cạnh cách viết Go tương ứng, kèm những điểm khác biệt hay gặp như lỗi trả về dạng giá trị và slice thay cho mảng.",
+      "rust": "Rust quản lý bộ nhớ bằng ownership và borrow checker thay cho garbage collector, còn lỗi và giá trị rỗng được biểu diễn bằng Result và Option. Mỗi bài dưới đây đặt một khái niệm JavaScript cạnh cách viết Rust tương ứng để bạn thấy chỗ nào giống, chỗ nào phải nghĩ khác.",
+      "swift": "Swift có kiểu tĩnh với optional thay cho null/undefined, struct là value type và hỗ trợ async/await với structured concurrency. Mỗi bài dưới đây đặt một khái niệm JavaScript cạnh cách viết Swift tương ứng, kèm lưu ý khi API chỉ có trên nền tảng Apple.",
+      "java": "Java hiện đại có record, Stream API, pattern matching và virtual thread, gọn hơn nhiều so với hình dung cũ. Mỗi bài dưới đây đặt một khái niệm JavaScript cạnh cách viết Java tương ứng, kèm những khác biệt về kiểu tĩnh, exception và xử lý đồng thời."
+    }
   },
   "Post": {
     "previous": "← Bài trước",
@@ -24,7 +30,8 @@
     "codeTabsLabel": "Ngôn ngữ",
     "minVersions": "Phiên bản tối thiểu",
     "verifiedOn": "Đã chạy thử trên",
-    "esmNote": "Code Node.js là ES module: lưu file .mjs hoặc đặt \"type\": \"module\" trong package.json."
+    "esmNote": "Code Node.js là ES module: lưu file .mjs hoặc đặt \"type\": \"module\" trong package.json.",
+    "byline": "Tác giả:"
   },
   "NotFound": {
     "title": "Không tìm thấy trang",
