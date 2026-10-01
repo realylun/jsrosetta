@@ -8,12 +8,14 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import rehypeCodeTabs, { type CodeTabsOptions } from "./rehype-code-tabs";
+import rehypeTableRowHeaders from "./rehype-table-row-headers";
 import rehypeTableScroll from "./rehype-table-scroll";
 import remarkDirectives from "./remark-directives";
 import remarkSafeLinks from "./remark-safe-links";
 
 const prettyCodeOptions: PrettyCodeOptions = {
-  theme: { light: "github-light", dark: "github-dark" },
+  // Both themes keep every token colour at WCAG AA contrast (≥ 4.5:1) on --code-bg.
+  theme: { light: "github-light-high-contrast", dark: "github-dark-default" },
   keepBackground: false,
   defaultLang: "plaintext",
 };
@@ -30,6 +32,7 @@ const createProcessor = (options: CodeTabsOptions) =>
     .use(remarkRehype)
     .use(rehypePrettyCode, prettyCodeOptions)
     .use(rehypeCodeTabs, options)
+    .use(rehypeTableRowHeaders)
     .use(rehypeTableScroll)
     .use(rehypeSlug)
     .use(rehypeAutolinkHeadings, {

@@ -28,7 +28,7 @@ export default async function GlobalNotFound() {
     <html lang={routing.defaultLocale}>
       <body className="bg-white font-sans text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
         <main className="mx-auto w-full max-w-5xl px-4 py-24 text-center sm:px-6">
-          <p className="font-mono text-sm text-gray-500">throw new NotFoundError()</p>
+          <p className="font-mono text-sm text-gray-500 dark:text-gray-400">throw new NotFoundError()</p>
           {messages.map(({ locale, t }) => (
             <section key={locale} lang={locale} className="mt-8">
               <h1 className="text-3xl font-bold">{t("title")}</h1>

@@ -10,7 +10,8 @@ import { SITE, baseOpenGraph, localizePath, rssAlternate } from "@/lib/site";
 
 import "../globals.css";
 
-const inter = Inter({ subsets: ["latin", "vietnamese"], variable: "--font-inter" });
+// "latin-ext" covers đ/ơ/ư, so without its preload Vietnamese text waits for a late font request.
+const inter = Inter({ subsets: ["latin", "latin-ext", "vietnamese"], variable: "--font-inter" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 
 type Props = Readonly<{

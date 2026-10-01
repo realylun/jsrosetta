@@ -56,14 +56,14 @@ export default async function LanguagePage({ params }: Props) {
           Node.js <span className="text-(--lang-color)">→</span> {language.label}
         </h1>
         <p className="mt-3 max-w-2xl text-lg text-gray-600 dark:text-gray-400">{t(`intro.${lang}`)}</p>
-        <p className="mt-3 text-sm text-gray-500">
+        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
           {t("count", { count: posts.length, label: language.label })}
         </p>
         <div className="mt-10">
           {posts.length > 0 ? (
             <PostGrid posts={posts} lang={lang} />
           ) : (
-            <p className="text-gray-500">{t("empty", { label: language.label })}</p>
+            <p className="text-gray-500 dark:text-gray-400">{t("empty", { label: language.label })}</p>
           )}
         </div>
       </Container>

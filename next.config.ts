@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   experimental: {
     // Unmatched or malformed URLs render outside the [locale] root layout.
     globalNotFound: true,
+    // Tailwind CSS is small; inlining removes the render-blocking stylesheet request for first visits.
+    inlineCss: true,
   },
 };
 

@@ -45,7 +45,7 @@ export default async function HomePage({ params }: Props) {
       />
       <Container className="py-16">
         <section className="max-w-2xl">
-          <p className="font-mono text-sm text-gray-500">const you = new NodeDeveloper();</p>
+          <p className="font-mono text-sm text-gray-500 dark:text-gray-400">const you = new NodeDeveloper();</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">{t("heading")}</h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">{t("intro")}</p>
           <div className="mt-6">
@@ -53,11 +53,11 @@ export default async function HomePage({ params }: Props) {
           </div>
         </section>
 
-        {sections.length === 0 && <p className="mt-16 text-gray-500">{t("empty")}</p>}
+        {sections.length === 0 && <p className="mt-16 text-gray-500 dark:text-gray-400">{t("empty")}</p>}
 
         {sections.map((section) => (
           <section key={section.category} className="mt-16">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {tCategory(section.category)}
             </h2>
             <PostGrid posts={section.posts} />
