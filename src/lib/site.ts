@@ -36,6 +36,15 @@ export const OG_LOCALES: Readonly<Record<Locale, string>> = {
   en: "en_US",
 };
 
+/** One static image for every page; rendered at 2x the 1200x630 OG size so it stays sharp. */
+export const OG_IMAGE = {
+  url: "/og-cat.png",
+  width: 2400,
+  height: 1260,
+  type: "image/png",
+  alt: SITE.name,
+} as const;
+
 /**
  * Next.js replaces (not merges) nested metadata objects, so every page spreads this in.
  * `available` lists the locales the page exists in; the others become og:locale:alternate.
@@ -45,6 +54,7 @@ export function baseOpenGraph(locale: Locale, available: readonly Locale[] = rou
     siteName: SITE.name,
     locale: OG_LOCALES[locale],
     alternateLocale: available.filter((other) => other !== locale).map((other) => OG_LOCALES[other]),
+    images: [OG_IMAGE],
   };
 }
 

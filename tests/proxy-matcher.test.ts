@@ -23,8 +23,6 @@ describe("proxy matcher", () => {
       "/posts/variables",
       "/en/posts/variables",
       "/vi/posts/variables",
-      "/posts/custom-opengraph-image-guide",
-      "/posts/opengraph-images",
       "/feed.xml",
       "/vi/feed.xml",
       "/en/feed.xml",
@@ -33,11 +31,9 @@ describe("proxy matcher", () => {
     }
   });
 
-  it("skips OG image routes, internals and other files", () => {
+  it("skips internals and static files such as the OG image", () => {
     for (const pathname of [
-      "/vi/opengraph-image/cover",
-      "/en/posts/variables/opengraph-image/cover",
-      "/opengraph-image",
+      "/og-cat.png",
       "/_next/static/chunk.js",
       "/api/x",
       "/sitemap.xml",

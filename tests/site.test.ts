@@ -63,12 +63,19 @@ describe("locale urls", () => {
 
   it("maps locales to Open Graph locales with the others as alternates", async () => {
     const { baseOpenGraph } = await load();
-    expect(baseOpenGraph("vi")).toEqual({
+    expect(baseOpenGraph("vi")).toMatchObject({
       siteName: "jsrosetta",
       locale: "vi_VN",
       alternateLocale: ["en_US"],
     });
     expect(baseOpenGraph("en", ["vi", "en"]).alternateLocale).toEqual(["vi_VN"]);
     expect(baseOpenGraph("vi", ["vi"]).alternateLocale).toEqual([]);
+  });
+
+  it("gives every page the shared static OG image", async () => {
+    const { baseOpenGraph, OG_IMAGE } = await load();
+    expect(OG_IMAGE).toMatchObject({ url: "/og-cat.png", width: 2400, height: 1260, type: "image/png" });
+    expect(baseOpenGraph("vi").images).toEqual([OG_IMAGE]);
+    expect(baseOpenGraph("en", ["en"]).images).toEqual([OG_IMAGE]);
   });
 });

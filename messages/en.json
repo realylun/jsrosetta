@@ -65,9 +65,5 @@
     "errors": "Error handling",
     "io": "I/O",
     "stdlib": "Standard library"
-  },
-  "Og": {
-    "homeTitle": "Node.js to Go, Rust, Swift, Java",
-    "postAlt": "Cover image for a jsrosetta post"
   }
 }

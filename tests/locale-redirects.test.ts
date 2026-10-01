@@ -25,9 +25,7 @@ describe("defaultLocaleRedirects", () => {
     expect(redirectFor("/vi/feed.xml")).toBe("/feed.xml");
   });
 
-  it("leave OG images and other locales alone", () => {
-    expect(redirectFor("/vi/posts/arrays/opengraph-image/cover")).toBeUndefined();
-    expect(redirectFor("/vi/opengraph-image")).toBeUndefined();
+  it("leave other locales alone", () => {
     expect(redirectFor("/posts/arrays")).toBeUndefined();
     expect(redirectFor("/en/posts/arrays")).toBeUndefined();
     expect(redirectFor("/videos")).toBeUndefined();

@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "@/app/_components/site-footer";
 import { SiteHeader } from "@/app/_components/site-header";
 import { routing } from "@/i18n/routing";
-import { SITE, baseOpenGraph, localizePath, rssAlternate } from "@/lib/site";
+import { OG_IMAGE, SITE, baseOpenGraph, localizePath, rssAlternate } from "@/lib/site";
 
 import "../globals.css";
 
@@ -42,6 +42,8 @@ export async function generateMetadata({ params }: Omit<Props, "children">): Pro
       title: t("title"),
       description: t("description"),
     },
+    // Pages never set `twitter`, so this one entry covers the whole site.
+    twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
   };
 }
 

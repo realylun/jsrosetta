@@ -65,9 +65,5 @@
     "errors": "Xử lý lỗi",
     "io": "I/O",
     "stdlib": "Thư viện chuẩn"
-  },
-  "Og": {
-    "homeTitle": "Node.js sang Go, Rust, Swift, Java",
-    "postAlt": "Ảnh bìa bài viết trên jsrosetta"
   }
 }
