@@ -25,6 +25,12 @@ export const SITE = {
   repo: process.env.NEXT_PUBLIC_REPO_URL,
 } as const;
 
+/** Shown as the post byline, in meta author and as the schema.org Person author. */
+export const AUTHOR = {
+  name: "RealyLun",
+  url: "https://github.com/realylun",
+} as const;
+
 export const OG_LOCALES: Readonly<Record<Locale, string>> = {
   vi: "vi_VN",
   en: "en_US",

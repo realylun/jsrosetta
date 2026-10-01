@@ -18,7 +18,10 @@ export type Language = {
   verifiedOn: string;
 };
 
-export const SOURCE_LANGUAGE: LanguageId = "js";
+export const SOURCE_LANGUAGE = "js" satisfies LanguageId;
+
+/** Languages compared against Node.js: each has a /lang/<id> page. */
+export type TargetLanguageId = Exclude<LanguageId, typeof SOURCE_LANGUAGE>;
 
 export const LANGUAGES: Readonly<Record<LanguageId, Language>> = {
   js: {
@@ -42,6 +45,11 @@ export const LANGUAGES: Readonly<Record<LanguageId, Language>> = {
 
 export function isLanguageId(value: string): value is LanguageId {
   return (LANGUAGE_IDS as readonly string[]).includes(value);
+}
+
+export function isTargetLanguageId(value: string): value is TargetLanguageId {
+  const isSource = value === SOURCE_LANGUAGE;
+  return isLanguageId(value) && !isSource;
 }
 
 /** Resolve a code fence name (```rs, ```ts…) to a registered language. */

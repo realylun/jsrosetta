@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LANGUAGES, isLanguageId, resolveLanguage } from "@/lib/languages";
+import { LANGUAGES, isLanguageId, isTargetLanguageId, resolveLanguage } from "@/lib/languages";
 
 describe("languages", () => {
   it("resolves fence aliases to registered languages", () => {
@@ -17,6 +17,12 @@ describe("languages", () => {
   it("guards language ids", () => {
     expect(isLanguageId("swift")).toBe(true);
     expect(isLanguageId("python")).toBe(false);
+  });
+
+  it("guards target language ids, excluding the source language", () => {
+    expect(isTargetLanguageId("go")).toBe(true);
+    expect(isTargetLanguageId("js")).toBe(false);
+    expect(isTargetLanguageId("python")).toBe(false);
   });
 
   it("records the exact toolchain every language's code was verified on", () => {

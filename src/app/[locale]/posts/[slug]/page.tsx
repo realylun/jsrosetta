@@ -19,7 +19,7 @@ import {
 } from "@/lib/content";
 import { markdownToHtml } from "@/lib/markdown";
 import { buildAlternates, searchTitle } from "@/lib/seo";
-import { SITE, baseOpenGraph, localizePath } from "@/lib/site";
+import { AUTHOR, SITE, baseOpenGraph, localizePath } from "@/lib/site";
 import { postJsonLd, targetLanguageList } from "@/lib/structured-data";
 
 type Props = {
@@ -51,6 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: post.description,
     keywords: post.tags,
+    authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
     alternates: buildAlternates({ pathname, locale, locales }),
     openGraph: {
       ...baseOpenGraph(locale, locales),
@@ -61,6 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
       tags: post.tags,
+      authors: [AUTHOR.url],
     },
   };
 }
@@ -110,6 +112,12 @@ export default async function PostPage({ params }: Props) {
             <h1 className="mt-2 text-4xl font-bold tracking-tight">{post.title}</h1>
             <p className="mt-3 text-lg text-gray-600 dark:text-gray-400">{post.description}</p>
             <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
+              <span>
+                {t("byline")}{" "}
+                <a className="underline hover:text-gray-900 dark:hover:text-gray-100" href={AUTHOR.url} rel="author">
+                  {AUTHOR.name}
+                </a>
+              </span>
               <DateFormatter dateString={post.updated ?? post.date} />
               <LanguageList ids={post.languages} linked />
             </div>

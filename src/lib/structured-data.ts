@@ -1,7 +1,7 @@
 import type { Locale } from "../i18n/routing";
 import type { Post } from "./content";
 import { LANGUAGE_IDS, LANGUAGES, SOURCE_LANGUAGE, type LanguageId } from "./languages";
-import { SITE, localeUrl } from "./site";
+import { AUTHOR, SITE, localeUrl } from "./site";
 
 const CONTEXT = "https://schema.org";
 
@@ -51,7 +51,7 @@ export function postJsonLd({ post, locale, homeName }: PostInput) {
         datePublished: post.date,
         dateModified: post.updated ?? post.date,
         keywords: post.tags.join(", "),
-        author: publisher,
+        author: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
         publisher,
       },
       {

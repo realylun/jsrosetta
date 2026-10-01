@@ -59,6 +59,11 @@ describe("postJsonLd", () => {
       keywords: "comments, syntax",
     });
     expect(article.author).toEqual({
+      "@type": "Person",
+      name: "RealyLun",
+      url: "https://github.com/realylun",
+    });
+    expect(article.publisher).toEqual({
       "@type": "Organization",
       name: "jsrosetta",
       url: "https://reallylun.com",
