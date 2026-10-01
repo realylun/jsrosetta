@@ -30,6 +30,9 @@ updated: "2026-10-01"          # tuỳ chọn
 order: 60                      # thứ tự trên trang chủ
 category: async                # basics | types | control-flow | collections | functions | oop | async | errors | io | stdlib
 languages: [js, go, rust, swift, java]
+versions:                      # tuỳ chọn: phiên bản tối thiểu chạy được code trong bài
+  js: "17.2"
+  go: "1.25"
 tags: [promise, concurrency]   # tuỳ chọn
 draft: false                   # true: chỉ hiện khi chạy dev
 credits: "https://…"           # tuỳ chọn: link nguồn tham khảo
@@ -37,6 +40,8 @@ credits: "https://…"           # tuỳ chọn: link nguồn tham khảo
 ```
 
 Frontmatter được validate bằng zod. Sai trường nào thì build fail và báo đúng tên trường.
+
+`versions` là phiên bản thấp nhất mà **mọi** bản phát hành từ đó trở lên đều chạy được code trong bài; tính năng được backport về một nhánh cũ hơn (ví dụ có ở 20.3 và được backport về 18.17) không dùng làm mốc, nhưng có thể nhắc trong bài.
 
 ### Tab ngôn ngữ
 

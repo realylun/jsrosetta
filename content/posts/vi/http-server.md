@@ -139,7 +139,7 @@ $ curl http://localhost:8080
 hello world
 ```
 
-Client (`http_client.js`, chạy trong khi một server ở trên đang bật): `fetch()` toàn cục thay cho `http.get()`/`http.request()` cho các request đơn giản.
+Client (`http_client.js`, chạy trong khi một server ở trên đang bật): `fetch()` toàn cục thay cho `http.get()`/`http.request()` cho các request đơn giản. Xem thêm bài [HTTP client](/posts/http-client) về POST, mã lỗi, timeout và stream.
 
 :::tabs
 ```js

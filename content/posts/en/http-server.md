@@ -128,7 +128,7 @@ $ curl http://localhost:8080
 hello world
 ```
 
-Client (`http_client.js`, run while a server from above is up): the global `fetch()` replaces `http.get()`/`http.request()` for simple requests.
+Client (`http_client.js`, run while a server from above is up): the global `fetch()` replaces `http.get()`/`http.request()` for simple requests. See the [HTTP client](/en/posts/http-client) post for POST, error statuses, timeouts, and streaming.
 
 :::tabs
 ```js

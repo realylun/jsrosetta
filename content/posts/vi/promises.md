@@ -102,7 +102,7 @@ static void sleep(long ms) {
 
 ## Chạy nhiều promise song song (Promise.all)
 
-Dùng lại `asyncMethod` và `Result` ở trên:
+Dùng lại `asyncMethod` và `Result` ở trên (huỷ các tác vụ còn lại khi một tác vụ lỗi được bàn ở bài [structured concurrency](/posts/structured-concurrency)):
 
 :::tabs
 ```js
