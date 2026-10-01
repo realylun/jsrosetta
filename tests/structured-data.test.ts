@@ -52,7 +52,7 @@ describe("postJsonLd", () => {
       description: "Line and block comments.",
       url: "https://reallylun.com/posts/comments",
       mainEntityOfPage: "https://reallylun.com/posts/comments",
-      image: "https://reallylun.com/vi/posts/comments/opengraph-image/cover",
+      image: "https://reallylun.com/og-cat.png",
       inLanguage: "vi",
       datePublished: "2026-09-27",
       dateModified: "2026-09-27",

@@ -1,7 +1,7 @@
 import type { Locale } from "../i18n/routing";
 import type { Post } from "./content";
 import { LANGUAGE_IDS, LANGUAGES, SOURCE_LANGUAGE, type LanguageId } from "./languages";
-import { AUTHOR, SITE, localeUrl } from "./site";
+import { AUTHOR, OG_IMAGE, SITE, absoluteUrl, localeUrl } from "./site";
 
 const CONTEXT = "https://schema.org";
 
@@ -45,8 +45,7 @@ export function postJsonLd({ post, locale, homeName }: PostInput) {
         description: post.description,
         url,
         mainEntityOfPage: url,
-        // Same route as the og:image, without the build hash Next.js appends.
-        image: `${SITE.url}/${locale}/posts/${post.slug}/opengraph-image/cover`,
+        image: absoluteUrl(OG_IMAGE.url),
         inLanguage: locale,
         datePublished: post.date,
         dateModified: post.updated ?? post.date,
