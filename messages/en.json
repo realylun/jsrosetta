@@ -20,6 +20,7 @@
     "credits": "Reference:",
     "navLabel": "Post navigation",
     "languagesLabel": "Languages in this post",
+    "seoTitle": "{title}: Node.js to {languages}",
     "codeTabsLabel": "Languages",
     "minVersions": "Minimum versions",
     "verifiedOn": "Verified on",

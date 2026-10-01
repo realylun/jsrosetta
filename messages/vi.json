@@ -20,6 +20,7 @@
     "credits": "Tham khảo:",
     "navLabel": "Điều hướng bài viết",
     "languagesLabel": "Ngôn ngữ trong bài",
+    "seoTitle": "{title}: Node.js sang {languages}",
     "codeTabsLabel": "Ngôn ngữ",
     "minVersions": "Phiên bản tối thiểu",
     "verifiedOn": "Đã chạy thử trên",

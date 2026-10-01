@@ -53,3 +53,20 @@ export function buildSitemapEntries<Extra extends object>(
     ...(languages && { alternates: { languages } }),
   }));
 }
+
+/** Search results cut titles near 60 characters; the " · jsrosetta" template adds about 12. */
+const SEARCH_TITLE_MAX = 50;
+
+/**
+ * `<title>` for a post: adds the target languages people search for ("Comments: Node.js to Go,
+ * Rust…") when that still fits in a search result, otherwise keeps the plain title.
+ */
+export function searchTitle(
+  title: string,
+  languages: string,
+  format: (title: string, languages: string) => string,
+): string {
+  if (!languages) return title;
+  const candidate = format(title, languages);
+  return candidate.length <= SEARCH_TITLE_MAX ? candidate : title;
+}
