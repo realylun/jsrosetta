@@ -91,7 +91,7 @@ static void sleep(long ms) {
 
 ## Running several promises in parallel (Promise.all)
 
-Reusing `asyncMethod` and `Result` from above:
+Reusing `asyncMethod` and `Result` from above (cancelling the remaining tasks when one fails is covered in the [structured concurrency](/en/posts/structured-concurrency) post):
 
 :::tabs
 ```js
