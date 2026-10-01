@@ -81,3 +81,22 @@ describe("buildSitemapEntries", () => {
     ]);
   });
 });
+
+describe("searchTitle", () => {
+  const format = (title: string, languages: string) => `${title}: Node.js to ${languages}`;
+
+  it("adds the language suffix when it fits", () => {
+    expect(seo.searchTitle("Comments", "Go, Rust, Swift, Java", format)).toBe(
+      "Comments: Node.js to Go, Rust, Swift, Java",
+    );
+  });
+
+  it("keeps the plain title when the suffix would make it too long", () => {
+    const title = "Concurrency: Threads and Child Processes";
+    expect(seo.searchTitle(title, "Go, Rust, Swift, Java", format)).toBe(title);
+  });
+
+  it("keeps the plain title when there are no target languages", () => {
+    expect(seo.searchTitle("Comments", "", format)).toBe("Comments");
+  });
+});

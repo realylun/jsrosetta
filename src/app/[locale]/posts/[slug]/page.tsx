@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { Container } from "@/app/_components/container";
 import { DateFormatter } from "@/app/_components/date-formatter";
+import { JsonLd } from "@/app/_components/json-ld";
 import { LanguageList } from "@/app/_components/language-badge";
 import { PostBody } from "@/app/_components/post-body";
 import { VersionList } from "@/app/_components/version-list";
@@ -17,8 +18,9 @@ import {
   type Post,
 } from "@/lib/content";
 import { markdownToHtml } from "@/lib/markdown";
-import { buildAlternates } from "@/lib/seo";
-import { baseOpenGraph, localizePath } from "@/lib/site";
+import { buildAlternates, searchTitle } from "@/lib/seo";
+import { SITE, baseOpenGraph, localizePath } from "@/lib/site";
+import { postJsonLd, targetLanguageList } from "@/lib/structured-data";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -39,8 +41,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {};
   const pathname = `/posts/${post.slug}`;
   const locales = getTranslationLocales(post.slug);
+  const languages = targetLanguageList(post.languages);
+  const t = await getTranslations({ locale, namespace: "Post" });
+  // Search titles carry the language names people search for; the h1 stays short.
+  const title = searchTitle(post.title, languages, (title, languages) =>
+    t("seoTitle", { title, languages }),
+  );
   return {
-    title: post.title,
+    title,
     description: post.description,
     keywords: post.tags,
     alternates: buildAlternates({ pathname, locale, locales }),
@@ -48,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ...baseOpenGraph(locale, locales),
       type: "article",
       url: localizePath(locale, pathname),
-      title: post.title,
+      title,
       description: post.description,
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
@@ -94,6 +102,7 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <main>
+      <JsonLd data={postJsonLd({ post, locale, homeName: SITE.name })} />
       <Container className="py-12">
         <article className="mx-auto max-w-3xl">
           <header className="mb-10 border-b border-gray-200 pb-8 dark:border-gray-800">

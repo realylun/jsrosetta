@@ -3,6 +3,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Container } from "@/app/_components/container";
+import { JsonLd } from "@/app/_components/json-ld";
 import { LanguageList } from "@/app/_components/language-badge";
 import { PostGrid } from "@/app/_components/post-grid";
 import { routing } from "@/i18n/routing";
@@ -10,6 +11,8 @@ import { getAllPosts } from "@/lib/content";
 import { LANGUAGE_IDS, SOURCE_LANGUAGE } from "@/lib/languages";
 import { CATEGORIES } from "@/lib/post-schema";
 import { buildAlternates } from "@/lib/seo";
+import { SITE } from "@/lib/site";
+import { websiteJsonLd } from "@/lib/structured-data";
 
 const TARGET_LANGUAGES = LANGUAGE_IDS.filter((id) => id !== SOURCE_LANGUAGE);
 
@@ -27,6 +30,7 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations("Home");
+  const tSite = await getTranslations("Site");
   const tCategory = await getTranslations("Categories");
   const posts = getAllPosts(locale);
   const sections = CATEGORIES.map((category) => ({
@@ -36,6 +40,9 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <main>
+      <JsonLd
+        data={websiteJsonLd({ locale, name: SITE.name, description: tSite("description") })}
+      />
       <Container className="py-16">
         <section className="max-w-2xl">
           <p className="font-mono text-sm text-gray-500">const you = new NodeDeveloper();</p>
